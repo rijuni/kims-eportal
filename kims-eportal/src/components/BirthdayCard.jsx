@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import API from "../services/api";
-import { Mail, CalendarDays } from "lucide-react";
+import { Mail, CalendarDays, User } from "lucide-react";
 
 const mockBirthdays = [
   ...Array(3).fill({
@@ -27,14 +27,16 @@ const BirthdayCard = () => {
           <div className="item-info">
             <h4>{b.name}</h4>
             <div className="meta">
-              <span>Department: <strong>{b.department}</strong></span>
-              <span className="flex items-center gap-1.5 mt-1">
-                <CalendarDays size={12} /> {b.date_of_birth}
+              <span className="flex items-center gap-2">
+                <User size={14} /> <strong>{b.department}</strong>
+              </span>
+              <span className="flex items-center gap-2 mt-1">
+                <CalendarDays size={14} /> {b.date_of_birth}
               </span>
             </div>
           </div>
           <div className="mail-btn">
-            <Mail size={18} />
+            <Mail size={18} fill="#94a3b8" />
           </div>
         </div>
       ))}

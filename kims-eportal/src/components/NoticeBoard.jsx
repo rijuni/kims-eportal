@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import API from "../services/api";
-import { Bell } from "lucide-react";
+import { Bell, User, CalendarDays, Download } from "lucide-react";
 
 const mockNotices = [
   ...Array(6).fill({
@@ -32,13 +32,17 @@ const NoticeBoard = () => {
             <div className="item-info">
               <h4>{n.title}</h4>
               <div className="meta">
-                <span>Issued By: <strong>{n.issued_by}</strong></span>
-                <span>{n.date}</span>
+                <span className="flex items-center gap-2">
+                  <User size={14} /> {n.issued_by}
+                </span>
+                <span className="flex items-center gap-2 mt-1">
+                  <CalendarDays size={14} /> {n.date}
+                </span>
               </div>
             </div>
           </div>
-          <a href={n.document_url} target="_blank" className="download-btn hover-scale">
-            Download
+          <a href={n.document_url} target="_blank" className="download-btn hover-scale flex items-center gap-2">
+            <Download size={16} /> Download
           </a>
         </div>
       ))}

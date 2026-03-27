@@ -27,7 +27,7 @@ const EventsCard = () => {
                             <span className="flex items-center gap-2">
                                 <CalendarDays size={14} /> {e.event_date}
                             </span>
-                            <span className="flex items-center gap-2">
+                            <span className="flex items-center gap-2 mt-1">
                                 <MapPin size={14} /> {e.location}
                             </span>
                         </div>
