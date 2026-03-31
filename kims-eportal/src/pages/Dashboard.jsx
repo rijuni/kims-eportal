@@ -65,7 +65,7 @@ const Dashboard = () => {
                     <img src={cakeIcon} alt="Cake" className="w-[54px] h-[54px] object-contain drop-shadow-sm" />
                     <div>
                       <h2 className="page-title">Birthdays</h2>
-                      <p className="page-subtitle">Celebrating our team members on their special day</p>
+                      <p className="page-subtitle">Celebrating our team members</p>
                     </div>
                   </div>
                   <BirthdayCard />

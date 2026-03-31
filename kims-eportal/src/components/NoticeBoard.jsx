@@ -27,16 +27,18 @@ const NoticeBoard = () => {
         <div className="notice-item hover-scale" key={n.id}>
           <div className="item-left">
             <div className="icon-box">
-              <Bell size={18} fill="#94a3b8" />
+              <Bell size={17} />
             </div>
             <div className="item-info">
               <h4>{n.title}</h4>
               <div className="meta">
                 <span className="flex items-center gap-2">
-                  <User size={14} /> {n.issued_by}
+                  <User size={13} className="text-gray-500" /> 
+                  <span className="meta-label">Issued By: </span>
+                  <span className="meta-value">{n.issued_by}</span>
                 </span>
-                <span className="flex items-center gap-2 mt-1">
-                  <CalendarDays size={14} /> {n.date}
+                <span className="flex items-center gap-2 date-text">
+                  <CalendarDays size={12} className="text-gray-400" /> {n.date}
                 </span>
               </div>
             </div>

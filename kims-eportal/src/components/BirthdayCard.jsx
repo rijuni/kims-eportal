@@ -28,7 +28,7 @@ const BirthdayCard = () => {
             <h4>{b.name}</h4>
             <div className="meta">
               <span className="flex items-center gap-2">
-                <User size={14} /> <strong>{b.department}</strong>
+                <User size={14} /> {b.department}
               </span>
               <span className="flex items-center gap-2 mt-1">
                 <CalendarDays size={14} /> {b.date_of_birth}
