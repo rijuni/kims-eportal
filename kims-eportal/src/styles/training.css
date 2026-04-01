@@ -1,0 +1,150 @@
+/* ===== TRAINING MATERIALS PAGE ===== */
+
+.training-container {
+    width: 100%;
+}
+
+.training-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    padding-left: 12px;
+}
+
+.training-title {
+    font-size: 16px;
+    font-weight: 500;
+    color: #fff;
+    letter-spacing: 0.5px;
+}
+
+.training-request-btn {
+    background: #1FA463; /* Same green as KIMS */
+    color: white;
+    padding: 8px 18px;
+    border-radius: 50px;
+    font-size: 13px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(31, 164, 99, 0.3);
+    transition: all 0.2s ease;
+}
+
+.training-request-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(31, 164, 99, 0.4);
+}
+
+.documents-card {
+    background: #f8fafc; /* Very light gray/blue tint */
+    border-radius: 20px;
+    padding: 10px 0;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    width: 100%;
+}
+
+.document-item {
+    padding: 15px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.document-item:last-child {
+    border-bottom: none;
+}
+
+.doc-info-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.doc-row {
+    display: flex;
+    align-items: baseline;
+    gap: 30px;
+}
+
+.doc-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1a202c;
+    width: 80px;
+}
+
+.doc-value {
+    font-size: 14px;
+    font-weight: 500;
+    color: #4a5568;
+}
+
+.doc-actions {
+    display: flex;
+    align-items: center;
+    gap: 40px;
+}
+
+.pdf-icon-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+
+.pdf-thumb {
+    width: 32px;
+    height: 40px;
+    background: #cbd5e0;
+    border-radius: 4px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.pdf-thumb::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 0 10px 10px 0;
+    border-color: transparent transparent #f8fafc transparent;
+}
+
+.pdf-label {
+    background: #e53e3e; /* Red for PDF */
+    color: white;
+    font-size: 8px;
+    font-weight: 800;
+    padding: 2px 4px;
+    border-radius: 2px;
+    margin-top: -10px;
+    z-index: 2;
+}
+
+.download-link {
+    background: #1e3a8a; /* Navy blue */
+    color: white;
+    padding: 6px 20px;
+    border-radius: 50px;
+    font-size: 12px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 6px rgba(30, 58, 138, 0.2);
+}
+
+.download-link:hover {
+    background: #172554;
+    transform: scale(1.05);
+}

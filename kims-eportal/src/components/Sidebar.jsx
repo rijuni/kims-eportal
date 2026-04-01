@@ -1,8 +1,17 @@
-import React from "react";
+import { NavLink } from "react-router-dom";
 import { LayoutDashboard, BookOpen, BookUser, Calendar, CalendarDays, Users } from "lucide-react";
 import logo from "../img/Capture.PNG";
 
 const Sidebar = ({ isOpen, toggleSidebar }) => {
+  const menuItems = [
+    { icon: <LayoutDashboard size={18} className="mr-3" />, label: "Dashboard", path: "/" },
+    { icon: <BookOpen size={18} className="mr-3" />, label: "Training Materials", path: "/training-materials" },
+    { icon: <BookUser size={18} className="mr-3" />, label: "Telephone Directory", path: "/telephone-directory" },
+    { icon: <Calendar size={18} className="mr-3" />, label: "Holiday List", path: "/holiday-list" },
+    { icon: <CalendarDays size={18} className="mr-3" />, label: "Upcoming Events", path: "/upcoming-sidebar" },
+    { icon: <Users size={18} className="mr-3" />, label: "People", path: "/people" },
+  ];
+
   return (
     <>
       {/* Mobile Overlay */}
@@ -19,24 +28,16 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
           <img src={logo} alt="KIMS Logo" className="w-full h-auto object-contain" />
         </div>
         <ul className="sidebar-menu">
-          <li className="active">
-            <LayoutDashboard size={18} className="mr-3" /> Dashboard
-          </li>
-          <li>
-            <BookOpen size={18} className="mr-3" /> Training Materials
-          </li>
-          <li>
-            <BookUser size={18} className="mr-3" /> Telephone Directory
-          </li>
-          <li>
-            <Calendar size={18} className="mr-3" /> Holiday List
-          </li>
-          <li>
-            <CalendarDays size={18} className="mr-3" /> Upcoming Events
-          </li>
-          <li>
-            <Users size={18} className="mr-3" /> People
-          </li>
+          {menuItems.map((item) => (
+            <li key={item.path}>
+              <NavLink 
+                to={item.path} 
+                className={({ isActive }) => isActive ? "active-link" : ""}
+              >
+                {item.icon} {item.label}
+              </NavLink>
+            </li>
+          ))}
         </ul>
       </div>
     </>
