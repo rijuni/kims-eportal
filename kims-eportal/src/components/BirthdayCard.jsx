@@ -21,7 +21,7 @@ const BirthdayCard = () => {
   }, []);
 
   return (
-    <div className="card hover-lift">
+    <div className="card hover-lift birthdays-card">
       {birthdays.map((b) => (
         <div className="birthday-item hover-scale" key={b.id || Math.random()}>
           <div className="item-info">

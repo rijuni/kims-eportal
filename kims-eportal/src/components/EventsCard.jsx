@@ -18,7 +18,7 @@ const EventsCard = () => {
     }, []);
 
     return (
-        <div className="card hover-lift">
+        <div className="card hover-lift events-card">
             {events.map((e) => (
                 <div className="event-item hover-scale" key={e.id}>
                     <div className="item-info">

@@ -8,7 +8,8 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 25px;
+    margin-bottom: 0px;
+    /* Removed completely for tightest layout */
     padding-left: 12px;
 }
 
@@ -20,7 +21,8 @@
 }
 
 .training-request-btn {
-    background: #1FA463; /* Same green as KIMS */
+    background: #1FA463;
+    /* Same green as KIMS */
     color: white;
     padding: 8px 18px;
     border-radius: 50px;
@@ -41,15 +43,19 @@
 }
 
 .documents-card {
-    background: #f8fafc; /* Very light gray/blue tint */
+    background: #f8fafc;
+    /* Very light gray/blue tint */
     border-radius: 20px;
     padding: 10px 0;
+    margin-top: -10px;
+    /* Pulls the card up closer to the title */
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     width: 100%;
 }
 
 .document-item {
-    padding: 15px 40px;
+    padding: 8px 30px;
+    /* Reduced vertical padding for tighter spacing */
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -63,24 +69,26 @@
 .doc-info-grid {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 0px;
+    /* Removed gap between Topic and Topic Area */
 }
 
 .doc-row {
     display: flex;
     align-items: baseline;
-    gap: 30px;
+    gap: 15px;
+    /* Tighter gap between label and value */
 }
 
 .doc-label {
-    font-size: 14px;
+    font-size: 12.5px;
     font-weight: 600;
     color: #1a202c;
     width: 80px;
 }
 
 .doc-value {
-    font-size: 14px;
+    font-size: 12.5px;
     font-weight: 500;
     color: #4a5568;
 }
@@ -101,10 +109,12 @@
 .pdf-thumb {
     width: 32px;
     height: 40px;
-    background: #cbd5e0;
+    background: #e2e8f0;
+    /* Slightly darker gray for better contrast */
     border-radius: 4px;
     position: relative;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
 }
@@ -121,23 +131,37 @@
     border-color: transparent transparent #f8fafc transparent;
 }
 
+.pdf-arrow {
+    color: #e53e3e;
+    margin-top: -8px;
+    /* Center arrow in the upper gray section */
+    z-index: 1;
+}
+
 .pdf-label {
-    background: #e53e3e; /* Red for PDF */
+    background: #e53e3e;
+    /* Red for PDF */
     color: white;
-    font-size: 8px;
-    font-weight: 800;
-    padding: 2px 4px;
-    border-radius: 2px;
-    margin-top: -10px;
+    font-size: 9px;
+    font-weight: 700;
+    width: 100%;
+    text-align: center;
+    padding: 3px 0;
+    position: absolute;
+    bottom: 0;
+    border-radius: 0 0 3px 3px;
     z-index: 2;
 }
 
 .download-link {
-    background: #1e3a8a; /* Navy blue */
+    background: #1e3a8a;
+    /* Navy blue */
     color: white;
-    padding: 6px 20px;
+    padding: 0.1px 8px;
+    /* Highly reduced padding */
     border-radius: 50px;
-    font-size: 12px;
+    font-size: 9px;
+    /* Highly reduced font size */
     font-weight: 500;
     text-decoration: none;
     transition: all 0.2s ease;

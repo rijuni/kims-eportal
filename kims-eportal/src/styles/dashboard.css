@@ -96,7 +96,8 @@ body {
     font-weight: 400;
     color: #555;
     transition: all 0.2s;
-    gap: 0px; /* gap is already in icons */
+    gap: 0px;
+    /* gap is already in icons */
     text-decoration: none;
     position: relative;
 }
@@ -171,7 +172,8 @@ body {
 /* ===== LAYOUT ===== */
 .main-content {
     flex: 1;
-    padding: 0 40px 40px 40px;
+    padding: 0 10px 40px 50px;
+    /* Left padding equals the column gap for perfectly even spacing */
 }
 
 .dashboard-container {
@@ -180,13 +182,22 @@ body {
 
 .dashboard-flex {
     display: flex;
-    gap: 40px;
+    gap: 50px;
     align-items: flex-start;
 }
 
 .notice-section {
     flex: 1.5;
+    margin-top: -30px;
+    /* Pulls the entire Notice Board section upwards visually */
 }
+
+.notice-section .card {
+    min-height: 495px;
+    /* Forces the container to stretch further down towards the bottom */
+}
+
+
 
 .info-section {
     flex: 1;
@@ -202,9 +213,7 @@ body {
 
 .action-row {
     justify-content: flex-start;
-    /* Aligned to left to match section content boxes */
-    margin-bottom: 50px;
-    /* Reduced from 70px for tighter vertical spacing */
+    /* Inherits normal 20px margin-bottom from section-header-row for strict alignment */
 }
 
 .section-title-wrap {
@@ -223,11 +232,19 @@ body {
 .page-title {
     font-family: sans-serif;
     font-size: 15px;
-    font-weight: 400;
+    font-weight: 550;
+    /* Increased font weight to make it a little bit bolder */
     line-height: 1;
-    letter-spacing: 0.6px;
+    letter-spacing: 0.4px;
     color: #fff;
     margin-bottom: 4px;
+}
+
+.event-group .page-title,
+.birthday-group .page-title {
+    font-size: 13px;
+    /* Reduced specific to right panel */
+    margin-bottom: 2px;
 }
 
 .page-subtitle {
@@ -237,27 +254,37 @@ body {
     color: rgba(255, 255, 255, 0.7);
 }
 
+.event-group .page-subtitle,
+.birthday-group .page-subtitle {
+    font-size: 8.5px;
+    /* Reduced specific to right panel */
+}
+
 /* Action Pills */
 .action-pills {
     display: flex;
     justify-content: flex-start;
-    gap: 20px;
-    /* Increased gap between buttons as requested */
+    gap: 35px;
     position: relative;
-    top: 45px;
-    /* Visual downward shift */
+    top: 10px;
+    /* Visually shifts the pills down without affecting the position of Upcoming Events below it */
+    /* Increased gap between buttons as requested */
+    /* Removed forced top offsets to strictly align with Notice Board header row */
 }
 
 .action-pill {
     background: white;
     color: var(--kims-blue);
-    padding: 6px 16px;
-    /* Reduced from 8px 24px */
+    padding: 0.2px 18px;
+    /* Highly reduced top/bottom padding; left/right unchanged */
+    margin-top: 0;
+    margin-bottom: 0;
     border-radius: var(--border-radius-btn);
-    font-weight: 600;
+    font-weight: 700;
     /* Re-applied semi-bold emphasis */
     text-decoration: none;
-    font-size: 11.5px;
+    font-size: 14.5px;
+    /* Increased font size for better visibility */
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
 }
 
@@ -265,15 +292,27 @@ body {
 .card {
     background: white;
     border-radius: var(--border-radius-card);
-    padding: 24px 0;
-    /* Changed from 24px to remove horizontal padding for full-width dividers */
+    padding: 12px 0;
+    /* Reduced top and bottom padding inside the card */
     box-shadow: var(--card-shadow);
     color: #333;
     width: 100%;
 }
 
+.events-card,
+.birthdays-card {
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    width: fit-content !important;
+    min-width: 305px;
+    /* Prevents looking too squished */
+}
+
 .scrollable {
-    max-height: 520px;
+    max-height: 650px;
+    /* Increased from 520px to allow more height downward */
     overflow-y: auto;
 
     /* Hide scrollbar for Chrome, Safari and Opera */
@@ -290,7 +329,8 @@ body {
 
 /* Item Styling */
 .notice-item {
-    padding: 8px 24px;
+    padding: 8px 16px;
+    /* Reduced left and right padding inside the container */
     border-bottom: 1px solid #f0f4f8;
     display: flex;
     justify-content: flex-start;
@@ -302,8 +342,8 @@ body {
 
 .event-item,
 .birthday-item {
-    padding: 4px 18px;
-    /* Tightened 12px buffer for right panel */
+    padding: 4px 12px;
+    /* Reduced left and right padding inside the container */
     border-bottom: 1px solid #f0f4f8;
     display: flex;
     justify-content: flex-start;
@@ -376,17 +416,22 @@ body {
     font-size: 8.5px;
     font-weight: 500;
     text-decoration: none;
+    margin-left: auto;
+    /* Pushes button to exactly the right side */
 }
 
 .mail-btn {
     color: #cbd5e0;
+    margin-left: auto;
+    /* Pushes icon to exactly the right side */
 }
 
 /* Right Panel Spacing */
 .right-panel-group {
     display: flex;
     flex-direction: column;
-    gap: 30px;
+    gap: 15px;
+    /* Restored a small gap to shift Birthdays slightly downward */
 }
 
 /* ================================================= */

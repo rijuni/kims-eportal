@@ -8,18 +8,18 @@ const Header = () => {
     return (
         <div className="top-header">
             {!isTrainingPage && (
-                <div className="flex items-center gap-4 w-full justify-between">
-                    {/* Search Pill - Replaces the hamburger menu on the left */}
-                    <div className="flex items-center bg-white px-4 py-2 rounded-full border border-gray-200 w-[200px] sm:w-[280px] md:w-[320px] shadow-sm">
-                        <input 
-                            type="text" 
-                            placeholder="Search here..." 
-                            className="bg-transparent border-none outline-none text-gray-700 text-[14px] w-full"
+                <div className="flex items-center gap-[38px] w-full justify-end">
+                    {/* Search Box - Size matched with Login button */}
+                    <div className="flex items-center bg-[#F8FFF9] px-4 h-[42px] rounded-full border border-gray-100 w-[130px] shadow-sm hover:shadow-md transition-all">
+                        <input
+                            type="text"
+                            placeholder=""
+                            className="bg-transparent border-none outline-none text-gray-700 text-[16px] w-full"
                         />
-                        <Search size={20} className="text-gray-400" />
+                        <Search size={28} className="text-[#A0AEC0] ml-1" />
                     </div>
 
-                    {/* Login Pill - Pushed to the right */}
+                    {/* Login Pill */}
                     <button className="login-btn hover-scale">
                         <UserCircle size={22} className="fill-white/20" />
                         <span>Login</span>

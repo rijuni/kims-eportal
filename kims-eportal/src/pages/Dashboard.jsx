@@ -50,7 +50,7 @@ const Dashboard = () => {
                 {/* Upcoming Events Section */}
                 <div className="event-group">
                   <div className="section-title-wrap flex items-center gap-3">
-                    <img src={calendarIcon} alt="Calendar" className="w-[54px] h-[54px] object-contain drop-shadow-sm" />
+                    <img src={calendarIcon} alt="Calendar" className="w-[36px] h-[36px] object-contain drop-shadow-sm" />
                     <div>
                       <h2 className="page-title">Upcoming Events</h2>
                       <p className="page-subtitle">Be ready for every important moment</p>
@@ -62,7 +62,7 @@ const Dashboard = () => {
                 {/* Birthdays Section */}
                 <div className="birthday-group">
                   <div className="section-title-wrap flex items-center gap-3">
-                    <img src={cakeIcon} alt="Cake" className="w-[54px] h-[54px] object-contain drop-shadow-sm" />
+                    <img src={cakeIcon} alt="Cake" className="w-[36px] h-[36px] object-contain drop-shadow-sm" />
                     <div>
                       <h2 className="page-title">Birthdays</h2>
                       <p className="page-subtitle">Celebrating our team members</p>

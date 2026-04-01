@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
 import { ChevronRight } from "lucide-react";
+import { FaFilePdf } from "react-icons/fa6";
 import "../styles/training.css";
 
 const TrainingMaterials = () => {
@@ -49,12 +50,10 @@ const TrainingMaterials = () => {
                                         <span className="doc-value">: {doc.topicArea}</span>
                                     </div>
                                 </div>
-                                
+
                                 <div className="doc-actions">
-                                    <div className="pdf-icon-box">
-                                        <div className="pdf-thumb">
-                                            <div className="pdf-label">PDF</div>
-                                        </div>
+                                    <div className="pdf-icon-box bg-transparent flex items-center justify-center">
+                                        <FaFilePdf size={22} className="text-[#e53e3e] drop-shadow-sm cursor-pointer hover:scale-105 transition-transform" />
                                     </div>
                                     <a href="#" className="download-link">Download</a>
                                 </div>
