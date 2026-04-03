@@ -1,5 +1,10 @@
 /* ===== TRAINING MATERIALS PAGE ===== */
 
+.training-wrapper .main-content {
+    padding-left: 50px;
+    padding-right: 50px;
+}
+
 .training-container {
     width: 100%;
 }
@@ -51,6 +56,8 @@
     /* Pulls the card up closer to the title */
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     width: 100%;
+    max-height: calc(100vh - 135px);
+    overflow-y: auto;
 }
 
 .document-item {

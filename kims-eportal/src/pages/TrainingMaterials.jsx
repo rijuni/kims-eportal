@@ -23,7 +23,7 @@ const TrainingMaterials = () => {
     ];
 
     return (
-        <div className={`dashboard-wrapper ${isSidebarOpen ? "sidebar-open" : ""}`}>
+        <div className={`dashboard-wrapper training-wrapper ${isSidebarOpen ? "sidebar-open" : ""}`}>
             <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
 
             <div className="main-content">
