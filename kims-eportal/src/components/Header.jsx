@@ -3,12 +3,12 @@ import { useLocation } from "react-router-dom";
 
 const Header = () => {
     const location = useLocation();
-    const isTrainingPage = location.pathname === "/training-materials";
-    const isTelephonePage = location.pathname === "/telephone-directory";
+    const hiddenPaths = ["/training-materials", "/telephone-directory", "/holiday-list", "/upcoming-events", "/people"];
+    const isHidden = hiddenPaths.includes(location.pathname);
 
     return (
         <div className="top-header">
-            {!isTrainingPage && !isTelephonePage && (
+            {!isHidden && (
                 <div className="flex items-center gap-[38px] w-full justify-end">
                     {/* Search Box - Size matched with Login button */}
                     <div className="flex items-center bg-[#F8FFF9] px-4 h-[42px] rounded-full border border-gray-100 w-[130px] shadow-sm hover:shadow-md transition-all">

@@ -88,7 +88,7 @@ body {
 }
 
 .sidebar-menu li a {
-    padding: 10px 25px;
+    padding: 10px 40px;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -96,22 +96,29 @@ body {
     font-weight: 400;
     color: #555;
     transition: all 0.2s;
-    gap: 0px;
-    /* gap is already in icons */
+    gap: 5px;
     text-decoration: none;
     position: relative;
+}
+
+.sidebar-menu li a svg {
+    color: #4a5568; /* Charcoal/Dark Gray for inactive icons */
+}
+
+.sidebar-menu li a.active-link {
+    color: #1fa463;
+    background: rgba(11, 124, 74, 0.08);
+    font-weight: 600;
+}
+
+.sidebar-menu li a.active-link svg {
+    color: #1fa463; /* Green for active icon */
 }
 
 .sidebar-menu li a:hover {
     color: var(--kims-green);
     background: rgba(31, 164, 99, 0.05);
     padding-left: 35px;
-}
-
-.sidebar-menu li a.active-link {
-    color: var(--kims-green);
-    background: rgba(11, 124, 74, 0.08);
-    font-weight: 600;
 }
 
 .sidebar-menu li a.active-link::after {

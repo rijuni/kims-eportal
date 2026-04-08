@@ -1,6 +1,9 @@
 /* ===== TRAINING MATERIALS PAGE ===== */
 
 .training-wrapper .main-content {
+    flex: 1;
+    height: 100vh;
+    overflow: hidden;
     padding-left: 50px;
     padding-right: 50px;
 }
@@ -56,7 +59,8 @@
     /* Pulls the card up closer to the title */
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     width: 100%;
-    max-height: calc(100vh - 135px);
+    /* Increased subtraction to match 40px bottom gap of Dashboard Notice Board */
+    height: calc(100vh - 135px);
     overflow-y: auto;
 }
 
@@ -67,6 +71,11 @@
     justify-content: space-between;
     align-items: center;
     border-bottom: 1px solid #e2e8f0;
+    transition: background-color 0.2s ease;
+}
+
+.document-item:hover {
+    background-color: #f1f5f9;
 }
 
 .document-item:last-child {
@@ -171,11 +180,10 @@
     /* Highly reduced font size */
     font-weight: 500;
     text-decoration: none;
-    transition: all 0.2s ease;
+    transition: background-color 0.2s ease;
     box-shadow: 0 2px 6px rgba(30, 58, 138, 0.2);
 }
 
 .download-link:hover {
     background: #172554;
-    transform: scale(1.05);
 }

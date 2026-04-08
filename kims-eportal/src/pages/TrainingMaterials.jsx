@@ -53,7 +53,7 @@ const TrainingMaterials = () => {
 
                                 <div className="doc-actions">
                                     <div className="pdf-icon-box bg-transparent flex items-center justify-center">
-                                        <FaFilePdf size={22} className="text-[#e53e3e] drop-shadow-sm cursor-pointer hover:scale-105 transition-transform" />
+                                        <FaFilePdf size={22} className="text-[#e53e3e] drop-shadow-sm cursor-pointer transition-colors" />
                                     </div>
                                     <a href="#" className="download-link">Download</a>
                                 </div>

@@ -1,0 +1,158 @@
+.upcoming-wrapper {
+    display: flex;
+    height: 100vh;
+    width: 100%;
+    /* Same KIMS Gradient Background */
+    background: linear-gradient(to right,
+            var(--kims-green) 0%,
+            var(--kims-green) 40%,
+            var(--kims-blue) 60%,
+            var(--kims-blue) 100%);
+    overflow: hidden;
+}
+
+.upcoming-wrapper .main-content {
+    flex: 1;
+    height: 100vh;
+    overflow: hidden;
+    padding-left: 30px;
+    padding-right: 30px;
+    padding-bottom: 40px;
+}
+
+.upcoming-container {
+    padding: 0px 20px;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0;
+}
+
+.upcoming-header-row {
+    margin-bottom: 8px;
+}
+
+.upcoming-title {
+    padding-left: 20px;
+    color: white;
+    font-size: 18px;
+    font-weight: 500;
+    letter-spacing: 0.4px;
+    margin-bottom: 4px;
+    font-family: 'Poppins', sans-serif;
+}
+
+.upcoming-card {
+    background: white;
+    border-radius: 24px;
+    padding: 0px 10px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    /* Calculated for a strict 40px bottom gap */
+    height: calc(100vh - 120px);
+    overflow-y: auto;
+}
+
+/* Custom Scrollbar for the card */
+.upcoming-card::-webkit-scrollbar {
+    width: 6px;
+}
+
+.upcoming-card::-webkit-scrollbar-thumb {
+    background: #e2e8f0;
+    border-radius: 10px;
+}
+
+.event-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0px;
+}
+
+.full-event-item {
+    padding: 5.2px 2px;
+    border-bottom: 1px solid #f1f5f9;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    transition: background-color 0.2s ease;
+}
+
+.full-event-item:last-child {
+    border-bottom: none;
+}
+
+.full-event-item:hover {
+    background-color: #f1f5f9;
+}
+
+.event-details {
+    flex: 1;
+}
+
+.event-name {
+    font-weight: 600;
+    font-size: 13px;
+    color: #1a202c;
+    margin-bottom: 4px;
+    display: block;
+}
+
+.event-meta {
+    display: flex;
+    gap: 30px;
+    color: #4a5568;
+    font-size: 12.5px;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.event-icon-box {
+    background: #1fa46315;
+    color: #1fa463;
+    padding: 6px;
+    border-radius: 12px;
+}
+
+.doc-actions {
+    display: flex;
+    align-items: center;
+    gap: 40px;
+}
+
+.download-btn {
+    background: #1e3a8a;
+    /* Navy blue */
+    color: white;
+    padding: 0.1px 8px;
+    /* Highly reduced padding */
+    border-radius: 50px;
+    font-size: 9px;
+    /* Highly reduced font size */
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background-color 0.2s ease;
+    box-shadow: 0 2px 6px rgba(30, 58, 138, 0.2);
+}
+
+.download-btn:hover {
+    background: #172554;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .event-meta {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .full-event-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
