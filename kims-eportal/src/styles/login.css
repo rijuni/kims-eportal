@@ -9,29 +9,30 @@
 
 .login-card {
     background: white;
-    padding: 40px;
+    padding: 30px 40px;
     border-radius: 20px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1), 0 4px 10px rgba(0, 0, 0, 0.05);
     width: 100%;
     max-width: 400px;
 }
 
 .login-header {
     text-align: center;
-    margin-bottom: 30px;
+    margin-bottom: 20px;
 }
 
 .login-logo {
-    width: 150px;
-    margin: 0 auto 15px auto;
+    width: 140px;
+    margin: 0 auto 12px auto;
     display: block;
 }
 
 .login-title {
+    font-family: 'Poppins';
     color: #1a202c;
-    font-size: 22px;
+    font-size: 20px;
     font-weight: 600;
-    margin-bottom: 5px;
+    margin-bottom: 4px;
 }
 
 .login-subtitle {
@@ -51,7 +52,7 @@
 }
 
 .login-form .form-group {
-    margin-bottom: 20px;
+    margin-bottom: 16px;
 }
 
 .login-form label {
@@ -59,17 +60,19 @@
     color: #4a5568;
     font-size: 13px;
     font-weight: 500;
-    margin-bottom: 8px;
+    margin-bottom: 4px;
 }
 
 .login-form input {
     width: 100%;
-    padding: 12px 15px;
+    padding: 10px 15px;
+    background-color: #f8fafc;
+    color: #1a202c;
     border: 1px solid #e2e8f0;
     border-radius: 8px;
     font-size: 14px;
     outline: none;
-    transition: border-color 0.2s ease;
+    transition: all 0.2s ease;
 }
 
 .login-form input:focus {
@@ -80,20 +83,20 @@
     width: 100%;
     background: var(--kims-green);
     color: white;
-    padding: 12px;
+    padding: 10px;
     border: none;
     border-radius: 8px;
     font-size: 15px;
     font-weight: 600;
     cursor: pointer;
-    margin-top: 10px;
+    margin-top: 8px;
 }
 
 .login-back-btn {
     width: 100%;
     background: transparent;
     color: #4a5568;
-    padding: 10px;
+    padding: 8px;
     border: none;
     font-size: 13px;
     cursor: pointer;

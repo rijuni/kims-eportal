@@ -1,7 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import '../styles/login.css'; 
+import '../styles/login.css';
 import logo from '../img/Capture.PNG';
 
 const Login = () => {
@@ -12,7 +12,7 @@ const Login = () => {
     const navigate = useNavigate();
 
     if (user) {
-        return <Navigate to="/admin" />;
+        return <Navigate to="/" />;
     }
 
     const handleSubmit = async (e) => {
@@ -20,7 +20,7 @@ const Login = () => {
         setError(null);
         const res = await login(username, password);
         if (res.success) {
-            navigate('/admin');
+            navigate('/');
         } else {
             setError(res.message);
         }
@@ -31,29 +31,29 @@ const Login = () => {
             <div className="login-card">
                 <div className="login-header">
                     <img src={logo} alt="KIMS Logo" className="login-logo" />
-                    <h1 className="login-title">Admin Console</h1>
-                    <p className="login-subtitle">Sign in to access the admin panel</p>
+                    <h1 className="login-title">KIMS EPORTAL</h1>
+                    <p className="login-subtitle">Sign in to access</p>
                 </div>
                 {error && <div className="login-error">{error}</div>}
                 <form onSubmit={handleSubmit} className="login-form">
                     <div className="form-group">
                         <label>Username</label>
-                        <input 
-                            type="text" 
-                            value={username} 
-                            onChange={e=>setUsername(e.target.value)} 
+                        <input
+                            type="text"
+                            value={username}
+                            onChange={e => setUsername(e.target.value)}
                             placeholder="Enter username"
-                            required 
+                            required
                         />
                     </div>
                     <div className="form-group">
                         <label>Password</label>
-                        <input 
-                            type="password" 
-                            value={password} 
-                            onChange={e=>setPassword(e.target.value)} 
+                        <input
+                            type="password"
+                            value={password}
+                            onChange={e => setPassword(e.target.value)}
                             placeholder="Enter password"
-                            required 
+                            required
                         />
                     </div>
                     <button type="submit" className="login-submit-btn hover-lift">Sign In</button>
