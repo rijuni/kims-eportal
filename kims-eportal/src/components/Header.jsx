@@ -1,10 +1,20 @@
-import { Search, UserCircle } from "lucide-react";
-import { useLocation } from "react-router-dom";
+import { Search, UserCircle, LogOut } from "lucide-react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useContext } from "react";
+import { AuthContext } from "../context/AuthContext";
 
 const Header = () => {
     const location = useLocation();
-    const hiddenPaths = ["/training-materials", "/telephone-directory", "/holiday-list", "/upcoming-events", "/people"];
+    const navigate = useNavigate();
+    const { user, logout } = useContext(AuthContext);
+
+    const hiddenPaths = ["/training-materials", "/telephone-directory", "/holiday-list", "/upcoming-events", "/people", "/admin"];
     const isHidden = hiddenPaths.includes(location.pathname);
+
+    const handleLogout = () => {
+        logout();
+        navigate('/');
+    };
 
     return (
         <div className="top-header">
@@ -20,11 +30,21 @@ const Header = () => {
                         <Search size={28} className="text-[#A0AEC0] ml-1" />
                     </div>
 
-                    {/* Login Pill */}
-                    <button className="login-btn hover-scale">
-                        <UserCircle size={22} className="fill-white/20" />
-                        <span>Login</span>
-                    </button>
+                    {/* Auth Status Pill */}
+                    {user ? (
+                        <div className="flex items-center gap-3">
+                            <span className="text-white font-medium text-[14px]">Hi, {user.username}</span>
+                            <button onClick={handleLogout} className="login-btn hover-scale flex items-center justify-center !bg-[#e53e3e]">
+                                <LogOut size={20} className="mr-1" />
+                                <span>Logout</span>
+                            </button>
+                        </div>
+                    ) : (
+                        <button onClick={() => navigate('/login')} className="login-btn hover-scale">
+                            <UserCircle size={22} className="fill-white/20" />
+                            <span>Login</span>
+                        </button>
+                    )}
                 </div>
             )}
         </div>

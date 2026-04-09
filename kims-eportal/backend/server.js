@@ -1,13 +1,70 @@
 const express = require("express");
 const cors = require("cors");
+const mysql = require("mysql2/promise");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 require("dotenv").config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// Database Connection Pool
+const pool = mysql.createPool({
+    host: process.env.DB_HOST || 'localhost',
+    user: process.env.DB_USER || 'root',
+    password: process.env.DB_PASS || 'kims@123',
+    database: process.env.DB_NAME || 'kims_portal',
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
+});
+
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// Auth Route
+app.post("/api/login", async (req, res) => {
+    try {
+        const { username, password } = req.body;
+        if (!username || !password) {
+            return res.status(400).json({ success: false, message: "Please provide username and password" });
+        }
+
+        const [users] = await pool.query('SELECT * FROM users WHERE username = ?', [username]);
+        if (users.length === 0) {
+            return res.status(401).json({ success: false, message: "Invalid credentials" });
+        }
+
+        const user = users[0];
+        const isMatch = await bcrypt.compare(password, user.password);
+
+        if (!isMatch) {
+            return res.status(401).json({ success: false, message: "Invalid credentials" });
+        }
+
+        // Create JWT token
+        const token = jwt.sign(
+            { id: user.id, username: user.username, role: user.role },
+            process.env.JWT_SECRET || 'secret',
+            { expiresIn: '1d' }
+        );
+
+        res.json({
+            success: true,
+            user: {
+                id: user.id,
+                username: user.username,
+                role: user.role
+            },
+            token
+        });
+
+    } catch (error) {
+        console.error("Login Error:", error);
+        res.status(500).json({ success: false, message: "Internal server error" });
+    }
+});
 
 // Mock Data
 const notices = [
