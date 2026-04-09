@@ -43,8 +43,8 @@ const NoticeBoard = () => {
               </div>
             </div>
           </div>
-          <a href={n.document_url} target="_blank" className="download-btn hover-scale flex items-center gap-2">
-            <Download size={16} /> Download
+          <a href={n.document_url} target="_blank" className="download-btn hover-scale flex items-center justify-center gap-1">
+            <Download size={12} /> Download
           </a>
         </div>
       ))}
