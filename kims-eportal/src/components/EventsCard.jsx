@@ -2,18 +2,12 @@ import React, { useEffect, useState } from "react";
 import API from "../services/api";
 import { CalendarDays, MapPin } from "lucide-react";
 
-const mockEvents = [
-    { id: 1, event_name: "World Cancer Day", event_date: "4th February, 2026", location: "KIMS Cancer Centre" },
-    { id: 2, event_name: "International Women's Day", event_date: "8th March, 2026", location: "KIMS Lobby" },
-    { id: 3, event_name: "World Kidney Day", event_date: "13th March, 2026", location: "KIMS Super speciality & Cancer Centre" },
-];
-
 const EventsCard = () => {
-    const [events, setEvents] = useState(mockEvents);
+    const [events, setEvents] = useState([]);
 
     useEffect(() => {
         API.get("/events/upcoming")
-            .then((res) => { if (res.data?.length > 0) setEvents(res.data) })
+            .then((res) => { if (res.data) setEvents(res.data) })
             .catch((err) => console.error(err));
     }, []);
 

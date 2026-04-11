@@ -8,6 +8,7 @@ import UpcomingEvents from "./pages/UpcomingEvents";
 import People from "./pages/People";
 import Login from "./pages/Login";
 import AdminPanel from "./pages/AdminPanel";
+import ManageDashboard from "./pages/ManageDashboard";
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
           <Route path="/people" element={<People />} />
           <Route path="/login" element={<Login />} />
           <Route path="/admin" element={<AdminPanel />} />
+          <Route path="/admin/manage-dashboard" element={<ManageDashboard />} />
         </Routes>
       </Router>
     </AuthProvider>

@@ -2,21 +2,12 @@ import React, { useEffect, useState } from "react";
 import API from "../services/api";
 import { Mail, CalendarDays, User } from "lucide-react";
 
-const mockBirthdays = [
-  ...Array(3).fill({
-    id: Math.random(),
-    name: "Mr. Debi Prasad Panda",
-    department: "ICT CELL",
-    date_of_birth: "18th March, 2026"
-  })
-];
-
 const BirthdayCard = () => {
-  const [birthdays, setBirthdays] = useState(mockBirthdays);
+  const [birthdays, setBirthdays] = useState([]);
 
   useEffect(() => {
     API.get("/employees/birthdays")
-      .then((res) => { if (res.data?.length > 0) setBirthdays(res.data) })
+      .then((res) => { if (res.data) setBirthdays(res.data) })
       .catch((err) => console.error(err));
   }, []);
 

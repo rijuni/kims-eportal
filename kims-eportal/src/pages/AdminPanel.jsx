@@ -22,7 +22,7 @@ const AdminPanel = () => {
     };
 
     const adminSections = [
-        { title: "Dashboard", icon: <Clipboard />, desc: "Manage Dashboard", theme: "green" },
+        { title: "Dashboard", icon: <Clipboard />, desc: "Manage Dashboard", theme: "green", link: "/admin/manage-dashboard" },
         { title: "Training Materials", icon: <BookOpen />, desc: "Manage Training Materials", theme: "green" },
         { title: "Telephone Directory", icon: <Contact />, desc: "Manage Telephone Directory", theme: "red" },
         { title: "Holiday List", icon: <CalendarRange />, desc: "Manage Holiday List", theme: "orange" },
@@ -46,6 +46,7 @@ const AdminPanel = () => {
                                 icon={section.icon}
                                 description={section.desc}
                                 theme={section.theme}
+                                link={section.link}
                             />
                         ))}
                     </div>

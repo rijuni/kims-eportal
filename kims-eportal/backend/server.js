@@ -3,6 +3,10 @@ const cors = require("cors");
 const mysql = require("mysql2/promise");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const multer = require("multer");
+const xlsx = require("xlsx");
+const path = require("path");
+const fs = require("fs");
 require("dotenv").config();
 
 const app = express();
@@ -22,6 +26,7 @@ const pool = mysql.createPool({
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Auth Route
 app.post("/api/login", async (req, res) => {
@@ -66,63 +71,140 @@ app.post("/api/login", async (req, res) => {
     }
 });
 
-// Mock Data
-const notices = [
-  {
-    id: 1,
-    title: "Counter Wise Allotment of Schools/Department/Units",
-    issued_by: "Principal KIMS",
-    date: "1st January, 2026",
-    document_url: "#"
-  },
-  {
-    id: 2,
-    title: "New Health & Safety Protocols for Q2",
-    issued_by: "HR Department",
-    date: "15th January, 2026",
-    document_url: "#"
-  },
-  {
-    id: 3,
-    title: "Annual Sports Meet 2026 - Registration Open",
-    issued_by: "Sports Committee",
-    date: "20th January, 2026",
-    document_url: "#"
-  }
-];
+// Multer Setup for Excel Upload
+const upload = multer({ storage: multer.memoryStorage() });
 
-const events = [
-  { id: 1, event_name: "World Cancer Day", event_date: "4th February, 2026", location: "KIMS Cancer Centre" },
-  { id: 2, event_name: "International Women's Day", event_date: "8th March, 2026", location: "KIMS Lobby" },
-  { id: 3, event_name: "World Kidney Day", event_date: "13th March, 2026", location: "KIMS Super speciality & Cancer Centre" },
-];
+// Multer Disk Storage for Notices (PDF)
+const noticesStorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        const dir = "uploads/notices";
+        if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir, { recursive: true });
+        }
+        cb(null, dir);
+    },
+    filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+        cb(null, "notice-" + uniqueSuffix + path.extname(file.originalname));
+    }
+});
+const uploadNotice = multer({ storage: noticesStorage });
 
-const birthdays = [
-  {
-    id: 1,
-    name: "Mr. Debi Prasad Panda",
-    department: "ICT CELL",
-    date_of_birth: "18th March, 2026"
-  },
-  {
-    id: 2,
-    name: "Dr. Ananya Roy",
-    department: "Cardiology",
-    date_of_birth: "22nd March, 2026"
-  }
-];
-
-// Routes
-app.get("/api/notices", (req, res) => {
-  res.json(notices);
+// --- NOTICES ROUTES ---
+app.get("/api/notices", async (req, res) => {
+    try {
+        const [rows] = await pool.query('SELECT * FROM notices ORDER BY created_at DESC');
+        res.json(rows);
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
 });
 
-app.get("/api/events/upcoming", (req, res) => {
-  res.json(events);
+app.post("/api/notices", uploadNotice.single("noticeFile"), async (req, res) => {
+    try {
+        const { title, issued_by, date } = req.body;
+        const document_url = req.file ? `/uploads/notices/${req.file.filename}` : null;
+        
+        await pool.query(
+            'INSERT INTO notices (title, issued_by, date, document_url) VALUES (?, ?, ?, ?)', 
+            [title, issued_by, date, document_url]
+        );
+        res.json({ success: true, message: "Notice added successfully" });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
 });
 
-app.get("/api/employees/birthdays", (req, res) => {
-  res.json(birthdays);
+app.delete("/api/notices/:id", async (req, res) => {
+    try {
+        await pool.query('DELETE FROM notices WHERE id = ?', [req.params.id]);
+        res.json({ success: true, message: "Notice deleted" });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+// --- EVENTS ROUTES ---
+app.get("/api/events/upcoming", async (req, res) => {
+    try {
+        const [rows] = await pool.query('SELECT * FROM events ORDER BY created_at DESC');
+        res.json(rows);
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+app.post("/api/events", async (req, res) => {
+    try {
+        const { event_name, event_date, location } = req.body;
+        await pool.query('INSERT INTO events (event_name, event_date, location) VALUES (?, ?, ?)', [event_name, event_date, location]);
+        res.json({ success: true, message: "Event added successfully" });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+app.delete("/api/events/:id", async (req, res) => {
+    try {
+        await pool.query('DELETE FROM events WHERE id = ?', [req.params.id]);
+        res.json({ success: true, message: "Event deleted" });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+// --- BIRTHDAYS ROUTES ---
+app.get("/api/employees/birthdays", async (req, res) => {
+    try {
+        const [rows] = await pool.query('SELECT * FROM birthdays ORDER BY created_at DESC');
+        res.json(rows);
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+app.post("/api/birthdays/upload", upload.single('excelFile'), async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ success: false, message: "No file uploaded" });
+        }
+
+        // Parse Excel from memory buffer
+        const workbook = xlsx.read(req.file.buffer, { type: 'buffer' });
+        const sheetName = workbook.SheetNames[0];
+        const sheet = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
+
+        if (sheet.length === 0) {
+            return res.status(400).json({ success: false, message: "Excel file is empty" });
+        }
+
+        // Drop previous records
+        await pool.query('TRUNCATE TABLE birthdays');
+
+        // Insert new records
+        for (const row of sheet) {
+            // Fuzzy match column names since headers might have different cases
+            const name = row['Name'] || row['name'] || row['Employee Name'];
+            const dept = row['Department'] || row['department'] || row['Dept'] || row['dept'];
+            const dob = row['DOB'] || row['dob'] || row['Date of Birth'] || row['date_of_birth'];
+
+            if (name && dept && dob) {
+                // To maintain legacy date format logic on front end or just insert the string
+                // Excel dates might parse weird. XLSX util usually gives excel epoch int or string.
+                // We'll trust whatever string or value it gives us and store it.
+                await pool.query(
+                    'INSERT INTO birthdays (name, department, date_of_birth) VALUES (?, ?, ?)',
+                    [String(name).trim(), String(dept).trim(), String(dob).trim()]
+                );
+            }
+        }
+
+        res.json({ success: true, message: "Birthdays updated successfully from Excel!" });
+
+    } catch (err) {
+        console.error("Excel Upload Error:", err);
+        res.status(500).json({ success: false, message: "Failed to process Excel file" });
+    }
 });
 
 // Default Route

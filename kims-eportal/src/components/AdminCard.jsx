@@ -1,6 +1,17 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
-const AdminCard = ({ title, icon, description, theme }) => {
+const AdminCard = ({ title, icon, description, theme, link }) => {
+    const navigate = useNavigate();
+
+    const handleAccess = () => {
+        if (link) {
+            navigate(link);
+        } else {
+            console.log(`Access clicked for ${title} - No link provided`);
+        }
+    };
+
     return (
         <div className={`admin-card theme-${theme}`}>
             {/* Top Color Line */}
@@ -12,7 +23,7 @@ const AdminCard = ({ title, icon, description, theme }) => {
             {/* Description */}
             <p>{description}</p>
             {/* Button */}
-            <button className="access-btn">Access</button>
+            <button className="access-btn" onClick={handleAccess}>Access</button>
         </div>
     );
 };

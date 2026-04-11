@@ -31,6 +31,43 @@ async function setupDatabase() {
         `);
         console.log('Table `users` created or already exists.');
 
+        // Create Notices Table
+        await connection.query(`
+            CREATE TABLE IF NOT EXISTS notices (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                title VARCHAR(255) NOT NULL,
+                issued_by VARCHAR(255) NOT NULL,
+                date VARCHAR(50) NOT NULL,
+                document_url VARCHAR(255),
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+        console.log('Table `notices` created or already exists.');
+
+        // Create Events Table
+        await connection.query(`
+            CREATE TABLE IF NOT EXISTS events (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                event_name VARCHAR(255) NOT NULL,
+                event_date VARCHAR(50) NOT NULL,
+                location VARCHAR(255) NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+        console.log('Table `events` created or already exists.');
+
+        // Create Birthdays Table
+        await connection.query(`
+            CREATE TABLE IF NOT EXISTS birthdays (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                name VARCHAR(255) NOT NULL,
+                department VARCHAR(255) NOT NULL,
+                date_of_birth VARCHAR(50) NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+        console.log('Table `birthdays` created or already exists.');
+
         // Check if admin user already exists
         const [rows] = await connection.query(`SELECT * FROM users WHERE username = 'admin'`);
         if (rows.length === 0) {
