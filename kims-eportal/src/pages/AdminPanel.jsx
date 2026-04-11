@@ -22,12 +22,12 @@ const AdminPanel = () => {
     };
 
     const adminSections = [
-        { title: "Dashboard", icon: <Clipboard />, desc: "Revert services to the desired status", theme: "blue" },
-        { title: "Training Materials", icon: <BookOpen />, desc: "Blood Bag Cross-Match", theme: "green" },
-        { title: "Telephone Directory", icon: <Contact />, desc: "Revert invoices to the desired status", theme: "red" },
-        { title: "Holiday List", icon: <CalendarRange />, desc: "Remove death details for a patient", theme: "orange" },
-        { title: "Upcoming Events", icon: <CalendarClock />, desc: "Revert OT request to pending status", theme: "teal" },
-        { title: "People", icon: <Users />, desc: "Revert patient status to IP", theme: "amber" },
+        { title: "Dashboard", icon: <Clipboard />, desc: "Manage Dashboard", theme: "green" },
+        { title: "Training Materials", icon: <BookOpen />, desc: "Manage Training Materials", theme: "green" },
+        { title: "Telephone Directory", icon: <Contact />, desc: "Manage Telephone Directory", theme: "red" },
+        { title: "Holiday List", icon: <CalendarRange />, desc: "Manage Holiday List", theme: "orange" },
+        { title: "Upcoming Events", icon: <CalendarClock />, desc: "Manage Upcoming Events", theme: "teal" },
+        { title: "People", icon: <Users />, desc: "Manage People", theme: "amber" },
     ];
 
     return (

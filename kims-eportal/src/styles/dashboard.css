@@ -369,6 +369,12 @@ body {
     font-size: 14.5px;
     /* Increased font size for better visibility */
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+    transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+.action-pill:hover {
+    background: var(--kims-green);
+    color: white;
 }
 
 /* ===== CARDS ===== */

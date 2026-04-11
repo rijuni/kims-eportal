@@ -1,31 +1,42 @@
 /* Page Container - creating gaps on top, bottom, left, and right */
 .admin-dashboard-container {
-    background: #f8f9fa;
-    /* Lighter background for better contrast */
-    padding: 40px 30px;
-    /* Significant gap from top and sides */
+    padding: 40px 0;
+    /* Let the native main-content handle the left/right sidebar gaps! */
     min-height: 100vh;
 }
 
 /* GRID */
 .grid-container {
     display: grid;
-    /* Clean layout with auto-fit, making responsive gap between boxes */
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 30px;
-    /* Gap between each section */
-    max-width: 1150px;
-    margin: 0 auto;
+    /* Strict 3-column layout as requested */
+    grid-template-columns: repeat(3, 1fr);
+    gap: 28px;
+    /* Reduced gap slightly */
+    width: 100%;
+    max-width: 900px;
+    /* Strongly restricted max-width to reduce box size, left aligned */
     color: #000000;
+}
+
+/* Responsive constraints for the grid */
+@media (max-width: 1024px) {
+    .grid-container {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .grid-container {
+        grid-template-columns: 1fr;
+    }
 }
 
 /* CARD / PROPER BOXED CARDS */
 .admin-card {
     position: relative;
-    background: #ffffff;
     border-radius: 12px;
-    padding: 32px 24px;
-    /* Internal padding making sure content is nicely enclosed */
+    padding: 20px 20px;
+    /* Reduced internal padding to shrink card footprint */
     text-align: center;
     border: 1px solid #edf2f7;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02), 0 10px 15px rgba(0, 0, 0, 0.03);
@@ -100,6 +111,11 @@
 /* THEMES */
 
 /* BLUE */
+.theme-blue {
+    background-color: #eff6ff;
+    border-color: #bfdbfe;
+}
+
 .theme-blue .top-line {
     background: #3b82f6;
 }
@@ -112,20 +128,38 @@
     background: #3b82f6;
 }
 
+.theme-blue .access-btn:hover {
+    background: #2563eb;
+}
+
 /* GREEN */
+.theme-green {
+    background-color: #f0fdf4;
+    border-color: #bbf7d0;
+}
+
 .theme-green .top-line {
-    background: #10b981;
+    background: #22c55e;
 }
 
 .theme-green .icon {
-    color: #10b981;
+    color: #22c55e;
 }
 
 .theme-green .access-btn {
-    background: #10b981;
+    background: #22c55e;
+}
+
+.theme-green .access-btn:hover {
+    background: #16a34a;
 }
 
 /* RED */
+.theme-red {
+    background-color: #fef2f2;
+    border-color: #fecaca;
+}
+
 .theme-red .top-line {
     background: #ef4444;
 }
@@ -138,7 +172,16 @@
     background: #ef4444;
 }
 
+.theme-red .access-btn:hover {
+    background: #dc2626;
+}
+
 /* ORANGE */
+.theme-orange {
+    background-color: #fff7ed;
+    border-color: #fed7aa;
+}
+
 .theme-orange .top-line {
     background: #f97316;
 }
@@ -151,7 +194,16 @@
     background: #f97316;
 }
 
+.theme-orange .access-btn:hover {
+    background: #ea580c;
+}
+
 /* TEAL */
+.theme-teal {
+    background-color: #f0fdfa;
+    border-color: #99f6e4;
+}
+
 .theme-teal .top-line {
     background: #14b8a6;
 }
@@ -164,7 +216,16 @@
     background: #14b8a6;
 }
 
+.theme-teal .access-btn:hover {
+    background: #0d9488;
+}
+
 /* AMBER */
+.theme-amber {
+    background-color: #fffbeb;
+    border-color: #fde68a;
+}
+
 .theme-amber .top-line {
     background: #f59e0b;
 }
@@ -175,4 +236,8 @@
 
 .theme-amber .access-btn {
     background: #f59e0b;
+}
+
+.theme-amber .access-btn:hover {
+    background: #d97706;
 }
