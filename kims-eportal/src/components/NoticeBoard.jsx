@@ -22,7 +22,7 @@ const NoticeBoard = () => {
   }, []);
 
   return (
-    <div className="card scrollable hover-lift">
+    <div className="card scrollable">
       {notices.map((n) => (
         <div className="notice-item hover-scale" key={n.id}>
           <div className="item-left">

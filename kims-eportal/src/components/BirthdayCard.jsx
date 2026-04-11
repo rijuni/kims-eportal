@@ -21,7 +21,14 @@ const BirthdayCard = () => {
   }, []);
 
   return (
-    <div className="card hover-lift birthdays-card">
+    <div className="card birthdays-card">
+      {/* Cracker Animation elements */}
+      <div className="cracker-wrapper">
+        <div className="cracker" style={{ left: '20%', top: '40%', animationDelay: '0s' }}></div>
+        <div className="cracker" style={{ left: '75%', top: '30%', animationDelay: '0.8s' }}></div>
+        <div className="cracker" style={{ left: '45%', top: '70%', animationDelay: '1.6s' }}></div>
+      </div>
+      
       {birthdays.map((b) => (
         <div className="birthday-item hover-scale" key={b.id || Math.random()}>
           <div className="item-info">
@@ -35,8 +42,8 @@ const BirthdayCard = () => {
               </span>
             </div>
           </div>
-          <div className="mail-btn">
-            <Mail size={18} fill="#94a3b8" />
+          <div className="mail-btn" title="Send Mail">
+            <Mail size={18} />
           </div>
         </div>
       ))}

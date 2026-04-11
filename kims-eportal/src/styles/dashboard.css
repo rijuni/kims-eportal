@@ -262,12 +262,12 @@ body {
 
 .notice-section {
     flex: 1.5;
-    margin-top: -30px;
+    margin-top: -35px;
     /* Pulls the entire Notice Board section upwards visually */
 }
 
 .notice-section .card {
-    height: calc(100vh - 135px);
+    height: calc(100vh - 122px);
     display: flex;
     flex-direction: column;
     padding-top: 0 !important;
@@ -373,6 +373,8 @@ body {
 
 /* ===== CARDS ===== */
 .card {
+    position: relative;
+    /* Essential for containing absolute-positioned children like the cracker animation */
     background: white;
     border-radius: var(--border-radius-card);
     padding: 12px 0;
@@ -512,9 +514,24 @@ body {
 }
 
 .mail-btn {
-    color: #cbd5e0;
+    color: #94a3b8;
     margin-left: auto;
-    /* Pushes icon to exactly the right side */
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+}
+
+.mail-btn:hover {
+    background: rgba(21, 69, 129, 0.1);
+    /* Light version of kims-blue */
+    color: #154581;
+    /* kims-blue */
+    transform: scale(1.1);
 }
 
 /* Right Panel Spacing */
@@ -530,6 +547,7 @@ body {
     flex-direction: column;
     flex: 1;
     overflow: hidden;
+    margin-bottom: -4px;
 }
 
 .birthdays-card {
@@ -566,5 +584,51 @@ body {
 
     .sidebar-open .sidebar {
         transform: translateX(280px);
+    }
+}
+
+/* Cracker / Firework Animation */
+.cracker-wrapper {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+    opacity: 0.8;
+    /* Increased opacity for better visibility */
+}
+
+.cracker {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: transparent;
+    border-radius: 50%;
+    animation: crackerBurst 2.8s infinite;
+}
+
+@keyframes crackerBurst {
+    0% {
+        transform: scale(0.1);
+        opacity: 1;
+        box-shadow: 0 0 #fff;
+    }
+
+    20% {
+        opacity: 1;
+    }
+
+    100% {
+        transform: scale(1.8);
+        opacity: 0;
+        box-shadow:
+            -70px -70px 2px #e63946, 70px -70px 2px #f77f00,
+            -70px 70px 2px #fcbf49, 70px 70px 2px #d62828,
+            0 -100px 3px #003049, 0 100px 3px #33a8c7,
+            -100px 0 3px #52b788, 100px 0 3px #ff9ff3,
+            -50px -50px 2px #fff, 50px -50px 2px #fff,
+            -50px 50px 2px #fff, 50px 50px 2px #fff,
+            0 -140px 4px #1d3557, 0 140px 4px #1d3557,
+            -140px 0 4px #1d3557, 140px 0 4px #1d3557;
     }
 }

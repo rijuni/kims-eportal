@@ -3,9 +3,9 @@ import API from "../services/api";
 import { CalendarDays, MapPin } from "lucide-react";
 
 const mockEvents = [
-  { id: 1, event_name: "World Cancer Day", event_date: "4th February, 2026", location: "KIMS Cancer Centre" },
-  { id: 2, event_name: "International Women's Day", event_date: "8th March, 2026", location: "KIMS Lobby" },
-  { id: 3, event_name: "World Kidney Day", event_date: "13th March, 2026", location: "KIMS Super speciality & Cancer Centre" },
+    { id: 1, event_name: "World Cancer Day", event_date: "4th February, 2026", location: "KIMS Cancer Centre" },
+    { id: 2, event_name: "International Women's Day", event_date: "8th March, 2026", location: "KIMS Lobby" },
+    { id: 3, event_name: "World Kidney Day", event_date: "13th March, 2026", location: "KIMS Super speciality & Cancer Centre" },
 ];
 
 const EventsCard = () => {
@@ -18,7 +18,7 @@ const EventsCard = () => {
     }, []);
 
     return (
-        <div className="card hover-lift events-card">
+        <div className="card events-card">
             {events.map((e) => (
                 <div className="event-item hover-scale" key={e.id}>
                     <div className="item-info">

@@ -3,6 +3,9 @@ import { Navigate } from 'react-router-dom';
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
 import { AuthContext } from '../context/AuthContext';
+import { Clipboard, BookOpen, Contact, CalendarRange, CalendarClock, Users } from 'lucide-react';
+import AdminCard from '../components/AdminCard';
+import '../styles/Adminpanel.css';
 
 const AdminPanel = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -18,6 +21,15 @@ const AdminPanel = () => {
         setIsSidebarOpen(!isSidebarOpen);
     };
 
+    const adminSections = [
+        { title: "Dashboard", icon: <Clipboard />, desc: "Revert services to the desired status", theme: "blue" },
+        { title: "Training Materials", icon: <BookOpen />, desc: "Blood Bag Cross-Match", theme: "green" },
+        { title: "Telephone Directory", icon: <Contact />, desc: "Revert invoices to the desired status", theme: "red" },
+        { title: "Holiday List", icon: <CalendarRange />, desc: "Remove death details for a patient", theme: "orange" },
+        { title: "Upcoming Events", icon: <CalendarClock />, desc: "Revert OT request to pending status", theme: "teal" },
+        { title: "People", icon: <Users />, desc: "Revert patient status to IP", theme: "amber" },
+    ];
+
     return (
         <div className={`dashboard-wrapper ${isSidebarOpen ? "sidebar-open" : ""}`}>
             <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
@@ -25,30 +37,17 @@ const AdminPanel = () => {
             <div className="main-content">
                 <Header toggleSidebar={toggleSidebar} />
 
-                <div className="dashboard-container">
-                    <div className="section-header-row mb-4">
-                        <div className="section-title-wrap">
-                            <h1 className="page-title text-2xl font-bold text-white">Admin Panel</h1>
-                            <p className="page-subtitle text-white/80">Manage portal content and settings</p>
-                        </div>
-                    </div>
-
-                    <div className="card p-8 min-h-[500px]">
-                        <h2 className="text-xl font-semibold mb-4 text-[#1a202c]">Welcome, {user.username}!</h2>
-                        <p className="text-gray-600 mb-6">
-                            This is the protected administration area. From here you can manage notices, events, and other portal content.
-                        </p>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <div className="p-6 border border-gray-100 rounded-xl bg-gray-50 flex flex-col items-center justify-center cursor-pointer hover:shadow-md transition">
-                                <span className="text-[#1FA463] font-bold text-lg">Manage Notices</span>
-                            </div>
-                            <div className="p-6 border border-gray-100 rounded-xl bg-gray-50 flex flex-col items-center justify-center cursor-pointer hover:shadow-md transition">
-                                <span className="text-[#1FA463] font-bold text-lg">Manage Events</span>
-                            </div>
-                            <div className="p-6 border border-gray-100 rounded-xl bg-gray-50 flex flex-col items-center justify-center cursor-pointer hover:shadow-md transition">
-                                <span className="text-[#1FA463] font-bold text-lg">User Directory</span>
-                            </div>
-                        </div>
+                <div className="admin-dashboard-container">
+                    <div className="grid-container">
+                        {adminSections.map((section, idx) => (
+                            <AdminCard
+                                key={idx}
+                                title={section.title}
+                                icon={section.icon}
+                                description={section.desc}
+                                theme={section.theme}
+                            />
+                        ))}
                     </div>
                 </div>
             </div>
