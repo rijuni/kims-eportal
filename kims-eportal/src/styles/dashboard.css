@@ -396,8 +396,8 @@ body {
     padding-bottom: 0 !important;
     margin-top: 0 !important;
     margin-bottom: 0 !important;
-    width: fit-content !important;
-    min-width: 305px;
+    width: 305px !important;
+    max-width: 305px !important;
     /* Prevents looking too squished */
 }
 

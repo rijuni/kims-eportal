@@ -90,6 +90,38 @@ const noticesStorage = multer.diskStorage({
 });
 const uploadNotice = multer({ storage: noticesStorage });
 
+// Multer Disk Storage for Events (Images)
+const eventsStorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        const dir = "uploads/events";
+        if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir, { recursive: true });
+        }
+        cb(null, dir);
+    },
+    filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+        cb(null, "event-" + uniqueSuffix + path.extname(file.originalname));
+    }
+});
+const uploadEvent = multer({ storage: eventsStorage });
+
+// Multer Disk Storage for Training Materials (PDFs)
+const trainingStorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        const dir = "uploads/training";
+        if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir, { recursive: true });
+        }
+        cb(null, dir);
+    },
+    filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+        cb(null, "training-" + uniqueSuffix + path.extname(file.originalname));
+    }
+});
+const uploadTraining = multer({ storage: trainingStorage });
+
 // --- NOTICES ROUTES ---
 app.get("/api/notices", async (req, res) => {
     try {
@@ -134,13 +166,166 @@ app.get("/api/events/upcoming", async (req, res) => {
     }
 });
 
-app.post("/api/events", async (req, res) => {
+app.post("/api/events", uploadEvent.single('eventImage'), async (req, res) => {
     try {
-        const { event_name, event_date, location } = req.body;
-        await pool.query('INSERT INTO events (event_name, event_date, location) VALUES (?, ?, ?)', [event_name, event_date, location]);
+        const { event_name, event_date, location, event_type, event_details } = req.body;
+        const image_url = req.file ? `/uploads/events/${req.file.filename}` : null;
+        
+        await pool.query(
+            'INSERT INTO events (event_name, event_date, location, event_type, event_details, image_url) VALUES (?, ?, ?, ?, ?, ?)', 
+            [event_name, event_date, location, event_type || 'General', event_details || '', image_url]
+        );
         res.json({ success: true, message: "Event added successfully" });
     } catch (err) {
         res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+app.put("/api/events/:id", uploadEvent.single('eventImage'), async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { event_name, event_date, location, event_type, event_details } = req.body;
+        
+        // Fetch existing to handle image cleanup
+        const [existing] = await pool.query('SELECT image_url FROM events WHERE id = ?', [id]);
+        if (existing.length === 0) {
+            return res.status(404).json({ success: false, message: "Event not found" });
+        }
+
+        let image_url = existing[0].image_url;
+        if (req.file) {
+            // New image uploaded, delete old one if it exists
+            if (image_url) {
+                const oldPath = path.join(__dirname, image_url);
+                if (fs.existsSync(oldPath)) {
+                    fs.unlinkSync(oldPath);
+                }
+            }
+            image_url = `/uploads/events/${req.file.filename}`;
+        }
+
+        await pool.query(
+            'UPDATE events SET event_name = ?, event_date = ?, location = ?, event_type = ?, event_details = ?, image_url = ? WHERE id = ?',
+            [event_name, event_date, location, event_type, event_details, image_url, id]
+        );
+
+        res.json({ success: true, message: "Event updated successfully" });
+    } catch (err) {
+        console.error("Update Event Error:", err);
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+app.post("/api/events/upload", upload.single('excelFile'), async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ success: false, message: "No file uploaded" });
+        }
+
+        const workbook = xlsx.read(req.file.buffer, { type: 'buffer' });
+        let allEventRows = [];
+
+        // Fuzzy search for event data
+        for (const sheetName of workbook.SheetNames) {
+            const sheet = workbook.Sheets[sheetName];
+            const rawData = xlsx.utils.sheet_to_json(sheet, { header: 1, raw: false });
+
+            if (!rawData || rawData.length === 0) continue;
+
+            let headerRowIndex = -1;
+            let colMap = {};
+
+            for (let i = 0; i < Math.min(rawData.length, 20); i++) {
+                const row = rawData[i];
+                if (!row || !Array.isArray(row)) continue;
+
+                const normalizedRow = row.map(cell => String(cell || '').toLowerCase().replace(/[\s._]/g, ''));
+                
+                const eventIdx = normalizedRow.findIndex(c => c === 'eventname' || c === 'event' || c === 'particulars' || c === 'title' || c === 'particular');
+                const dateIdx = normalizedRow.findIndex(c => c === 'date' || c === 'eventdate');
+                const timingIdx = normalizedRow.findIndex(c => c === 'timing' || c === 'time');
+                const locationIdx = normalizedRow.findIndex(c => c === 'location' || c === 'venue' || c === 'place');
+                const typeIdx = normalizedRow.findIndex(c => c === 'eventtype' || c === 'type' || c === 'category' || c === 'cat');
+                const detailsIdx = normalizedRow.findIndex(c => c === 'eventdetails' || c === 'details' || c === 'description' || c === 'notes');
+
+                if (eventIdx !== -1 && (dateIdx !== -1 || timingIdx !== -1)) {
+                    headerRowIndex = i;
+                    colMap.event = eventIdx;
+                    colMap.date = dateIdx;
+                    colMap.timing = timingIdx;
+                    colMap.location = locationIdx;
+                    colMap.type = typeIdx;
+                    colMap.details = detailsIdx;
+                    break;
+                }
+            }
+
+            if (headerRowIndex !== -1) {
+                for (let j = headerRowIndex + 1; j < rawData.length; j++) {
+                    const row = rawData[j];
+                    if (!row || !row[colMap.event]) continue;
+
+                    let combinedDateUrl = "";
+                    if (colMap.date !== undefined && colMap.date !== -1 && row[colMap.date]) {
+                        combinedDateUrl += row[colMap.date];
+                    }
+                    if (colMap.timing !== undefined && colMap.timing !== -1 && row[colMap.timing]) {
+                        if (combinedDateUrl) combinedDateUrl += ", ";
+                        combinedDateUrl += row[colMap.timing];
+                    }
+
+                    allEventRows.push({
+                        event_name: row[colMap.event],
+                        event_date: combinedDateUrl || 'TBD',
+                        location: colMap.location !== -1 ? (row[colMap.location] || 'KIMS') : 'KIMS',
+                        event_type: colMap.type !== -1 ? (row[colMap.type] || 'General') : 'General',
+                        event_details: colMap.details !== -1 ? (row[colMap.details] || '') : ''
+                    });
+                }
+                if (allEventRows.length > 0) break;
+            }
+        }
+
+        if (allEventRows.length === 0) {
+            return res.status(400).json({ success: false, message: "No valid event data found. Headers should include 'Event' and 'Date'." });
+        }
+
+        // Truncate and insert
+        await pool.query('TRUNCATE TABLE events');
+
+        for (const e of allEventRows) {
+            await pool.query(
+                'INSERT INTO events (event_name, event_date, location, event_type, event_details) VALUES (?, ?, ?, ?, ?)',
+                [
+                    String(e.event_name).trim(), 
+                    String(e.event_date || 'TBD').trim(), 
+                    String(e.location || 'KIMS').trim(),
+                    String(e.event_type || 'General').trim(),
+                    String(e.event_details || '').trim()
+                ]
+            );
+        }
+
+        // Track last uploaded file
+        await pool.query(
+            'INSERT INTO system_settings (setting_key, setting_value) VALUES (?, ?) ON DUPLICATE KEY UPDATE setting_value = ?',
+            ['last_event_sync_file', req.file.originalname, req.file.originalname]
+        );
+
+        res.json({ success: true, message: `Successfully synced ${allEventRows.length} events!`, filename: req.file.originalname });
+    } catch (err) {
+        console.error("Event Sync Error:", err);
+        res.status(500).json({ success: false, message: "Failed to process events Excel file." });
+    }
+});
+
+app.delete("/api/events", async (req, res) => {
+    try {
+        await pool.query('TRUNCATE TABLE events');
+        await pool.query('DELETE FROM system_settings WHERE setting_key = "last_event_sync_file"');
+        res.json({ success: true, message: "Events cleared successfully" });
+    } catch (err) {
+        res.status(500).json({ success: false, message: "Failed to clear events" });
     }
 });
 
@@ -199,11 +384,334 @@ app.post("/api/birthdays/upload", upload.single('excelFile'), async (req, res) =
             }
         }
 
-        res.json({ success: true, message: "Birthdays updated successfully from Excel!" });
+        // Track last uploaded file
+        await pool.query(
+            'INSERT INTO system_settings (setting_key, setting_value) VALUES (?, ?) ON DUPLICATE KEY UPDATE setting_value = ?',
+            ['last_birthday_sync_file', req.file.originalname, req.file.originalname]
+        );
+
+        res.json({ success: true, message: "Birthdays updated successfully from Excel!", filename: req.file.originalname });
 
     } catch (err) {
         console.error("Excel Upload Error:", err);
         res.status(500).json({ success: false, message: "Failed to process Excel file" });
+    }
+});
+
+app.delete("/api/birthdays", async (req, res) => {
+    try {
+        await pool.query('TRUNCATE TABLE birthdays');
+        await pool.query('DELETE FROM system_settings WHERE setting_key = "last_birthday_sync_file"');
+        res.json({ success: true, message: "Birthdays cleared successfully" });
+    } catch (err) {
+        res.status(500).json({ success: false, message: "Failed to clear birthdays" });
+    }
+});
+
+// --- HOLIDAYS ROUTES ---
+app.get("/api/holidays", async (req, res) => {
+    try {
+        const [rows] = await pool.query('SELECT * FROM holidays ORDER BY sl_no ASC');
+        res.json(rows);
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+app.post("/api/holidays/upload", upload.single('excelFile'), async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ success: false, message: "No file uploaded" });
+        }
+
+        const workbook = xlsx.read(req.file.buffer, { type: 'buffer' });
+        let allHolidayRows = [];
+
+        // Try to find holiday data in ANY sheet
+        for (const sheetName of workbook.SheetNames) {
+            const sheet = workbook.Sheets[sheetName];
+            const rawData = xlsx.utils.sheet_to_json(sheet, { header: 1 }); // Array of arrays
+
+            if (!rawData || rawData.length === 0) continue;
+
+            // Find the header row (look for 'sl' and 'event' in the same row)
+            let headerRowIndex = -1;
+            let colMap = {};
+
+            for (let i = 0; i < Math.min(rawData.length, 20); i++) {
+                const row = rawData[i];
+                if (!row || !Array.isArray(row)) continue;
+
+                const normalizedRow = row.map(cell => String(cell || '').toLowerCase().replace(/[\s._]/g, ''));
+                
+                const slIdx = normalizedRow.findIndex(c => c === 'slno' || c === 'sl' || c === 'sino' || c === 'sn' || c === 'sno');
+                const eventIdx = normalizedRow.findIndex(c => c === 'event' || c === 'particulars' || c === 'particular' || c === 'holidayname' || c === 'description');
+                
+                if (slIdx !== -1 && eventIdx !== -1) {
+                    headerRowIndex = i;
+                    colMap.sl = slIdx;
+                    colMap.event = eventIdx;
+                    colMap.date = normalizedRow.findIndex(c => c === 'date' || c === 'holidaydate');
+                    colMap.days = normalizedRow.findIndex(c => c === 'days' || c === 'day');
+                    colMap.nod = normalizedRow.findIndex(c => c === 'noofdays' || c === 'dayscount' || c === 'duration');
+                    break;
+                }
+            }
+
+            if (headerRowIndex !== -1) {
+                // Found headers! Parse subsequent rows
+                for (let j = headerRowIndex + 1; j < rawData.length; j++) {
+                    const row = rawData[j];
+                    if (!row || !row[colMap.sl] || !row[colMap.event]) continue;
+
+                    allHolidayRows.push({
+                        sl_no: row[colMap.sl],
+                        date: colMap.date !== -1 ? row[colMap.date] : '',
+                        days: colMap.days !== -1 ? row[colMap.days] : '',
+                        no_of_days: colMap.nod !== -1 ? row[colMap.nod] : 1,
+                        event: row[colMap.event]
+                    });
+                }
+                if (allHolidayRows.length > 0) break; // Stop after finding the first sheet with data
+            }
+        }
+
+        if (allHolidayRows.length === 0) {
+            const sheetList = workbook.SheetNames.join(', ');
+            return res.status(400).json({ 
+                success: false, 
+                message: `No valid holiday data found. We checked sheets: [${sheetList}]. Please ensure your headers include 'Sl No' and 'Event' (or 'Particulars', 'sl.no', etc.).` 
+            });
+        }
+
+        // Truncate and insert
+        await pool.query('TRUNCATE TABLE holidays');
+
+        for (const h of allHolidayRows) {
+            await pool.query(
+                'INSERT INTO holidays (sl_no, date, days, no_of_days, event) VALUES (?, ?, ?, ?, ?)',
+                [h.sl_no, String(h.date || '').trim(), String(h.days || '').trim(), parseInt(h.no_of_days) || 1, String(h.event || '').trim()]
+            );
+        }
+
+        // Update last uploaded filename in system_settings
+        await pool.query(
+            'INSERT INTO system_settings (setting_key, setting_value) VALUES (?, ?) ON DUPLICATE KEY UPDATE setting_value = ?',
+            ['last_holiday_sync_file', req.file.originalname, req.file.originalname]
+        );
+
+        res.json({ success: true, message: `Successfully synced ${allHolidayRows.length} holidays from Excel!`, filename: req.file.originalname });
+    } catch (err) {
+        console.error("Holiday Excel Upload Error:", err);
+        res.status(500).json({ success: false, message: "Failed to process Excel file. " + err.message });
+    }
+});
+
+// --- SETTINGS ROUTES ---
+app.get("/api/settings/:key", async (req, res) => {
+    try {
+        const [rows] = await pool.query('SELECT setting_value FROM system_settings WHERE setting_key = ?', [req.params.key]);
+        if (rows.length === 0) {
+            return res.json({ success: true, value: null });
+        }
+        res.json({ success: true, value: rows[0].setting_value });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+app.delete("/api/holidays", async (req, res) => {
+    try {
+        // Clear all holiday data
+        await pool.query('TRUNCATE TABLE holidays');
+        
+        // Clear the filename tracking
+        await pool.query('DELETE FROM system_settings WHERE setting_key = "last_holiday_sync_file"');
+        
+        res.json({ success: true, message: "Holiday list cleared successfully" });
+    } catch (err) {
+        console.error("Clear Holiday Error:", err);
+        res.status(500).json({ success: false, message: "Failed to clear holiday list" });
+    }
+});
+
+// --- TELEPHONE DIRECTORY ROUTES ---
+app.get("/api/telephone", async (req, res) => {
+    try {
+        const [rows] = await pool.query('SELECT * FROM telephone_directory ORDER BY organisation, department, name');
+        res.json(rows);
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+app.get("/api/telephone/departments", async (req, res) => {
+    try {
+        const [rows] = await pool.query('SELECT DISTINCT department FROM telephone_directory WHERE department IS NOT NULL AND department != "" ORDER BY department ASC');
+        const departments = rows.map(r => r.department);
+        res.json(departments);
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+app.post("/api/telephone/upload", upload.single('excelFile'), async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ success: false, message: "No file uploaded" });
+        }
+
+        const workbook = xlsx.read(req.file.buffer, { type: 'buffer' });
+        let allPhoneRows = [];
+
+        for (const sheetName of workbook.SheetNames) {
+            const sheet = workbook.Sheets[sheetName];
+            const rawData = xlsx.utils.sheet_to_json(sheet, { header: 1 });
+
+            if (!rawData || rawData.length === 0) continue;
+
+            let headerRowIndex = -1;
+            let colMap = {};
+
+            for (let i = 0; i < Math.min(rawData.length, 20); i++) {
+                const row = rawData[i];
+                if (!row || !Array.isArray(row)) continue;
+
+                const normalizedRow = row.map(cell => String(cell || '').toLowerCase().replace(/[\s._]/g, ''));
+                
+                const nameIdx = normalizedRow.findIndex(c => c === 'name' || c === 'employeename');
+                const deptIdx = normalizedRow.findIndex(c => c === 'department' || c === 'dept');
+                const orgIdx = normalizedRow.findIndex(c => c === 'organisation' || c === 'organization' || c === 'org');
+                
+                if (nameIdx !== -1 && deptIdx !== -1) {
+                    headerRowIndex = i;
+                    colMap.name = nameIdx;
+                    colMap.dept = deptIdx;
+                    colMap.org = orgIdx !== -1 ? orgIdx : -1;
+                    colMap.loc = normalizedRow.findIndex(c => c === 'location' || c === 'loc');
+                    colMap.ip = normalizedRow.findIndex(c => c === 'ipno' || c === 'ip' || c === 'extension');
+                    colMap.mobile = normalizedRow.findIndex(c => c === 'mobileno' || c === 'mobile' || c === 'phone' || c === 'phoneno');
+                    break;
+                }
+            }
+
+            if (headerRowIndex !== -1) {
+                for (let j = headerRowIndex + 1; j < rawData.length; j++) {
+                    const row = rawData[j];
+                    if (!row || !row[colMap.name]) continue;
+
+                    allPhoneRows.push({
+                        organisation: colMap.org !== -1 ? (row[colMap.org] || 'KIMS') : 'KIMS',
+                        department: row[colMap.dept] || '',
+                        location: colMap.loc !== -1 ? (row[colMap.loc] || '') : '',
+                        name: row[colMap.name],
+                        ip_no: colMap.ip !== -1 ? (row[colMap.ip] || '') : '',
+                        mobile_no: colMap.mobile !== -1 ? (row[colMap.mobile] || '') : ''
+                    });
+                }
+                if (allPhoneRows.length > 0) break;
+            }
+        }
+
+        if (allPhoneRows.length === 0) {
+            return res.status(400).json({ success: false, message: "No valid directory data found. Headers should include 'Name' and 'Department'." });
+        }
+
+        await pool.query('TRUNCATE TABLE telephone_directory');
+
+        for (const r of allPhoneRows) {
+            await pool.query(
+                'INSERT INTO telephone_directory (organisation, department, location, name, ip_no, mobile_no) VALUES (?, ?, ?, ?, ?, ?)',
+                [String(r.organisation).trim(), String(r.department).trim(), String(r.location).trim(), String(r.name).trim(), String(r.ip_no).trim(), String(r.mobile_no).trim()]
+            );
+        }
+
+        await pool.query(
+            'INSERT INTO system_settings (setting_key, setting_value) VALUES (?, ?) ON DUPLICATE KEY UPDATE setting_value = ?',
+            ['last_telephone_sync_file', req.file.originalname, req.file.originalname]
+        );
+
+        res.json({ success: true, message: `Successfully synced ${allPhoneRows.length} contacts!`, filename: req.file.originalname });
+    } catch (err) {
+        console.error("Telephone Sync Error:", err);
+        res.status(500).json({ success: false, message: "Failed to process Excel file." });
+    }
+});
+
+app.put("/api/telephone/:id", async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { organisation, department, location, name, ip_no, mobile_no } = req.body;
+        
+        await pool.query(
+            'UPDATE telephone_directory SET organisation = ?, department = ?, location = ?, name = ?, ip_no = ?, mobile_no = ? WHERE id = ?',
+            [organisation || '', department || '', location || '', name || '', ip_no || '', mobile_no || '', id]
+        );
+        res.json({ success: true, message: "Contact updated successfully" });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+app.delete("/api/telephone/:id", async (req, res) => {
+    try {
+        await pool.query('DELETE FROM telephone_directory WHERE id = ?', [req.params.id]);
+        res.json({ success: true, message: "Contact deleted" });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+app.delete("/api/telephone", async (req, res) => {
+    try {
+        await pool.query('TRUNCATE TABLE telephone_directory');
+        await pool.query('DELETE FROM system_settings WHERE setting_key = "last_telephone_sync_file"');
+        res.json({ success: true, message: "Directory cleared successfully" });
+    } catch (err) {
+        res.status(500).json({ success: false, message: "Failed to clear directory" });
+    }
+});
+
+// --- TRAINING MATERIALS ROUTES ---
+app.get("/api/training", async (req, res) => {
+    try {
+        const [rows] = await pool.query('SELECT * FROM training_materials ORDER BY created_at DESC');
+        res.json(rows);
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+app.post("/api/training", uploadTraining.single("trainingFile"), async (req, res) => {
+    try {
+        const { topic, topic_area } = req.body;
+        const document_url = req.file ? `/uploads/training/${req.file.filename}` : null;
+        
+        await pool.query(
+            'INSERT INTO training_materials (topic, topic_area, document_url) VALUES (?, ?, ?)', 
+            [topic, topic_area, document_url]
+        );
+        res.json({ success: true, message: "Material added successfully" });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+app.delete("/api/training/:id", async (req, res) => {
+    try {
+        const { id } = req.params;
+        // Fetch existing to handle file cleanup
+        const [existing] = await pool.query('SELECT document_url FROM training_materials WHERE id = ?', [id]);
+        if (existing.length > 0 && existing[0].document_url) {
+            const filePath = path.join(__dirname, existing[0].document_url);
+            if (fs.existsSync(filePath)) {
+                fs.unlinkSync(filePath);
+            }
+        }
+        await pool.query('DELETE FROM training_materials WHERE id = ?', [id]);
+        res.json({ success: true, message: "Material deleted" });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
     }
 });
 

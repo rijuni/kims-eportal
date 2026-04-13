@@ -9,6 +9,10 @@ import People from "./pages/People";
 import Login from "./pages/Login";
 import AdminPanel from "./pages/AdminPanel";
 import ManageDashboard from "./pages/ManageDashboard";
+import ManageHolidays from "./pages/ManageHolidays";
+import ManageEvents from "./pages/ManageEvents";
+import ManageTelephone from "./pages/ManageTelephone";
+import ManageTraining from "./pages/ManageTraining";
 
 function App() {
   return (
@@ -24,6 +28,10 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/admin" element={<AdminPanel />} />
           <Route path="/admin/manage-dashboard" element={<ManageDashboard />} />
+          <Route path="/admin/manage-holidays" element={<ManageHolidays />} />
+          <Route path="/admin/manage-events" element={<ManageEvents />} />
+          <Route path="/admin/manage-telephone" element={<ManageTelephone />} />
+          <Route path="/admin/manage-training" element={<ManageTraining />} />
         </Routes>
       </Router>
     </AuthProvider>

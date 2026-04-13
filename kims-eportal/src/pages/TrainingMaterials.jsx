@@ -1,26 +1,39 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, FileText } from "lucide-react";
 import { FaFilePdf } from "react-icons/fa6";
+import API from "../services/api";
 import "../styles/training.css";
 
 const TrainingMaterials = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [documents, setDocuments] = useState([]);
 
     const toggleSidebar = () => {
         setIsSidebarOpen(!isSidebarOpen);
     };
 
-    const documents = [
-        { id: 1, topic: "IP Billing User Manual", topicArea: "IP Billing" },
-        { id: 2, topic: "OP Billing User Manual", topicArea: "OP Billing" },
-        { id: 3, topic: "Registration User Manual", topicArea: "Registration" },
-        { id: 4, topic: "Radiology Token Generation & Report Dispatch User Manual", topicArea: "Radiology Token Generation & Report Dispatch" },
-        { id: 5, topic: "OT Role User Manual", topicArea: "OP Pharmacy Sales" },
-        { id: 6, topic: "Lab Sample Collection & Send User Manual", topicArea: "IP Pharmacy User Role" },
-        { id: 7, topic: "HR Role User Manual", topicArea: "HR Role" },
-    ];
+    const fetchDocuments = async () => {
+        try {
+            const res = await API.get("/training");
+            if (res.data) setDocuments(res.data);
+        } catch (err) {
+            console.error("Error fetching documents:", err);
+        }
+    };
+
+    useEffect(() => {
+        fetchDocuments();
+    }, []);
+
+    const getFullUrl = (url) => {
+        if (!url) return "#";
+        const baseUrl = "http://localhost:5000";
+        // Check if we are running in production or network
+        const finalBase = window.location.hostname === 'localhost' ? baseUrl : `http://${window.location.hostname}:5000`;
+        return `${finalBase}${url}`;
+    };
 
     return (
         <div className={`dashboard-wrapper training-wrapper ${isSidebarOpen ? "sidebar-open" : ""}`}>
@@ -38,27 +51,41 @@ const TrainingMaterials = () => {
                     </div>
 
                     <div className="documents-card">
-                        {documents.map((doc) => (
-                            <div className="document-item" key={doc.id}>
-                                <div className="doc-info-grid">
-                                    <div className="doc-row">
-                                        <span className="doc-label">Topic</span>
-                                        <span className="doc-value">: {doc.topic}</span>
+                        {documents.length > 0 ? (
+                            documents.map((doc) => (
+                                <div className="document-item" key={doc.id}>
+                                    <div className="doc-info-grid">
+                                        <div className="doc-row">
+                                            <span className="doc-label">Topic</span>
+                                            <span className="doc-value">: {doc.topic}</span>
+                                        </div>
+                                        <div className="doc-row">
+                                            <span className="doc-label">Topic Area</span>
+                                            <span className="doc-value">: {doc.topic_area}</span>
+                                        </div>
                                     </div>
-                                    <div className="doc-row">
-                                        <span className="doc-label">Topic Area</span>
-                                        <span className="doc-value">: {doc.topicArea}</span>
-                                    </div>
-                                </div>
 
-                                <div className="doc-actions">
-                                    <div className="pdf-icon-box bg-transparent flex items-center justify-center">
-                                        <FaFilePdf size={22} className="text-[#e53e3e] drop-shadow-sm cursor-pointer transition-colors" />
+                                    <div className="doc-actions">
+                                        <div className="pdf-icon-box bg-transparent flex items-center justify-center">
+                                            <FaFilePdf size={22} className="text-[#e53e3e] drop-shadow-sm cursor-pointer transition-colors" />
+                                        </div>
+                                        <a 
+                                            href={getFullUrl(doc.document_url)} 
+                                            target="_blank" 
+                                            rel="noopener noreferrer" 
+                                            className="download-link"
+                                            download
+                                        >
+                                            Download
+                                        </a>
                                     </div>
-                                    <a href="#" className="download-link">Download</a>
                                 </div>
+                            ))
+                        ) : (
+                            <div style={{ padding: '40px', textAlign: 'center', color: '#64748b' }}>
+                                No training materials found in the library.
                             </div>
-                        ))}
+                        )}
                     </div>
                 </div>
             </div>

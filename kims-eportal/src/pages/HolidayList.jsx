@@ -1,32 +1,31 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
+import API from "../services/api";
 import '../styles/holiday-list.css';
 
 const HolidayList = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [holidays, setHolidays] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
-  const holidays = [
-    { sl: 1, date: "23-01-2026", days: "Friday", noOfDays: 1, event: "Saraswati Puja" },
-    { sl: 2, date: "26-01-2026", days: "Monday", noOfDays: 1, event: "Republic Day" },
-    { sl: 3, date: "04-03-2026", days: "Wednesday", noOfDays: 1, event: "Holi" },
-    { sl: 4, date: "21-03-2026", days: "Saturday", noOfDays: 1, event: "ID-UL-FITRE" },
-    { sl: 5, date: "27-03-2026", days: "Friday", noOfDays: 1, event: "Shree Ram Navami" },
-    { sl: 6, date: "14-04-2026", days: "Tuesday", noOfDays: 1, event: "Maha Vishuba Sankranti" },
-    { sl: 7, date: "15-06-2026", days: "Monday", noOfDays: 1, event: "Raja Sankranti" },
-    { sl: 8, date: "16-07-2026", days: "Thursday", noOfDays: 1, event: "Ratha Yatra" },
-    { sl: 9, date: "15-08-2026", days: "Saturday", noOfDays: 1, event: "Independence Day" },
-    { sl: 10, date: "04-09-2026", days: "Friday", noOfDays: 1, event: "Janmashtami" },
-    { sl: 11, date: "14-09-2026", days: "Monday", noOfDays: 1, event: "Ganesh Puja" },
-    { sl: 12, date: "02-10-2026", days: "Friday", noOfDays: 1, event: "Gandhi Jayanti" },
-    { sl: 13, date: "19-10-2026", days: "Monday", noOfDays: 1, event: "Durga Puja (Maha Navami)" },
-    { sl: 14, date: "20-10-2026", days: "Tuesday", noOfDays: 1, event: "Durga Puja (Vijaya Dasami)" },
-    { sl: 15, date: "25-12-2026", days: "Friday", noOfDays: 1, event: "Christmas" },
-  ];
+  useEffect(() => {
+    const fetchHolidays = async () => {
+      try {
+        const res = await API.get("/holidays");
+        if (res.data) setHolidays(res.data);
+      } catch (err) {
+        console.error("Error fetching holidays:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchHolidays();
+  }, []);
 
   return (
     <div className={`holiday-wrapper ${isSidebarOpen ? "sidebar-open" : ""}`}>
@@ -41,28 +40,38 @@ const HolidayList = () => {
           </div>
           
           <div className="holiday-card scrollable">
-            <table className="holiday-table">
-              <thead>
-                <tr>
-                  <th className="col-sl">Sl no</th>
-                  <th className="col-date">Date</th>
-                  <th className="col-days">Days</th>
-                  <th className="col-nod text-center">No of Days</th>
-                  <th className="col-event">Event</th>
-                </tr>
-              </thead>
-              <tbody>
-                {holidays.map((holiday) => (
-                  <tr key={holiday.sl}>
-                    <td className="col-sl">{holiday.sl}</td>
-                    <td className="col-date">{holiday.date}</td>
-                    <td className="col-days">{holiday.days}</td>
-                    <td className="col-nod text-center">{holiday.noOfDays}</td>
-                    <td className="col-event">{holiday.event}</td>
+            {loading ? (
+              <div className="loading-spinner">Loading holidays...</div>
+            ) : (
+              <table className="holiday-table">
+                <thead>
+                  <tr>
+                    <th className="col-sl">Sl no</th>
+                    <th className="col-date">Date</th>
+                    <th className="col-days">Days</th>
+                    <th className="col-nod text-center">No of Days</th>
+                    <th className="col-event">Event</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {holidays.length > 0 ? (
+                    holidays.map((holiday) => (
+                      <tr key={holiday.id}>
+                        <td className="col-sl">{holiday.sl_no}</td>
+                        <td className="col-date">{holiday.date}</td>
+                        <td className="col-days">{holiday.days}</td>
+                        <td className="col-nod text-center">{holiday.no_of_days}</td>
+                        <td className="col-event">{holiday.event}</td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="5" className="text-center">No holidays listed for this year.</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            )}
           </div>
         </div>
       </div>

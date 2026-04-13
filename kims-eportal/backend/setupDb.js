@@ -51,6 +51,9 @@ async function setupDatabase() {
                 event_name VARCHAR(255) NOT NULL,
                 event_date VARCHAR(50) NOT NULL,
                 location VARCHAR(255) NOT NULL,
+                event_type VARCHAR(255) DEFAULT 'General',
+                event_details TEXT,
+                image_url VARCHAR(255),
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         `);
@@ -67,6 +70,56 @@ async function setupDatabase() {
             )
         `);
         console.log('Table `birthdays` created or already exists.');
+
+        // Create Holidays Table
+        await connection.query(`
+            CREATE TABLE IF NOT EXISTS holidays (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                sl_no INT NOT NULL,
+                date VARCHAR(50) NOT NULL,
+                days VARCHAR(50) NOT NULL,
+                no_of_days INT NOT NULL,
+                event VARCHAR(255) NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+        
+        // Create Telephone Directory Table
+        await connection.query(`
+            CREATE TABLE IF NOT EXISTS telephone_directory (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                organisation VARCHAR(255),
+                department VARCHAR(255),
+                location VARCHAR(255),
+                name VARCHAR(255),
+                ip_no VARCHAR(100),
+                mobile_no VARCHAR(100),
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+        console.log('Table `telephone_directory` created or already exists.');
+
+        // Create Training Materials Table
+        await connection.query(`
+            CREATE TABLE IF NOT EXISTS training_materials (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                topic VARCHAR(255) NOT NULL,
+                topic_area VARCHAR(255) NOT NULL,
+                document_url VARCHAR(255) NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+        console.log('Table `training_materials` created or already exists.');
+
+        // Create System Settings table
+        await connection.query(`
+            CREATE TABLE IF NOT EXISTS system_settings (
+                setting_key VARCHAR(255) PRIMARY KEY,
+                setting_value TEXT,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+            )
+        `);
+        console.log('Table `system_settings` created or already exists.');
 
         // Check if admin user already exists
         const [rows] = await connection.query(`SELECT * FROM users WHERE username = 'admin'`);

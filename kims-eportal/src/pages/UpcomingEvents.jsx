@@ -1,25 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
-import { CalendarDays, MapPin, Gift } from "lucide-react";
+import { CalendarDays, MapPin } from "lucide-react";
 import '../styles/upcoming-events.css';
+import API from "../services/api";
 
 const UpcomingEvents = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [events, setEvents] = useState([]);
+    const [selectedEvent, setSelectedEvent] = useState(null);
 
     const toggleSidebar = () => {
         setIsSidebarOpen(!isSidebarOpen);
     };
 
-    const events = [
-        { id: 1, name: "World Cancer Day", date: "4th February, 2026", location: "KIMS Cancer Centre", category: "Health" },
-        { id: 2, name: "International Women's Day", date: "8th March, 2026", location: "KIMS Lobby", category: "Celebration" },
-        { id: 3, name: "World Kidney Day", date: "13th March, 2026", location: "KIMS Super speciality & Cancer Centre", category: "Health" },
-        { id: 4, name: "Employee Wellness Workshop", date: "25th March, 2026", location: "KIMS Auditorium", category: "Training" },
-        { id: 5, name: "World Health Day", date: "7th April, 2026", location: "KIMS Campus", category: "General" },
-        { id: 6, name: "Doctor's Appreciation Night", date: "15th June, 2026", location: "KIMS Grand Ballroom", category: "Corporate" },
-        { id: 7, name: "Independence Day Celebration", date: "15th August, 2026", location: "KIMS Main Gate", category: "National" },
-    ];
+    useEffect(() => {
+        API.get("/events/upcoming")
+            .then(res => { if(res.data) setEvents(res.data); })
+            .catch(console.error);
+    }, []);
 
     return (
         <div className={`upcoming-wrapper ${isSidebarOpen ? "sidebar-open" : ""}`}>
@@ -33,40 +32,102 @@ const UpcomingEvents = () => {
                         <h1 className="upcoming-title">Be ready for every important moment</h1>
                     </div>
 
-                    <div className="upcoming-card scrollable">
-                        <div className="event-grid">
-                            {events.map((event) => (
-                                <div className="full-event-item" key={event.id}>
-                                    <div className="event-icon-box">
-                                        <CalendarDays size={24} />
-                                    </div>
-                                    <div className="event-details">
-                                        <h3 className="event-name">{event.name}</h3>
-                                        <div className="event-meta">
-                                            <div className="meta-item">
-                                                <CalendarDays size={14} className="text-[#1fa463]" />
-                                                <span>{event.date}</span>
-                                            </div>
-                                            <div className="meta-item">
-                                                <MapPin size={14} className="text-[#1fa463]" />
-                                                <span>{event.location}</span>
-                                            </div>
-                                            <div className="meta-item">
-                                                <span className="bg-[#1fa46315] text-[#1fa463] text-[10px] uppercase font-bold px-2 py-0.5 rounded-full">
-                                                    {event.category}
+                    <div className="upcoming-card">
+                        <div className="table-responsive">
+                            <table className="upcoming-table">
+                                <thead>
+                                    <tr>
+                                        <th>Date & Timing</th>
+                                        <th>Event Name</th>
+                                        <th>Location</th>
+                                        <th>Type</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {events.map((event) => (
+                                        <tr key={event.id} className="upcoming-row">
+                                            <td className="date-cell">
+                                                <div className="flex-cell">
+                                                    <CalendarDays size={14} className="text-[#1fa463]" />
+                                                    <span>{event.event_date}</span>
+                                                </div>
+                                            </td>
+                                            <td className="event-cell">
+                                                <span className="event-name-text">{event.event_name}</span>
+                                            </td>
+                                            <td className="location-cell">
+                                                <div className="flex-cell">
+                                                    <MapPin size={14} className="text-[#1fa463]" />
+                                                    <span>{event.location}</span>
+                                                </div>
+                                            </td>
+                                            <td className="type-cell">
+                                                <span className="type-badge-pill">
+                                                    {event.event_type}
                                                 </span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="doc-actions">
-                                        <button className="download-btn">View Details</button>
-                                    </div>
-                                </div>
-                            ))}
+                                            </td>
+                                            <td className="action-cell">
+                                                <button 
+                                                    className="detail-action-btn" 
+                                                    onClick={() => setSelectedEvent(event)}
+                                                >
+                                                    View Details
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
             </div>
+
+            {selectedEvent && (
+                <div className="event-modal-overlay" onClick={() => setSelectedEvent(null)}>
+                    <div className="event-modal-box" onClick={e => e.stopPropagation()}>
+                        {selectedEvent.image_url ? (
+                            <div 
+                                className="modal-hero-bg" 
+                                style={{ 
+                                    backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.7)), url(http://localhost:5000${selectedEvent.image_url})` 
+                                }}
+                            >
+                                <button className="close-btn-overlay" onClick={() => setSelectedEvent(null)}>&times;</button>
+                                <div className="hero-content">
+                                    <span className="m-badge-hero">{selectedEvent.event_type}</span>
+                                    <h2>{selectedEvent.event_name}</h2>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="modal-header">
+                                <h2>{selectedEvent.event_name}</h2>
+                                <button className="close-btn" onClick={() => setSelectedEvent(null)}>&times;</button>
+                            </div>
+                        )}
+                        <div className="modal-body">
+                            {!selectedEvent.image_url && (
+                                <div className="modal-meta">
+                                    <div className="m-item"><CalendarDays size={14} /> {selectedEvent.event_date}</div>
+                                    <div className="m-item"><MapPin size={14} /> {selectedEvent.location}</div>
+                                    <div className="m-badge">{selectedEvent.event_type}</div>
+                                </div>
+                            )}
+                            {selectedEvent.image_url && (
+                                <div className="modal-meta-hero">
+                                    <div className="m-item"><CalendarDays size={14} /> {selectedEvent.event_date}</div>
+                                    <div className="m-item"><MapPin size={14} /> {selectedEvent.location}</div>
+                                </div>
+                            )}
+                           <div className="modal-details-content">
+                                <h3>About this Event</h3>
+                                <p>{selectedEvent.event_details || "No additional details provided for this event."}</p>
+                           </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
