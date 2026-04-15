@@ -83,7 +83,7 @@ async function setupDatabase() {
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         `);
-        
+
         // Create Telephone Directory Table
         await connection.query(`
             CREATE TABLE IF NOT EXISTS telephone_directory (
@@ -143,6 +143,21 @@ async function setupDatabase() {
     } catch (err) {
         console.error('Error setting up database:', err.message);
     }
+}
+
+setupDatabase();
+            );
+console.log('Admin user successfully seeded. (username: admin, password: admin)');
+        } else {
+    console.log('Admin user already exists. Skipping insertion.');
+}
+
+await connection.end();
+console.log('Database setup complete.');
+
+    } catch (err) {
+    console.error('Error setting up database:', err.message);
+}
 }
 
 setupDatabase();

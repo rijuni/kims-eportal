@@ -17,7 +17,7 @@ const HolidayList = () => {
     const fetchHolidays = async () => {
         try {
             const res = await API.get("/holidays");
-            if (res.data) setHolidays(res.data);
+            if (res.data) setHolidays(res.data.filter(h => h.is_visible));
         } catch (err) {
             console.error("Error fetching holidays:", err);
         } finally {

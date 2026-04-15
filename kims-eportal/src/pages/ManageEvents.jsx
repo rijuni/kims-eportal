@@ -518,7 +518,22 @@ const ManageEvents = () => {
                 ></textarea>
               </div>
               <div className="form-group">
-                <label>Update Background Image (Leave empty to keep current)</label>
+                <label>Background Image</label>
+                {editingEvent?.image_url && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: '#f8fafc', padding: '8px', borderRadius: '6px', border: '1px solid #e2e8f0', marginBottom: '10px' }}>
+                    <div style={{ width: '40px', height: '40px', borderRadius: '50%', overflow: 'hidden', border: '2px solid #fff', boxShadow: '0 2px 4px rgba(0,0,0,0.1)', flexShrink: 0 }}>
+                      <img 
+                        src={`http://${window.location.hostname}:5000${editingEvent.image_url}`} 
+                        alt="Profile" 
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                      />
+                    </div>
+                    <div style={{ fontSize: '12px', color: '#1e293b', fontWeight: '500', wordBreak: 'break-all' }}>
+                      {editingEvent.image_url.split('/').pop()}
+                    </div>
+                  </div>
+                )}
+                <label style={{ fontSize: '11px', color: '#64748b', marginBottom: '4px', display: 'block' }}>Update Image (Leave empty to keep current)</label>
                 <input 
                   type="file" 
                   accept="image/*" 

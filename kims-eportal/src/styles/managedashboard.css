@@ -1,5 +1,5 @@
 .admin-manage-container {
-    padding: 0 50px;
+    padding: 0 30px;
     height: 100vh;
     overflow-y: auto;
 }
@@ -8,7 +8,7 @@
     display: flex;
     align-items: center;
     gap: 15px;
-    margin-top: 20px;
+    margin-top: 15px;
     margin-bottom: 2px;
 }
 
@@ -61,7 +61,7 @@
 .manage-box {
     background: #ffffff;
     border-radius: 12px;
-    padding: 15px;
+    padding: 10px 12px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02), 0 10px 15px rgba(0, 0, 0, 0.03);
     border: 1px solid #edf2f7;
     position: relative;
@@ -77,9 +77,9 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-    padding-bottom: 6px;
+    padding-bottom: 4px;
 }
 
 .box-header h2 {
@@ -114,13 +114,22 @@
     color: #000000;
 }
 
+.box-green {
+    border-top: 4px solid #10b981;
+}
+
+.box-green .box-header {
+    color: #000000;
+}
+
+
 /* Forms */
 .manage-box form,
 .upload-container {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    margin-bottom: 16px;
+    gap: 6px;
+    margin-bottom: 12px;
 }
 
 .manage-box input[type="text"],
@@ -335,9 +344,9 @@
     justify-content: space-between;
     align-items: center;
     background: #f8fafc;
-    padding: 6px 10px;
+    padding: 4px 8px;
     border-radius: 6px;
-    font-size: 12px;
+    font-size: 11.5px;
     color: #000000;
     border: 1px solid #e2e8f0;
 }
@@ -461,7 +470,7 @@
 .delete-confirm-box {
     background: #fff1f2;
     border: 1px solid #fecdd3;
-    padding: 12px;
+    padding: 8px;
     border-radius: 8px;
     margin-bottom: 15px;
 }
@@ -575,7 +584,7 @@
 
 .upcoming-table thead th {
     text-align: left;
-    padding: 12px 15px;
+    padding: 8px 12px;
     background: #f8fafc;
     color: #475569;
     font-size: 11px;
@@ -595,7 +604,7 @@
 }
 
 .upcoming-row td {
-    padding: 12px 15px;
+    padding: 8px 12px;
     vertical-align: middle;
 }
 
@@ -654,7 +663,10 @@
 .admin-modal-box {
     background: white;
     width: 95%;
-    max-width: 550px;
+    max-width: 500px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
     border-radius: 16px;
     overflow: hidden;
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
@@ -663,7 +675,7 @@
 
 .modal-header {
     background: #f8fafc;
-    padding: 15px 20px;
+    padding: 8px 15px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -692,10 +704,11 @@
 }
 
 .modal-form-content {
-    padding: 15px 20px;
+    padding: 10px 15px;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
+    overflow-y: auto;
 }
 
 .form-group {
@@ -714,7 +727,7 @@
 .form-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 15px;
+    gap: 8px;
 }
 
 .modal-actions {
@@ -722,7 +735,7 @@
     justify-content: flex-end;
     gap: 12px;
     margin-top: 10px;
-    padding-top: 15px;
+    padding-top: 10px;
     border-top: 1px solid #f1f5f9;
 }
 
@@ -744,13 +757,25 @@
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 @keyframes slideUp {
-    from { transform: translateY(10px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
+    from {
+        transform: translateY(10px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
 }
 
 /* Full Screen Mode */
@@ -778,6 +803,7 @@
 .manage-box.is-fullscreen .upcoming-table td {
     padding: 15px 20px;
 }
+
 /* Manage Telephone Grid */
 .manage-directory-list {
     width: 100%;
@@ -839,7 +865,8 @@
     padding: 10px 15px;
     background: #ffffff;
     border-bottom: 2px solid #f1f5f9;
-    border-top: 4px solid #3b82f6; /* Blue for notices */
+    border-top: 4px solid #3b82f6;
+    /* Blue for notices */
     position: sticky;
     top: 0;
     z-index: 10;
@@ -860,4 +887,3 @@
 .notice-list-item:hover {
     background-color: #f1f5f9;
 }
-

@@ -23,11 +23,11 @@ const AdminPanel = () => {
 
     const adminSections = [
         { title: "Dashboard", icon: <Clipboard />, desc: "Manage Dashboard", theme: "green", link: "/admin/manage-dashboard" },
-        { title: "Training Materials", icon: <BookOpen />, desc: "Manage Training Materials", theme: "green", link: "/admin/manage-training" },
-        { title: "Telephone Directory", icon: <Contact />, desc: "Manage Telephone Directory", theme: "red", link: "/admin/manage-telephone" },
-        { title: "Holiday List", icon: <CalendarRange />, desc: "Manage Holiday List", theme: "orange", link: "/admin/manage-holidays" },
+        { title: "Training Materials", icon: <BookOpen />, desc: "Manage Training Materials", theme: "teal", link: "/admin/manage-training" },
+        { title: "Telephone Directory", icon: <Contact />, desc: "Manage Telephone Directory", theme: "blue", link: "/admin/manage-telephone" },
+        { title: "Holiday List", icon: <CalendarRange />, desc: "Manage Holiday List", theme: "green", link: "/admin/manage-holidays" },
         { title: "Upcoming Events", icon: <CalendarClock />, desc: "Manage Upcoming Events", theme: "teal", link: "/admin/manage-events" },
-        { title: "People", icon: <Users />, desc: "Manage People", theme: "amber" },
+        { title: "People", icon: <Users />, desc: "Manage People", theme: "blue" },
     ];
 
     return (

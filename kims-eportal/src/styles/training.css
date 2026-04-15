@@ -55,7 +55,7 @@
     /* Very light gray/blue tint */
     border-radius: 20px;
     padding: 10px 0;
-    margin-top: -10px;
+    margin-top: -20px;
     /* Pulls the card up closer to the title */
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     width: 100%;

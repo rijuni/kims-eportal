@@ -125,7 +125,13 @@ const uploadTraining = multer({ storage: trainingStorage });
 // --- NOTICES ROUTES ---
 app.get("/api/notices", async (req, res) => {
     try {
-        const [rows] = await pool.query('SELECT * FROM notices ORDER BY created_at DESC');
+        const isPublic = req.query.public === "true";
+        let sql = "SELECT * FROM notices";
+        if (isPublic) {
+            sql += " WHERE is_visible = 1";
+        }
+        sql += " ORDER BY created_at DESC";
+        const [rows] = await pool.query(sql);
         res.json(rows);
     } catch (err) {
         res.status(500).json({ success: false, message: err.message });
@@ -136,9 +142,9 @@ app.post("/api/notices", uploadNotice.single("noticeFile"), async (req, res) => 
     try {
         const { title, issued_by, date } = req.body;
         const document_url = req.file ? `/uploads/notices/${req.file.filename}` : null;
-        
+
         await pool.query(
-            'INSERT INTO notices (title, issued_by, date, document_url) VALUES (?, ?, ?, ?)', 
+            'INSERT INTO notices (title, issued_by, date, document_url) VALUES (?, ?, ?, ?)',
             [title, issued_by, date, document_url]
         );
         res.json({ success: true, message: "Notice added successfully" });
@@ -156,6 +162,29 @@ app.delete("/api/notices/:id", async (req, res) => {
     }
 });
 
+app.patch("/api/notices/:id/toggle-visibility", async (req, res) => {
+    try {
+        const { id } = req.params;
+        const [rows] = await pool.query('SELECT is_visible FROM notices WHERE id = ?', [id]);
+        if (rows.length === 0) return res.status(404).json({ success: false, message: "Notice not found" });
+
+        const newVisibility = rows[0].is_visible ? 0 : 1;
+        await pool.query('UPDATE notices SET is_visible = ? WHERE id = ?', [newVisibility, id]);
+        res.json({ success: true, is_visible: newVisibility });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+app.delete("/api/notices", async (req, res) => {
+    try {
+        await pool.query('TRUNCATE TABLE notices');
+        res.json({ success: true, message: "All notices cleared successfully" });
+    } catch (err) {
+        res.status(500).json({ success: false, message: "Failed to clear notices" });
+    }
+});
+
 // --- EVENTS ROUTES ---
 app.get("/api/events/upcoming", async (req, res) => {
     try {
@@ -170,9 +199,9 @@ app.post("/api/events", uploadEvent.single('eventImage'), async (req, res) => {
     try {
         const { event_name, event_date, location, event_type, event_details } = req.body;
         const image_url = req.file ? `/uploads/events/${req.file.filename}` : null;
-        
+
         await pool.query(
-            'INSERT INTO events (event_name, event_date, location, event_type, event_details, image_url) VALUES (?, ?, ?, ?, ?, ?)', 
+            'INSERT INTO events (event_name, event_date, location, event_type, event_details, image_url) VALUES (?, ?, ?, ?, ?, ?)',
             [event_name, event_date, location, event_type || 'General', event_details || '', image_url]
         );
         res.json({ success: true, message: "Event added successfully" });
@@ -185,7 +214,7 @@ app.put("/api/events/:id", uploadEvent.single('eventImage'), async (req, res) =>
     try {
         const { id } = req.params;
         const { event_name, event_date, location, event_type, event_details } = req.body;
-        
+
         // Fetch existing to handle image cleanup
         const [existing] = await pool.query('SELECT image_url FROM events WHERE id = ?', [id]);
         if (existing.length === 0) {
@@ -240,7 +269,7 @@ app.post("/api/events/upload", upload.single('excelFile'), async (req, res) => {
                 if (!row || !Array.isArray(row)) continue;
 
                 const normalizedRow = row.map(cell => String(cell || '').toLowerCase().replace(/[\s._]/g, ''));
-                
+
                 const eventIdx = normalizedRow.findIndex(c => c === 'eventname' || c === 'event' || c === 'particulars' || c === 'title' || c === 'particular');
                 const dateIdx = normalizedRow.findIndex(c => c === 'date' || c === 'eventdate');
                 const timingIdx = normalizedRow.findIndex(c => c === 'timing' || c === 'time');
@@ -297,8 +326,8 @@ app.post("/api/events/upload", upload.single('excelFile'), async (req, res) => {
             await pool.query(
                 'INSERT INTO events (event_name, event_date, location, event_type, event_details) VALUES (?, ?, ?, ?, ?)',
                 [
-                    String(e.event_name).trim(), 
-                    String(e.event_date || 'TBD').trim(), 
+                    String(e.event_name).trim(),
+                    String(e.event_date || 'TBD').trim(),
                     String(e.location || 'KIMS').trim(),
                     String(e.event_type || 'General').trim(),
                     String(e.event_details || '').trim()
@@ -443,10 +472,10 @@ app.post("/api/holidays/upload", upload.single('excelFile'), async (req, res) =>
                 if (!row || !Array.isArray(row)) continue;
 
                 const normalizedRow = row.map(cell => String(cell || '').toLowerCase().replace(/[\s._]/g, ''));
-                
+
                 const slIdx = normalizedRow.findIndex(c => c === 'slno' || c === 'sl' || c === 'sino' || c === 'sn' || c === 'sno');
                 const eventIdx = normalizedRow.findIndex(c => c === 'event' || c === 'particulars' || c === 'particular' || c === 'holidayname' || c === 'description');
-                
+
                 if (slIdx !== -1 && eventIdx !== -1) {
                     headerRowIndex = i;
                     colMap.sl = slIdx;
@@ -478,9 +507,9 @@ app.post("/api/holidays/upload", upload.single('excelFile'), async (req, res) =>
 
         if (allHolidayRows.length === 0) {
             const sheetList = workbook.SheetNames.join(', ');
-            return res.status(400).json({ 
-                success: false, 
-                message: `No valid holiday data found. We checked sheets: [${sheetList}]. Please ensure your headers include 'Sl No' and 'Event' (or 'Particulars', 'sl.no', etc.).` 
+            return res.status(400).json({
+                success: false,
+                message: `No valid holiday data found. We checked sheets: [${sheetList}]. Please ensure your headers include 'Sl No' and 'Event' (or 'Particulars', 'sl.no', etc.).`
             });
         }
 
@@ -524,10 +553,10 @@ app.delete("/api/holidays", async (req, res) => {
     try {
         // Clear all holiday data
         await pool.query('TRUNCATE TABLE holidays');
-        
+
         // Clear the filename tracking
         await pool.query('DELETE FROM system_settings WHERE setting_key = "last_holiday_sync_file"');
-        
+
         res.json({ success: true, message: "Holiday list cleared successfully" });
     } catch (err) {
         console.error("Clear Holiday Error:", err);
@@ -578,11 +607,11 @@ app.post("/api/telephone/upload", upload.single('excelFile'), async (req, res) =
                 if (!row || !Array.isArray(row)) continue;
 
                 const normalizedRow = row.map(cell => String(cell || '').toLowerCase().replace(/[\s._]/g, ''));
-                
+
                 const nameIdx = normalizedRow.findIndex(c => c === 'name' || c === 'employeename');
                 const deptIdx = normalizedRow.findIndex(c => c === 'department' || c === 'dept');
                 const orgIdx = normalizedRow.findIndex(c => c === 'organisation' || c === 'organization' || c === 'org');
-                
+
                 if (nameIdx !== -1 && deptIdx !== -1) {
                     headerRowIndex = i;
                     colMap.name = nameIdx;
@@ -642,7 +671,7 @@ app.put("/api/telephone/:id", async (req, res) => {
     try {
         const { id } = req.params;
         const { organisation, department, location, name, ip_no, mobile_no } = req.body;
-        
+
         await pool.query(
             'UPDATE telephone_directory SET organisation = ?, department = ?, location = ?, name = ?, ip_no = ?, mobile_no = ? WHERE id = ?',
             [organisation || '', department || '', location || '', name || '', ip_no || '', mobile_no || '', id]
@@ -686,9 +715,9 @@ app.post("/api/training", uploadTraining.single("trainingFile"), async (req, res
     try {
         const { topic, topic_area } = req.body;
         const document_url = req.file ? `/uploads/training/${req.file.filename}` : null;
-        
+
         await pool.query(
-            'INSERT INTO training_materials (topic, topic_area, document_url) VALUES (?, ?, ?)', 
+            'INSERT INTO training_materials (topic, topic_area, document_url) VALUES (?, ?, ?)',
             [topic, topic_area, document_url]
         );
         res.json({ success: true, message: "Material added successfully" });
@@ -717,12 +746,12 @@ app.delete("/api/training/:id", async (req, res) => {
 
 // Default Route
 app.get("/", (req, res) => {
-  res.send("KIMS E-Portal Backend is running...");
+    res.send("KIMS E-Portal Backend is running...");
 });
 
 // Start Server
 app.listen(PORT, "0.0.0.0", () => {
-  console.log(`Server is running on port ${PORT}`);
-  console.log(`Local Access: http://localhost:${PORT}`);
-  console.log(`Network Access: http://10.11.173.89:${PORT}`);
+    console.log(`Server is running on port ${PORT}`);
+    console.log(`Local Access: http://localhost:${PORT}`);
+    console.log(`Network Access: http://10.11.173.89:${PORT}`);
 });

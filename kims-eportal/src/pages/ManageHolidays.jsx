@@ -25,7 +25,7 @@ const ManageHolidays = () => {
     try {
       const res = await API.get("/holidays");
       if (res.data) setHolidays(res.data);
-      
+
       // Fetch the last synced filename from global settings
       const settingsRes = await API.get("/settings/last_holiday_sync_file");
       if (settingsRes.data && settingsRes.data.value) {
@@ -126,7 +126,7 @@ const ManageHolidays = () => {
       <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
       <div className="main-content">
         <Header toggleSidebar={toggleSidebar} />
-        
+
         <div className="admin-manage-container">
           <div className="page-header-row">
             <button className="back-btn" onClick={() => navigate("/admin")} title="Back to Admin Panel">
@@ -135,18 +135,18 @@ const ManageHolidays = () => {
             <h1 className="manage-page-title">Manage Holiday List</h1>
           </div>
           <p className="manage-page-sub">Upload an Excel sheet to bulk-update the holiday calendar for the year.</p>
-          
+
           <div className="manage-grid">
-            
+
             {/* Upload Box */}
-            <div className="manage-box box-orange">
+            <div className="manage-box box-green">
               <div className="box-header">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                   <UploadCloud size={24} /> <h2>Bulk Holiday Upload (Excel)</h2>
                 </div>
                 {lastUploadedFile && (
-                  <button 
-                    className="toggle-view-btn" 
+                  <button
+                    className="toggle-view-btn"
                     onClick={() => setShowFileInfoDetail(!showFileInfoDetail)}
                     title={showFileInfoDetail ? "Hide Name" : "Show Name"}
                   >
@@ -158,15 +158,15 @@ const ManageHolidays = () => {
                 <p className="upload-hint">
                   Upload a valid Excel (.xlsx) file with headers like: Sl No, Event, Date, Days.
                 </p>
-                
+
                 <div className="file-info-bar">
                   <div className="info-text">
                     <strong>Synced File:</strong> {lastUploadedFile || "None"}
                   </div>
                   {lastUploadedFile && !isDeleting && (
-                    <button 
-                      className="trash-btn" 
-                      onClick={handleTrashClick} 
+                    <button
+                      className="trash-btn"
+                      onClick={handleTrashClick}
                       title="Clear All Holidays"
                     >
                       <Trash2 size={16} />
@@ -177,22 +177,22 @@ const ManageHolidays = () => {
                 {isDeleting && (
                   <div className="delete-confirm-box">
                     <p className="confirm-msg">Are you sure? Type <strong>DELETE</strong> to confirm.</p>
-                    <input 
-                      type="text" 
-                      className="confirm-input" 
-                      placeholder="Type DELETE" 
+                    <input
+                      type="text"
+                      className="confirm-input"
+                      placeholder="Type DELETE"
                       value={deleteInput}
                       onChange={(e) => setDeleteInput(e.target.value)}
                     />
                     <div className="confirm-actions">
-                      <button 
-                        className="btn-cancel" 
+                      <button
+                        className="btn-cancel"
                         onClick={resetDeleteState}
                       >
                         Cancel
                       </button>
-                      <button 
-                        className="btn-confirm" 
+                      <button
+                        className="btn-confirm"
                         disabled={deleteInput !== "DELETE" || loading}
                         onClick={handleDeleteAll}
                       >
@@ -203,17 +203,17 @@ const ManageHolidays = () => {
                 )}
 
                 <div className="file-drop-area">
-                  <input 
-                    id="holiday-upload-input" 
-                    type="file" 
-                    accept=".xlsx, .xls" 
-                    onChange={e => setExcelFile(e.target.files[0])} 
+                  <input
+                    id="holiday-upload-input"
+                    type="file"
+                    accept=".xlsx, .xls"
+                    onChange={e => setExcelFile(e.target.files[0])}
                   />
                 </div>
 
-                <button 
-                  type="button" 
-                  onClick={handleFileUpload} 
+                <button
+                  type="button"
+                  onClick={handleFileUpload}
                   className="action-btn-orange"
                   disabled={loading}
                 >

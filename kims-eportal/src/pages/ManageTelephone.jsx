@@ -5,7 +5,7 @@ import Header from "../components/Header";
 import API from "../services/api";
 import { 
   Building2, Users, MapPin, User, Hash, Phone, Smartphone, Settings,
-  UploadCloud, Trash2, Eye, EyeOff, ArrowLeft, Pencil, X 
+  UploadCloud, Trash2, Eye, EyeOff, ArrowLeft, Pencil, X, Maximize2, Minimize2, Search, MoreVertical 
 } from "lucide-react";
 import "../styles/managedashboard.css";
 
@@ -21,6 +21,16 @@ const ManageTelephone = () => {
   const [successMsg, setSuccessMsg] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteInput, setDeleteInput] = useState("");
+  const [isContactsFullScreen, setIsContactsFullScreen] = useState(false);
+  const [searchParams, setSearchParams] = useState({
+    organisation: "",
+    department: "",
+    location: "",
+    name: "",
+    ip_no: "",
+    mobile_no: ""
+  });
+  const [activeActionMenu, setActiveActionMenu] = useState(null);
 
   // Edit Form State
   const [editingContact, setEditingContact] = useState(null);
@@ -176,6 +186,17 @@ const ManageTelephone = () => {
     }
   };
 
+  const filteredContacts = contacts.filter(c => {
+    return (
+      (!searchParams.organisation || (c.organisation && String(c.organisation).toLowerCase().includes(searchParams.organisation.toLowerCase()))) &&
+      (!searchParams.department || (c.department && String(c.department).toLowerCase().includes(searchParams.department.toLowerCase()))) &&
+      (!searchParams.location || (c.location && String(c.location).toLowerCase().includes(searchParams.location.toLowerCase()))) &&
+      (!searchParams.name || (c.name && String(c.name).toLowerCase().includes(searchParams.name.toLowerCase()))) &&
+      (!searchParams.ip_no || (c.ip_no && String(c.ip_no).toLowerCase().includes(searchParams.ip_no.toLowerCase()))) &&
+      (!searchParams.mobile_no || (c.mobile_no && String(c.mobile_no).toLowerCase().includes(searchParams.mobile_no.toLowerCase())))
+    );
+  });
+
   return (
     <div className={`dashboard-wrapper ${isSidebarOpen ? "sidebar-open" : ""}`}>
       <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
@@ -259,11 +280,47 @@ const ManageTelephone = () => {
             </div>
 
             {/* Right Column: Existing Contacts */}
-            <div className="manage-box box-teal" style={{ height: "auto", maxHeight: "calc(100vh - 180px)", marginTop: "-15px" }}>
-              <div className="box-header">
-                <Users size={24} /> <h2>Existing Directory ({contacts.length})</h2>
+            <div className={`manage-box box-teal ${isContactsFullScreen ? 'is-fullscreen' : ''}`}>
+              <div className="box-header" style={{ justifyContent: 'space-between' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <Users size={24} /> <h2>Existing Directory ({filteredContacts.length})</h2>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  {!isContactsFullScreen && (
+                    <button 
+                      className="toggle-view-btn" 
+                      onClick={() => setIsContactsFullScreen(true)}
+                      title="Search Contacts"
+                    >
+                      <Search size={16} />
+                    </button>
+                  )}
+                  <button 
+                    className="toggle-view-btn" 
+                    onClick={() => {
+                        setIsContactsFullScreen(!isContactsFullScreen);
+                        if (isContactsFullScreen) {
+                          setSearchParams({ organisation: "", department: "", location: "", name: "", ip_no: "", mobile_no: "" });
+                        }
+                    }}
+                    title={isContactsFullScreen ? "Exit Fullscreen" : "Fullscreen View"}
+                  >
+                    {isContactsFullScreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
+                  </button>
+                </div>
               </div>
               
+              {isContactsFullScreen && (
+                <div style={{ padding: '8px 12px', background: '#f8fafc', borderBottom: '1px solid #e2e8f0', display: 'flex', gap: '8px' }}>
+                  <input type="text" className="light-input" placeholder="Site..." value={searchParams.organisation} onChange={e => setSearchParams({...searchParams, organisation: e.target.value})} style={{ flex: 1, minWidth: 0, padding: '6px 10px', height: '30px', fontSize: '13px', margin: 0 }} />
+                  <input type="text" className="light-input" placeholder="Dept..." value={searchParams.department} onChange={e => setSearchParams({...searchParams, department: e.target.value})} style={{ flex: 1, minWidth: 0, padding: '6px 10px', height: '30px', fontSize: '13px', margin: 0 }} />
+                  <input type="text" className="light-input" placeholder="Loc..." value={searchParams.location} onChange={e => setSearchParams({...searchParams, location: e.target.value})} style={{ flex: 1, minWidth: 0, padding: '6px 10px', height: '30px', fontSize: '13px', margin: 0 }} />
+                  <input type="text" className="light-input" placeholder="Name..." value={searchParams.name} onChange={e => setSearchParams({...searchParams, name: e.target.value})} style={{ flex: 1.5, minWidth: 0, padding: '6px 10px', height: '30px', fontSize: '13px', margin: 0 }} />
+                  <input type="text" className="light-input" placeholder="Ext..." value={searchParams.ip_no} onChange={e => setSearchParams({...searchParams, ip_no: e.target.value})} style={{ flex: 1, minWidth: 0, padding: '6px 10px', height: '30px', fontSize: '13px', margin: 0 }} />
+                  <input type="text" className="light-input" placeholder="Mobile..." value={searchParams.mobile_no} onChange={e => setSearchParams({...searchParams, mobile_no: e.target.value})} style={{ flex: 1.2, minWidth: 0, padding: '6px 10px', height: '30px', fontSize: '13px', margin: 0 }} />
+                </div>
+              )}
+
               <div className="manage-directory-list scrollable">
                 <div className="manage-directory-header">
                   <div className="manage-header-col"><Building2 size={12} /> Site</div>
@@ -276,8 +333,8 @@ const ManageTelephone = () => {
                 </div>
 
                 <div className="manage-directory-items">
-                  {contacts.length > 0 ? (
-                    contacts.map(c => (
+                  {filteredContacts.length > 0 ? (
+                    filteredContacts.map(c => (
                       <div className="manage-directory-item" key={c.id}>
                         <div className="col-site truncate" title={c.organisation}>{c.organisation || '-'}</div>
                         <div className="col-dept truncate" title={c.department}>{c.department || '-'}</div>
@@ -285,9 +342,21 @@ const ManageTelephone = () => {
                         <div className="col-name font-semibold">{c.name}</div>
                         <div className="col-ip font-semibold text-teal-600">{c.ip_no || '-'}</div>
                         <div className="col-mob">{c.mobile_no || '-'}</div>
-                        <div className="manage-col-actions">
-                          <button onClick={() => handleEditClick(c)} className="edit-btn" title="Edit Contact"><Pencil size={12} /></button>
-                          <button onClick={() => handleSingleDelete(c.id)} className="del-btn" title="Delete Contact"><Trash2 size={12} /></button>
+                        <div className="manage-col-actions" style={{ position: 'relative' }}>
+                          <button onClick={() => setActiveActionMenu(activeActionMenu === c.id ? null : c.id)} className="toggle-view-btn" title="Actions" style={{ background: 'transparent', border: 'none', padding: '4px' }}>
+                            <MoreVertical size={16} />
+                          </button>
+                          {activeActionMenu === c.id && (
+                            <div className="action-dropdown" style={{ position: 'absolute', right: '0', top: '25px', background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '6px', padding: '4px', zIndex: 50, boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column', gap: '2px', minWidth: '110px' }}>
+                              <button onClick={() => { handleEditClick(c); setActiveActionMenu(null); }} style={{ padding: '6px 10px', textAlign: 'left', background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '12.5px', color: '#334155', display: 'flex', alignItems: 'center', gap: '8px', borderRadius: '4px', width: '100%' }} onMouseOver={(e) => e.target.style.background = '#f8fafc'} onMouseOut={(e) => e.target.style.background = 'transparent'}>
+                                <Pencil size={14} color="#3b82f6" /> Edit
+                              </button>
+                              <div style={{ height: '1px', background: '#f1f5f9', margin: '2px 0' }}></div>
+                              <button onClick={() => { handleSingleDelete(c.id); setActiveActionMenu(null); }} style={{ padding: '6px 10px', textAlign: 'left', background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '12.5px', color: '#ef4444', display: 'flex', alignItems: 'center', gap: '8px', borderRadius: '4px', width: '100%' }} onMouseOver={(e) => e.target.style.background = '#fef2f2'} onMouseOut={(e) => e.target.style.background = 'transparent'}>
+                                <Trash2 size={14} /> Delete
+                              </button>
+                            </div>
+                          )}
                         </div>
                       </div>
                     ))

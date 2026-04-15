@@ -53,7 +53,7 @@ const EventsCard = () => {
                     // Style variables
                     const hasImage = !!e.image_url;
                     const containerStyle = hasImage ? {
-                        background: `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.6)), url(${getBackendUrl()}${e.image_url})`,
+                        background: `linear-gradient(to right, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.2) 60%, rgba(0,0,0,0) 100%), url(${getBackendUrl()}${e.image_url})`,
                         backgroundSize: 'cover',
                         backgroundPosition: 'center',
                     } : {};
