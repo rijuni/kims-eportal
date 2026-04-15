@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
 import API from "../services/api";
-import { CopyPlus, CalendarHeart, Trash2, UploadCloud, Bell, ArrowLeft, Eye, EyeOff } from "lucide-react";
+import { Bell, UploadCloud, Trash2, Eye, EyeOff, ArrowLeft, User } from "lucide-react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import "../styles/managedashboard.css";
@@ -59,7 +59,6 @@ const ManageDashboard = () => {
       formData.append("title", noticeTitle);
       formData.append("issued_by", noticeIssuedBy);
       
-      // Format date for backend (e.g., 15th Jan 2026)
       const formattedDate = noticeDate ? noticeDate.toLocaleString('en-IN', {
         day: 'numeric',
         month: 'short',
@@ -71,35 +70,23 @@ const ManageDashboard = () => {
         formData.append("noticeFile", noticeFile);
       }
 
-      // Check if API service supports multipart or use fetch
-      let url = "http://localhost:5000/api/notices";
-      if (window.location.hostname !== 'localhost') {
-         url = `http://${window.location.hostname}:5000/api/notices`;
-      }
-
-      const res = await fetch(url, {
-        method: 'POST',
-        body: formData
+      const res = await API.post("/notices", formData, {
+        headers: { "Content-Type": "multipart/form-data" }
       });
-      const data = await res.json();
       
-      if (data.success) {
+      if (res.data.success) {
         setNoticeTitle("");
         setNoticeIssuedBy("");
         setNoticeDate(null);
         setNoticeFile(null);
-        // Clear file input
-        const fileInput = document.getElementById("notice-file-input");
-        if (fileInput) fileInput.value = "";
-        
+        setSuccessMsg("Notice added successfully!");
+        setTimeout(() => setSuccessMsg(""), 5000);
         setRefresh(prev => prev + 1);
-        alert("Notice added successfully!");
       } else {
-        alert("Error adding notice: " + data.message);
+        setSyncError("Error: " + res.data.message);
       }
     } catch (err) {
-      console.error(err);
-      alert("Error adding notice");
+      setSyncError("Error adding notice");
     }
   };
 
@@ -108,47 +95,38 @@ const ManageDashboard = () => {
       try {
         await API.delete(`/notices/${id}`);
         setRefresh(prev => prev + 1);
-      } catch (err) { alert("Error deleting"); }
+      } catch (err) { 
+        setSyncError("Error deleting notice");
+      }
     }
   };
 
   // Handle Birthdays Upload
   const handleFileUploadMenu = async () => {
+    setSyncError("");
+    setSuccessMsg("");
     if (!excelFile) {
-      alert("Please select an Excel file first!");
+      setSyncError("Please select an Excel file first!");
       return;
-    }
-
-    if (excelFile.name === lastUploadedFile) {
-        alert("This file already uploaded. Please rename or choose another.");
-        return;
     }
 
     setLoading(true);
     const formData = new FormData();
     formData.append("excelFile", excelFile);
     try {
-      let url = "http://localhost:5000/api/birthdays/upload";
-      if (window.location.hostname !== 'localhost') {
-         url = `http://${window.location.hostname}:5000/api/birthdays/upload`;
-      }
-      
-      const res = await fetch(url, {
-        method: 'POST',
-        body: formData
+      const res = await API.post("/birthdays/upload", formData, {
+        headers: { "Content-Type": "multipart/form-data" }
       });
-      const data = await res.json();
-      if (data.success) {
-        alert("Birthdays successfully synced from Excel!");
-        if (data.filename) setLastUploadedFile(data.filename);
+      if (res.data.success) {
+        setSuccessMsg("Birthdays successfully synced from Excel!");
+        if (res.data.filename) setLastUploadedFile(res.data.filename);
         setExcelFile(null);
-        document.getElementById("excel-upload-input").value = "";
+        setTimeout(() => setSuccessMsg(""), 5000);
       } else {
-        alert("Error: " + data.message);
+        setSyncError("Error: " + res.data.message);
       }
     } catch (err) {
-      console.error(err);
-      alert("Network or parse error on upload");
+      setSyncError("Network or parse error on upload");
     } finally {
       setLoading(false);
     }
@@ -156,6 +134,8 @@ const ManageDashboard = () => {
 
   const handleTrashClick = () => {
     setIsDeleting(true);
+    setSyncError("");
+    setSuccessMsg("");
   };
 
   const resetDeleteState = () => {
@@ -171,11 +151,11 @@ const ManageDashboard = () => {
       if (res.data.success) {
         setLastUploadedFile("");
         resetDeleteState();
-        alert("Birthdays cleared successfully.");
+        setSuccessMsg("Birthdays cleared successfully.");
+        setTimeout(() => setSuccessMsg(""), 5000);
       }
     } catch (err) {
-      console.error(err);
-      alert("Failed to clear birthdays");
+      setSyncError("Failed to clear birthdays");
     } finally {
       setLoading(false);
     }
@@ -201,11 +181,11 @@ const ManageDashboard = () => {
             {/* Notices Box */}
             <div className="manage-box box-blue">
               <div className="box-header">
-                <Bell size={24} /> <h2>Notice Board</h2>
+                <h2>Notice Board</h2>
               </div>
               <form onSubmit={handleNoticeSubmit}>
-                <input required type="text" placeholder="Notice Title" value={noticeTitle} onChange={e => setNoticeTitle(e.target.value)} />
-                <input required type="text" placeholder="Issued By" value={noticeIssuedBy} onChange={e => setNoticeIssuedBy(e.target.value)} />
+                <input required className="light-input" type="text" placeholder="Notice Title" value={noticeTitle} onChange={e => setNoticeTitle(e.target.value)} />
+                <input required className="light-input" type="text" placeholder="Issued By" value={noticeIssuedBy} onChange={e => setNoticeIssuedBy(e.target.value)} />
                 <DatePicker
                     selected={noticeDate}
                     onChange={(date) => setNoticeDate(date)}
@@ -221,7 +201,13 @@ const ManageDashboard = () => {
                   <input required id="notice-file-input" type="file" accept=".pdf" onChange={e => setNoticeFile(e.target.files[0])} />
                 </div>
                 <button type="submit" className="action-btn-blue">Add Notice</button>
+
+                <div className="feedback-area">
+                  {syncError && <div className="sync-error-msg">{syncError}</div>}
+                  {successMsg && <div className="sync-success-msg">{successMsg}</div>}
+                </div>
               </form>
+
               <div className="data-list">
                 {notices.map(n => (
                   <div key={n.id} className="data-row">
@@ -235,16 +221,7 @@ const ManageDashboard = () => {
             {/* Birthdays Excel Upload Box */}
             <div className="manage-box box-orange">
               <div className="box-header">
-                <UploadCloud size={24} /> <h2>Bulk Birthdays (Excel)</h2>
-                {lastUploadedFile && (
-                  <button 
-                    className="toggle-view-btn" 
-                    onClick={() => setShowFileInfoDetail(!showFileInfoDetail)}
-                    title={showFileInfoDetail ? "Hide Name" : "Show Name"}
-                  >
-                    {showFileInfoDetail ? <EyeOff size={16} /> : <Eye size={16} />}
-                  </button>
-                )}
+                <h2>Bulk Birthdays (Excel)</h2>
               </div>
               <div className="upload-container">
                 <p className="upload-hint">Upload a valid Excel (.xlsx) file with headers: Name, Department, Date of Birth.</p>
@@ -290,12 +267,16 @@ const ManageDashboard = () => {
                 >
                   {loading ? "Processing..." : "Sync Database via Excel"}
                 </button>
+
+                <div className="feedback-area">
+                  {syncError && <div className="sync-error-msg">{syncError}</div>}
+                  {successMsg && <div className="sync-success-msg">{successMsg}</div>}
+                </div>
               </div>
             </div>
 
           </div>
         </div>
-
       </div>
     </div>
   );

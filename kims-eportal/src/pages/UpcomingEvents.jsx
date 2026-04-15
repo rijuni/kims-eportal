@@ -91,7 +91,7 @@ const UpcomingEvents = () => {
                             <div 
                                 className="modal-hero-bg" 
                                 style={{ 
-                                    backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.7)), url(http://localhost:5000${selectedEvent.image_url})` 
+                                    backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.7)), url(http://${window.location.hostname}:5000${selectedEvent.image_url})` 
                                 }}
                             >
                                 <button className="close-btn-overlay" onClick={() => setSelectedEvent(null)}>&times;</button>

@@ -29,9 +29,7 @@ const TrainingMaterials = () => {
 
     const getFullUrl = (url) => {
         if (!url) return "#";
-        const baseUrl = "http://localhost:5000";
-        // Check if we are running in production or network
-        const finalBase = window.location.hostname === 'localhost' ? baseUrl : `http://${window.location.hostname}:5000`;
+        const finalBase = `http://${window.location.hostname}:5000`;
         return `${finalBase}${url}`;
     };
 

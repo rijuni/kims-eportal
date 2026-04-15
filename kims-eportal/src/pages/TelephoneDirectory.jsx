@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
-import { Search, Filter, User, Hash, Globe, Building2, UserCircle, Contact2 } from "lucide-react";
+import { Search, Filter, User, Hash, Globe, Building2, UserCircle, Contact2, Network, MapPin, Smartphone, Phone } from "lucide-react";
 import API from "../services/api";
 import "../styles/telephone-directory.css";
 
@@ -76,6 +76,18 @@ const TelephoneDirectory = () => {
             if (searchParams.ipNo && !matchIp) return false;
             
             return true;
+        }).sort((a, b) => {
+            const orgA = (a.organisation || "").toUpperCase();
+            const orgB = (b.organisation || "").toUpperCase();
+            
+            // Prioritize KIMS
+            if (orgA === "KIMS" && orgB !== "KIMS") return -1;
+            if (orgA !== "KIMS" && orgB === "KIMS") return 1;
+            
+            // Secondary sort by name
+            const nameA = (a.name || "").toUpperCase();
+            const nameB = (b.name || "").toUpperCase();
+            return nameA.localeCompare(nameB);
         });
     }, [directoryData, searchParams]);
 
@@ -97,7 +109,7 @@ const TelephoneDirectory = () => {
                                 value={searchParams.organisation} 
                                 onChange={handleInputChange}
                             >
-                                <option value="">Select Organisation</option>
+                                <option value="">Select Site</option>
                                 {organisations.map(org => (
                                     <option key={org} value={org}>{org}</option>
                                 ))}
@@ -148,15 +160,27 @@ const TelephoneDirectory = () => {
                         <div className="directory-table-header">
                             <div className="header-col col-org">
                                 <Building2 size={15} />
-                                <span>Organisation</span>
+                                <span>Site</span>
                             </div>
-                            <div className="header-col col-info">
-                                <UserCircle size={15} />
-                                <span>Employee Info</span>
+                            <div className="header-col col-dept">
+                                <Network size={15} />
+                                <span>Department</span>
                             </div>
-                            <div className="header-col col-phone" style={{ justifyContent: 'flex-end' }}>
-                                <Contact2 size={15} />
-                                <span>Contact</span>
+                            <div className="header-col col-loc">
+                                <MapPin size={15} />
+                                <span>Location</span>
+                            </div>
+                            <div className="header-col col-name">
+                                <User size={15} />
+                                <span>Name</span>
+                            </div>
+                            <div className="header-col col-ip">
+                                <Phone size={15} />
+                                <span>Ext / IP</span>
+                            </div>
+                            <div className="header-col col-mob">
+                                <Smartphone size={15} />
+                                <span>Mobile</span>
                             </div>
                         </div>
 
@@ -165,24 +189,21 @@ const TelephoneDirectory = () => {
                                 <div className="directory-item" key={index}>
                                     <div className="col-org">
                                         <h3 className="org-name">{item.organisation || "N/A"}</h3>
-                                        <p className="org-location">{item.location || ""}</p>
                                     </div>
-                                    <div className="col-info">
-                                        <div className="info-row">
-                                            <span className="info-label">Name</span>
-                                            <span className="info-value">: {item.name || "N/A"}</span>
-                                        </div>
-                                        <div className="info-row">
-                                            <span className="info-label">Department</span>
-                                            <span className="info-value">: {item.department || "N/A"}</span>
-                                        </div>
+                                    <div className="col-dept">
+                                        <span className="info-value">{item.department || "N/A"}</span>
                                     </div>
-                                    <div className="col-phone">
-                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', justifyContent: 'center', height: '100%' }}>
-                                            {item.ip_no && <span style={{ fontWeight: 600 }}>{item.ip_no}</span>}
-                                            {item.mobile_no && <span style={{ fontSize: '13px', color: '#64748b' }}>{item.mobile_no}</span>}
-                                            {!item.ip_no && !item.mobile_no && <span style={{ color: '#94a3b8' }}>-</span>}
-                                        </div>
+                                    <div className="col-loc">
+                                        <span className="info-value">{item.location || "N/A"}</span>
+                                    </div>
+                                    <div className="col-name">
+                                        <span className="info-value">{item.name || "N/A"}</span>
+                                    </div>
+                                    <div className="col-ip">
+                                        <span className="info-value" style={{ color: '#0d9488', fontWeight: '600' }}>{item.ip_no || "-"}</span>
+                                    </div>
+                                    <div className="col-mob">
+                                        <span className="info-value">{item.mobile_no || "-"}</span>
                                     </div>
                                 </div>
                             ))

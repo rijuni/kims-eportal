@@ -3,7 +3,10 @@ import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
 import API from "../services/api";
-import { Contact, UploadCloud, Trash2, Eye, EyeOff, ArrowLeft, Pencil, X, MapPin } from "lucide-react";
+import { 
+  Building2, Users, MapPin, User, Hash, Phone, Smartphone, Settings,
+  UploadCloud, Trash2, Eye, EyeOff, ArrowLeft, Pencil, X 
+} from "lucide-react";
 import "../styles/managedashboard.css";
 
 const ManageTelephone = () => {
@@ -205,7 +208,7 @@ const ManageTelephone = () => {
                 )}
               </div>
               <div className="upload-container">
-                <p className="upload-hint">Upload Excel with headers: Organisation, Department, Location, Name, IP No, Mobile No.</p>
+                <p className="upload-hint">Upload Excel with headers: Site, Department, Location, Name, IP No / Ext, Mobile No.</p>
                 <div className="file-info-bar">
                   <div className="info-text"><strong>Synced:</strong> {lastUploadedFile || "None"}</div>
                   {lastUploadedFile && !isDeleting && (
@@ -256,56 +259,44 @@ const ManageTelephone = () => {
             </div>
 
             {/* Right Column: Existing Contacts */}
-            <div className="manage-box box-teal">
+            <div className="manage-box box-teal" style={{ height: "auto", maxHeight: "calc(100vh - 180px)", marginTop: "-15px" }}>
               <div className="box-header">
-                <Contact size={24} /> <h2>Existing Directory ({contacts.length})</h2>
+                <Users size={24} /> <h2>Existing Directory ({contacts.length})</h2>
               </div>
-              <div className="table-responsive" style={{ marginTop: '10px' }}>
-                <table className="upcoming-table">
-                  <thead>
-                    <tr>
-                      <th style={{ padding: '12px 15px' }}>Name</th>
-                      <th style={{ padding: '12px 15px' }}>Org/Dept</th>
-                      <th style={{ padding: '12px 15px' }}>Extension / IP</th>
-                      <th style={{ padding: '12px 15px' }}>Mobile</th>
-                      <th style={{ padding: '12px 15px' }}></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {contacts.length > 0 ? (
-                      contacts.map(c => (
-                        <tr key={c.id} className="upcoming-row">
-                          <td style={{ padding: '12px 15px' }}>
-                            <span style={{ fontSize: '13px', fontWeight: '600', color: '#1e293b' }}>{c.name}</span>
-                          </td>
-                          <td style={{ padding: '12px 15px' }}>
-                            <div style={{ fontSize: '12px', color: '#64748b' }}>
-                              <strong>{c.organisation}</strong><br/>
-                              {c.department && <span>{c.department}</span>}
-                              {c.location && <><br/><span><MapPin size={10} style={{display:'inline', marginBottom:'-2px'}}/> {c.location}</span></>}
-                            </div>
-                          </td>
-                          <td style={{ padding: '12px 15px' }}>
-                            <span style={{ fontSize: '12px', color: '#0d9488', fontWeight: '600' }}>{c.ip_no || '-'}</span>
-                          </td>
-                          <td style={{ padding: '12px 15px' }}>
-                            <span style={{ fontSize: '12px', color: '#475569' }}>{c.mobile_no || '-'}</span>
-                          </td>
-                          <td style={{ padding: '12px 15px', textAlign: 'right' }}>
-                            <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-                              <button onClick={() => handleEditClick(c)} className="edit-btn" title="Edit Contact"><Pencil size={14} /></button>
-                              <button onClick={() => handleSingleDelete(c.id)} className="del-btn" title="Delete Contact"><Trash2 size={14} /></button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td colSpan="5" style={{ textAlign: 'center', padding: '30px', color: '#94a3b8', fontSize: '13px' }}>No contacts found. Upload an Excel file.</td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
+              
+              <div className="manage-directory-list scrollable">
+                <div className="manage-directory-header">
+                  <div className="manage-header-col"><Building2 size={12} /> Site</div>
+                  <div className="manage-header-col"><Users size={12} /> Dept</div>
+                  <div className="manage-header-col"><MapPin size={12} /> Loc</div>
+                  <div className="manage-header-col"><User size={12} /> Name</div>
+                  <div className="manage-header-col"><Hash size={12} /> Ext</div>
+                  <div className="manage-header-col"><Smartphone size={12} /> Mobile</div>
+                  <div className="manage-header-col justify-end"><Settings size={12} /> Action</div>
+                </div>
+
+                <div className="manage-directory-items">
+                  {contacts.length > 0 ? (
+                    contacts.map(c => (
+                      <div className="manage-directory-item" key={c.id}>
+                        <div className="col-site truncate" title={c.organisation}>{c.organisation || '-'}</div>
+                        <div className="col-dept truncate" title={c.department}>{c.department || '-'}</div>
+                        <div className="col-loc truncate" title={c.location}>{c.location || '-'}</div>
+                        <div className="col-name font-semibold">{c.name}</div>
+                        <div className="col-ip font-semibold text-teal-600">{c.ip_no || '-'}</div>
+                        <div className="col-mob">{c.mobile_no || '-'}</div>
+                        <div className="manage-col-actions">
+                          <button onClick={() => handleEditClick(c)} className="edit-btn" title="Edit Contact"><Pencil size={12} /></button>
+                          <button onClick={() => handleSingleDelete(c.id)} className="del-btn" title="Delete Contact"><Trash2 size={12} /></button>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="no-data" style={{ textAlign: 'center', padding: '40px', color: '#94a3b8', fontSize: '13px' }}>
+                      No contacts found. Upload an Excel file.
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -330,7 +321,7 @@ const ManageTelephone = () => {
               </div>
               <div className="form-row">
                 <div className="form-group">
-                  <label>Organisation</label>
+                  <label>Site</label>
                   <input className="light-input" type="text" name="organisation" value={editFields.organisation} onChange={handleEditChange} />
                 </div>
                 <div className="form-group">

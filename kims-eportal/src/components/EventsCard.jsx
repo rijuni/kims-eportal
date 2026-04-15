@@ -41,7 +41,7 @@ const EventsCard = () => {
     // Determine backend base URL for images
     const getBackendUrl = () => {
         // Normally API baseurl handles it, but since API serves `/api`, we want root
-        return "http://localhost:5000";
+        return `http://${window.location.hostname}:5000`;
     };
 
     return (

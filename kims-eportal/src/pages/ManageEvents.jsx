@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
 import API from "../services/api";
-import { CalendarHeart, UploadCloud, Trash2, Eye, EyeOff, ArrowLeft, MapPin, ChevronDown, ChevronUp, Pencil, X } from "lucide-react";
+import { CalendarHeart, UploadCloud, Trash2, Eye, EyeOff, ArrowLeft, MapPin, ChevronDown, ChevronUp, Pencil, X, Maximize2, Minimize2 } from "lucide-react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import "../styles/managedashboard.css";
@@ -21,6 +21,8 @@ const ManageEvents = () => {
   const [successMsg, setSuccessMsg] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteInput, setDeleteInput] = useState("");
+  const [isEventsFullScreen, setIsEventsFullScreen] = useState(false);
+
 
   // Manual Form State
   const [manualName, setManualName] = useState("");
@@ -396,10 +398,20 @@ const ManageEvents = () => {
               </div>
             </div>
 
-            <div className="manage-box box-blue">
-              <div className="box-header">
-                <CalendarHeart size={24} /> <h2>Existing Events</h2>
+            <div className={`manage-box box-blue ${isEventsFullScreen ? 'is-fullscreen' : ''}`}>
+              <div className="box-header" style={{ justifyContent: 'space-between' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <CalendarHeart size={24} /> <h2>Existing Events</h2>
+                </div>
+                <button 
+                  className="toggle-view-btn" 
+                  onClick={() => setIsEventsFullScreen(!isEventsFullScreen)}
+                  title={isEventsFullScreen ? "Exit Full Screen" : "Full Screen"}
+                >
+                  {isEventsFullScreen ? <Minimize2 size={20} /> : <Maximize2 size={20} />}
+                </button>
               </div>
+
               <div className="table-responsive" style={{ marginTop: '10px' }}>
                 <table className="upcoming-table">
                   <thead>

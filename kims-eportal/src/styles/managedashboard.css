@@ -141,31 +141,26 @@
     border-color: #3b82f6;
 }
 
-.manage-box input[type="text"].light-input,
-.manage-box input[type="date"].light-input,
-.manage-box input[type="datetime-local"].light-input,
-.manage-box textarea.light-input,
-.manage-box select.light-input {
+.light-input {
     width: 100%;
-    padding: 10px 15px;
-    border-radius: 6px;
+    padding: 8px 12px;
+    border-radius: 8px;
     font-size: 13.5px;
-    font-weight: 400;
-    /* Ensure consistent text weight */
-    background: #fdfdfd;
+    font-weight: 500;
+    background: #ffffff;
     border: 1px solid #e2e8f0;
-    color: #000000;
-    font-family: inherit;
+    color: #1e293b;
+    font-family: 'Poppins', sans-serif;
     outline: none;
-    transition: all 0.2s;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
 }
 
-.manage-box input[type="text"].light-input:focus,
-.manage-box textarea.light-input:focus,
-.manage-box select.light-input:focus {
+.light-input:focus {
     background: #ffffff;
     border-color: #14b8a6;
-    box-shadow: 0 0 0 2px rgba(20, 184, 166, 0.05);
+    box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.1), 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    transform: translateY(-1px);
 }
 
 .file-input-wrapper {
@@ -652,7 +647,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 3000;
+    z-index: 10000;
     animation: fadeIn 0.2s ease;
 }
 
@@ -697,16 +692,16 @@
 }
 
 .modal-form-content {
-    padding: 20px;
+    padding: 15px 20px;
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 12px;
 }
 
 .form-group {
     display: flex;
     flex-direction: column;
-    gap: 5px;
+    gap: 3px;
 }
 
 .form-group label {
@@ -757,3 +752,112 @@
     from { transform: translateY(10px); opacity: 0; }
     to { transform: translateY(0); opacity: 1; }
 }
+
+/* Full Screen Mode */
+.manage-box.is-fullscreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 5000;
+    margin: 0;
+    border-radius: 0;
+    padding: 25px 40px;
+    background: white;
+    overflow-y: auto;
+    animation: fadeIn 0.3s ease;
+}
+
+.manage-box.is-fullscreen .table-responsive {
+    height: calc(100vh - 100px);
+    margin-top: 20px !important;
+}
+
+.manage-box.is-fullscreen .upcoming-table th,
+.manage-box.is-fullscreen .upcoming-table td {
+    padding: 15px 20px;
+}
+/* Manage Telephone Grid */
+.manage-directory-list {
+    width: 100%;
+}
+
+.manage-directory-header {
+    display: grid;
+    grid-template-columns: 10% 15% 15% 20% 10% 15% 15%;
+    align-items: center;
+    padding: 10px 15px;
+    background: #ffffff;
+    border-bottom: 2px solid #f1f5f9;
+    border-top: 4px solid #1fa463;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.manage-directory-item {
+    display: grid;
+    grid-template-columns: 10% 15% 15% 20% 10% 15% 15%;
+    align-items: center;
+    padding: 6px 15px;
+    border-bottom: 1px solid #f8fafc;
+    transition: background-color 0.2s;
+    font-size: 11.5px;
+    color: #1a202c;
+    font-weight: 500;
+}
+
+.manage-directory-item:hover {
+    background-color: #f1f5f9;
+}
+
+.manage-header-col {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #64748b;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.manage-col-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
+
+
+/* Notice Grid */
+.notice-list-header {
+    display: grid;
+    grid-template-columns: 60% 25% 15%;
+    align-items: center;
+    padding: 10px 15px;
+    background: #ffffff;
+    border-bottom: 2px solid #f1f5f9;
+    border-top: 4px solid #3b82f6; /* Blue for notices */
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.notice-list-item {
+    display: grid;
+    grid-template-columns: 60% 25% 15%;
+    align-items: center;
+    padding: 8px 15px;
+    border-bottom: 1px solid #f8fafc;
+    transition: background-color 0.2s;
+    font-size: 11.5px;
+    color: #1a202c;
+    font-weight: 500;
+}
+
+.notice-list-item:hover {
+    background-color: #f1f5f9;
+}
+

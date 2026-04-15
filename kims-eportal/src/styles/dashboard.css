@@ -638,3 +638,21 @@ body {
             -140px 0 4px #1d3557, 140px 0 4px #1d3557;
     }
 }
+/* Holiday Today Sidebar Indicator Dot */
+.sidebar-holiday-indicator {
+    width: 6px;
+    height: 6px;
+    background-color: #1fa463;
+    border-radius: 50%;
+    margin-left: 10px;
+    box-shadow: 0 0 5px rgba(31, 164, 99, 0.4);
+    animation: holiday-dot-pulse 2s infinite ease-in-out;
+    display: inline-block;
+}
+
+@keyframes holiday-dot-pulse {
+    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(31, 164, 99, 0.6); }
+    70% { transform: scale(1.2); box-shadow: 0 0 0 10px rgba(31, 164, 99, 0); }
+    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(31, 164, 99, 0); }
+}
+
