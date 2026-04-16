@@ -1,15 +1,16 @@
 .admin-manage-container {
-    padding: 0 30px;
+    padding: 30px 30px 0;
     height: 100vh;
     overflow-y: auto;
+    margin-top: -10px;
 }
 
 .page-header-row {
     display: flex;
     align-items: center;
     gap: 15px;
-    margin-top: 15px;
-    margin-bottom: 2px;
+    margin-top: 25px;
+    margin-bottom: 8px;
 }
 
 .back-btn {
@@ -39,16 +40,16 @@
     font-weight: 600;
     color: #1a202c;
     margin: 0;
-    margin-top: -20px;
+    margin-top: -15px;
 }
 
 .manage-page-sub {
     font-size: 13px;
     color: #1a202c;
-    margin-bottom: 20px;
+    margin-bottom: 25px;
     font-weight: 500;
     padding-left: 49px;
-    margin-top: -22px;
+    margin-top: -25px;
 }
 
 .manage-grid {

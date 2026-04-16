@@ -1,10 +1,10 @@
 import { NavLink, useLocation } from "react-router-dom";
 import { useContext, useState, useEffect } from "react";
 import { AuthContext } from "../context/AuthContext";
-import { 
-  HiMiniSquares2X2, HiMiniPresentationChartBar, HiMiniIdentification, 
+import {
+  HiMiniSquares2X2, HiMiniPresentationChartBar, HiMiniIdentification,
   HiMiniCalendarDays, HiMiniCalendar, HiMiniUsers, HiMiniShieldCheck,
-  HiMiniSquaresPlus, HiMiniChevronDown, HiMiniChevronUp 
+  HiMiniSquaresPlus, HiMiniChevronDown, HiMiniChevronUp
 } from "react-icons/hi2";
 import logo from "../img/Capture.PNG";
 import API from "../services/api";
@@ -22,7 +22,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
         if (res.data) {
           const today = new Date();
           today.setHours(0, 0, 0, 0);
-          
+
           const hasHoliday = res.data.some(h => {
             if (!h.date) return false;
             let hDate;
@@ -58,11 +58,6 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
     { icon: <HiMiniUsers size={18} className="mr-3" />, label: "People", path: "/people" },
   ];
 
-  if (user && user.role === 'admin') {
-    if (!dropdownItems.some(item => item.path === "/admin")) {
-      dropdownItems.push({ icon: <HiMiniShieldCheck size={18} className="mr-3" />, label: "Admin Panel", path: "/admin" });
-    }
-  }
 
   // Auto-open dropdown if we are on a route that is inside the dropdown
   useEffect(() => {
@@ -90,24 +85,36 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
         </div>
         <ul className="sidebar-menu">
           <li>
-            <NavLink 
-              to={dashboardItem.path} 
+            <NavLink
+              to={dashboardItem.path}
               className={({ isActive }) => isActive ? "active-link flex items-center" : "flex items-center"}
               end
             >
-              {dashboardItem.icon} 
+              {dashboardItem.icon}
               <span className="flex-1">{dashboardItem.label}</span>
             </NavLink>
           </li>
           
+          {user && user.role === 'admin' && (
+            <li>
+              <NavLink 
+                to="/admin" 
+                className={({ isActive }) => isActive ? "active-link flex items-center" : "flex items-center"}
+              >
+                <HiMiniShieldCheck size={18} className="mr-3" />
+                <span className="flex-1">Admin Panel</span>
+              </NavLink>
+            </li>
+          )}
+
           <li className="mt-2">
-            <a 
+            <a
               className={`flex items-center cursor-pointer justify-between w-full transition-all duration-300 ${isDropdownOpen ? 'text-[#1FA463] font-semibold bg-gradient-to-r from-[rgba(31,164,99,0.1)] to-[rgba(31,164,99,0)]' : 'text-[#475569] hover:text-[#1FA463] hover:bg-gradient-to-r hover:from-[rgba(31,164,99,0.1)] hover:to-[rgba(31,164,99,0)]'} px-[40px] py-[12px]`}
               style={{ marginLeft: isDropdownOpen ? '0' : '0' }}
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
             >
-              <div className="flex items-center">
-                <HiMiniSquares2X2 size={18} className="mr-3 text-[#64748b]" style={{ color: isDropdownOpen ? '#1fa463' : '#64748b' }} />
+              <div className="flex items-center gap-[5px]">
+                <HiMiniSquaresPlus size={18} className="mr-3 text-[#64748b]" style={{ color: isDropdownOpen ? '#1fa463' : '#64748b' }} />
                 <span className="flex-1" style={{ fontSize: '13.5px' }}>Explore More</span>
               </div>
               <div className={`transition-transform duration-300 ${isDropdownOpen ? 'rotate-180 text-[#1FA463]' : 'text-[#64748b]'}`}>
@@ -116,9 +123,9 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             </a>
           </li>
 
-          <div 
+          <div
             className={`overflow-hidden transition-all duration-300 ease-in-out`}
-            style={{ 
+            style={{
               maxHeight: isDropdownOpen ? '500px' : '0px',
               opacity: isDropdownOpen ? 1 : 0,
               marginTop: isDropdownOpen ? '4px' : '0px'
@@ -126,13 +133,16 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
           >
             {dropdownItems.map((item) => (
               <li key={item.path}>
-                <NavLink 
-                  to={item.path} 
+                <NavLink
+                  to={item.path}
                   className={({ isActive }) => `flex items-center ${isActive ? 'active-link' : ''}`}
-                  style={{ paddingLeft: '55px', paddingTop: '8px', paddingBottom: '8px', fontSize: '13.5px', marginTop: '0px', marginBottom: '0px' }}
+                  style={{ paddingLeft: '55px', paddingTop: '10px', paddingBottom: '10px', fontSize: '13.5px' }}
                 >
-                  <span className="mr-3 opacity-80 scale-100">{item.icon}</span> 
-                  <span className="flex-1">{item.label}</span>
+                  <div className="flex items-center opacity-85">
+                    {item.icon}
+                  </div>
+                  <span className="flex-1 leading-none">{item.label}</span>
+                  
                   {item.label === "Holiday List" && isHolidayToday && (
                     <div className="sidebar-holiday-indicator scale-75" title="Holiday Today"></div>
                   )}

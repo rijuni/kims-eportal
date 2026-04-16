@@ -2,8 +2,10 @@ import React, { useState, useEffect, useMemo } from "react";
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
 import { Search, Filter, User, Hash, Globe, Building2, UserCircle, Contact2, Network, MapPin, Smartphone, Phone } from "lucide-react";
+import { HiMiniArrowDownTray } from "react-icons/hi2";
 import API from "../services/api";
 import "../styles/telephone-directory.css";
+import * as XLSX from "xlsx";
 
 const TelephoneDirectory = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -37,9 +39,6 @@ const TelephoneDirectory = () => {
         }
     };
 
-    useEffect(() => {
-        fetchData();
-    }, []);
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -90,6 +89,56 @@ const TelephoneDirectory = () => {
             return nameA.localeCompare(nameB);
         });
     }, [directoryData, searchParams]);
+
+    const filteredDirectoryRef = React.useRef(filteredDirectory);
+
+    useEffect(() => {
+        filteredDirectoryRef.current = filteredDirectory;
+    }, [filteredDirectory]);
+
+    useEffect(() => {
+        fetchData();
+    }, []); // Only run once on mount
+
+    const handleExportExcel = () => {
+        // Use the ref to get the latest data without causing a dependency loop
+        const dataToExport = filteredDirectoryRef.current;
+        if (!dataToExport || dataToExport.length === 0) {
+            alert("No data available to export.");
+            return;
+        }
+
+        // Prepare data for XLSX
+        const wsData = dataToExport.map(item => ({
+            "Organisation": item.organisation || "",
+            "Department": item.department || "",
+            "Location": item.location || "",
+            "Name": item.name || "",
+            "IP No / Ext": item.ip_no || "",
+            "Mobile No": item.mobile_no || ""
+        }));
+
+        // Create Worksheet
+        const ws = XLSX.utils.json_to_sheet(wsData);
+
+        // Set column widths for better readability
+        const wscols = [
+            { wch: 15 }, // Organisation
+            { wch: 25 }, // Department
+            { wch: 20 }, // Location
+            { wch: 30 }, // Name
+            { wch: 15 }, // IP No
+            { wch: 20 }  // Mobile
+        ];
+        ws['!cols'] = wscols;
+
+        // Create Workbook
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Telephone Directory");
+
+        // Download file
+        XLSX.writeFile(wb, `Telephone_Directory_${new Date().toLocaleDateString().replace(/\//g, '-')}.xlsx`);
+    };
 
     return (
         <div className={`telephone-wrapper ${isSidebarOpen ? "sidebar-open" : ""}`}>
@@ -147,6 +196,13 @@ const TelephoneDirectory = () => {
                                 <span>Search</span>
                                 <div className="search-icon-bg">
                                     <Search size={12} />
+                                </div>
+                            </button>
+
+                            <button className="export-btn" onClick={handleExportExcel} title="Export to Excel">
+                                <span>Export</span>
+                                <div className="export-icon-bg">
+                                    <HiMiniArrowDownTray size={12} className="text-white" />
                                 </div>
                             </button>
 

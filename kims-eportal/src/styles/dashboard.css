@@ -228,7 +228,7 @@ body {
     background: linear-gradient(to right, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.03));
     backdrop-filter: blur(16px) brightness(1.1);
     -webkit-backdrop-filter: blur(16px) brightness(1.1);
-    border-radius: 50px;
+    border-radius: 17px;
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
     border: 1px solid rgba(255, 255, 255, 0.15);
 }
@@ -263,7 +263,24 @@ body {
     border: none;
     cursor: pointer;
     box-shadow: 0 4px 10px rgba(31, 164, 99, 0.3);
-    margin-right: 15px;
+    margin-right: -5px;
+    padding-right: -10px;
+}
+
+.logout-btn {
+    height: 33px;
+    background: #ef4444;
+    color: white;
+    padding: 10px 10px;
+    border-radius: var(--border-radius-btn);
+    font-weight: 400;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(239, 68, 68, 0.3);
+    margin-right: 30px;
 }
 
 /* ===== LAYOUT ===== */
@@ -364,7 +381,7 @@ body {
 .birthday-group .page-subtitle {
     font-size: 8px;
     padding-left: 10px;
-    margin-bottom: -2px;
+    margin-bottom: -1px;
     /* Reduced specific to right panel */
 }
 
