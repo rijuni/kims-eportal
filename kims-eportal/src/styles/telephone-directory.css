@@ -141,7 +141,7 @@ select.pill-input {
     border-radius: 20px;
     padding: 0;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-    height: calc(100vh - 165px);
+    height: calc(110vh - 240px);
     overflow-y: auto;
     position: relative;
 }

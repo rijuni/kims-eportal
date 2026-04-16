@@ -48,7 +48,7 @@
     padding: 0px 10px;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
     /* Calculated for a strict 40px bottom gap */
-    height: calc(100vh - 120px);
+    height: calc(100vh - 130px);
     overflow-y: auto;
 }
 
@@ -154,7 +154,8 @@
 .upcoming-table {
     width: 100%;
     border-collapse: collapse;
-    min-width: 900px; /* Ensures columns stay wide enough */
+    min-width: 900px;
+    /* Ensures columns stay wide enough */
 }
 
 .upcoming-table thead th {
@@ -175,7 +176,8 @@
 }
 
 .upcoming-row:hover {
-    background-color: #f0fdf4; /* Very light green on hover */
+    background-color: #f0fdf4;
+    /* Very light green on hover */
 }
 
 .upcoming-row td {
@@ -247,8 +249,13 @@
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 .event-modal-box {
@@ -262,8 +269,15 @@
 }
 
 @keyframes slideUp {
-    from { transform: translateY(20px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
 }
 
 .modal-header {
