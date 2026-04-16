@@ -118,12 +118,29 @@ body {
     }
 }
 
+@keyframes scroll {
+    0% {
+        transform: translateX(100%);
+    }
+
+    100% {
+        transform: translateX(-100%);
+    }
+}
+
 /* ===== SIDEBAR ===== */
 .sidebar {
     width: var(--sidebar-width);
     height: 100vh;
-    background: var(--sidebar-bg);
-    color: #4a5568;
+    /* Frosty white top fading entirely to transparent to seamlessly reveal the native app background! */
+    background: linear-gradient(to bottom,
+            rgba(255, 255, 255, 0.96) 0px,
+            rgba(255, 255, 255, 0.96) 340px,
+            rgba(255, 255, 255, 0) 650px);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.02);
+    color: #475569;
     position: sticky;
     top: 0;
     flex-shrink: 0;
@@ -132,7 +149,6 @@ body {
     z-index: 50;
     padding: 20px 0;
     border-left: var(--sidebar-stripe) solid var(--kims-green);
-    /* Revert to brand green stripe */
     transition: transform 0.3s ease;
 }
 
@@ -149,13 +165,13 @@ body {
 }
 
 .sidebar-menu li a {
-    padding: 10px 40px;
+    padding: 12px 40px;
     cursor: pointer;
     display: flex;
     align-items: center;
     font-size: 13.5px;
-    font-weight: 400;
-    color: #555;
+    font-weight: 500;
+    color: #475569;
     transition: all 0.2s;
     gap: 5px;
     text-decoration: none;
@@ -163,36 +179,38 @@ body {
 }
 
 .sidebar-menu li a svg {
-    color: #4a5568;
-    /* Charcoal/Dark Gray for inactive icons */
+    color: #64748b;
 }
 
 .sidebar-menu li a.active-link {
-    color: #1fa463;
-    background: rgba(11, 124, 74, 0.08);
+    background: linear-gradient(135deg, #4ade80 0%, #1fa463 100%);
+    color: #ffffff;
     font-weight: 600;
+    border-radius: 16px 0 0 16px;
+    margin: 5px 0 5px 10px;
+    padding: 12px 30px;
+    box-shadow: 0 4px 15px rgba(31, 164, 99, 0.3);
 }
 
 .sidebar-menu li a.active-link svg {
-    color: #1fa463;
-    /* Green for active icon */
+    color: #ffffff;
 }
 
 .sidebar-menu li a:hover {
-    color: var(--kims-green);
-    background: rgba(31, 164, 99, 0.05);
-    padding-left: 35px;
+    color: #1fa463;
+    background: linear-gradient(to right, rgba(31, 164, 99, 0.1), rgba(31, 164, 99, 0));
+    padding-left: 45px;
+}
+
+/* Specific override to prevent hover shifting on the active link */
+.sidebar-menu li a.active-link:hover {
+    color: #ffffff;
+    background: linear-gradient(135deg, #4ade80 0%, #1fa463 100%);
+    padding-left: 30px;
 }
 
 .sidebar-menu li a.active-link::after {
-    content: '';
-    position: absolute;
-    right: 0;
-    top: 5px;
-    bottom: 5px;
-    width: 4px;
-    background-color: var(--kims-green);
-    border-radius: 4px 0 0 4px;
+    display: none;
 }
 
 .sidebar-menu li a:active {
@@ -201,11 +219,18 @@ body {
 
 /* ===== TOP HEADER ===== */
 .top-header {
-    padding: 20px 40px;
+    margin: 8px 0 20px 0;
+    padding: 2px 18px;
     display: flex;
     justify-content: flex-end;
     align-items: center;
-    gap: 20px;
+    gap: 15px;
+    background: linear-gradient(to right, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.03));
+    backdrop-filter: blur(16px) brightness(1.1);
+    -webkit-backdrop-filter: blur(16px) brightness(1.1);
+    border-radius: 50px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 .search-container {
@@ -375,6 +400,37 @@ body {
 .action-pill:hover {
     background: var(--kims-green);
     color: white;
+}
+
+.action-pill.blink-shadow-orange:hover {
+    background: #ff8c00;
+    color: white;
+}
+
+.action-pill.blink-shadow-green:hover {
+    background: var(--kims-green);
+    color: white;
+}
+
+.action-pill.blink-shadow-multicolor:hover {
+    background: linear-gradient(45deg, rgba(255, 0, 0, 0.8), rgba(0, 255, 0, 0.8), rgba(0, 150, 255, 0.8), rgba(255, 0, 255, 0.8));
+    background-size: 300% 300%;
+    animation: blink-shadow-multicolor 2.5s infinite linear, multicolor-bg 2.5s infinite linear;
+    color: white;
+}
+
+@keyframes multicolor-bg {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
 }
 
 /* ===== CARDS ===== */
@@ -638,6 +694,7 @@ body {
             -140px 0 4px #1d3557, 140px 0 4px #1d3557;
     }
 }
+
 /* Holiday Today Sidebar Indicator Dot */
 .sidebar-holiday-indicator {
     width: 6px;
@@ -651,8 +708,93 @@ body {
 }
 
 @keyframes holiday-dot-pulse {
-    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(31, 164, 99, 0.6); }
-    70% { transform: scale(1.2); box-shadow: 0 0 0 10px rgba(31, 164, 99, 0); }
-    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(31, 164, 99, 0); }
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(31, 164, 99, 0.6);
+    }
+
+    70% {
+        transform: scale(1.2);
+        box-shadow: 0 0 0 10px rgba(31, 164, 99, 0);
+    }
+
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(31, 164, 99, 0);
+    }
 }
 
+/* Blink Shadows for Action Pills */
+.blink-shadow-orange {
+    animation: blink-shadow-orange 1.5s infinite ease-in-out;
+}
+
+@keyframes blink-shadow-orange {
+
+    0%,
+    100% {
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1), 0 0 5px rgba(255, 140, 0, 0.4);
+    }
+
+    50% {
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1), 0 0 25px rgba(255, 140, 0, 1), 0 0 40px rgba(255, 165, 0, 0.8);
+    }
+}
+
+.blink-shadow-red {
+    animation: blink-shadow-red 1.5s infinite ease-in-out;
+}
+
+@keyframes blink-shadow-red {
+
+    0%,
+    100% {
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1), 0 0 5px rgba(255, 0, 0, 0.4);
+    }
+
+    50% {
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1), 0 0 25px rgba(255, 0, 0, 1), 0 0 40px rgba(255, 70, 70, 0.8);
+    }
+}
+
+.blink-shadow-green {
+    animation: blink-shadow-green 1.5s infinite ease-in-out;
+}
+
+@keyframes blink-shadow-green {
+
+    0%,
+    100% {
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1), 0 0 5px rgba(31, 164, 99, 0.4);
+    }
+
+    50% {
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1), 0 0 25px rgba(31, 164, 99, 1), 0 0 40px rgba(62, 219, 141, 0.8);
+    }
+}
+
+.blink-shadow-multicolor {
+    animation: blink-shadow-multicolor 2.5s infinite linear;
+}
+
+@keyframes blink-shadow-multicolor {
+    0% {
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1), 0 0 20px rgba(255, 0, 0, 0.9), 0 0 40px rgba(255, 0, 0, 0.6);
+    }
+
+    25% {
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1), 0 0 20px rgba(0, 255, 0, 0.9), 0 0 40px rgba(0, 255, 0, 0.6);
+    }
+
+    50% {
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1), 0 0 20px rgba(0, 150, 255, 0.9), 0 0 40px rgba(0, 150, 255, 0.6);
+    }
+
+    75% {
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1), 0 0 20px rgba(255, 0, 255, 0.9), 0 0 40px rgba(255, 0, 255, 0.6);
+    }
+
+    100% {
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1), 0 0 20px rgba(255, 0, 0, 0.9), 0 0 40px rgba(255, 0, 0, 0.6);
+    }
+}

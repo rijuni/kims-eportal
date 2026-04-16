@@ -40,9 +40,9 @@ const Dashboard = () => {
               {/* Action Pills aligned with the first header row for structural balance */}
               <div className="section-header-row action-row">
                 <div className="action-pills">
-                  <a href="https://hmis.kimsbbsr.co.in/live/login.html" target="_blank" rel="noopener noreferrer" className="action-pill hover-scale">Hinai</a>
-                  <a href="https://kiit.ac.in/sap/" target="_blank" rel="noopener noreferrer" className="action-pill hover-scale">SAP</a>
-                  <a href="https://mail.google.com/mail/u/0/?tab=rm&ogbl#inbox" target="_blank" rel="noopener noreferrer" className="action-pill hover-scale">Email</a>
+                  <a href="https://hmis.kimsbbsr.co.in/live/login.html" target="_blank" rel="noopener noreferrer" className="action-pill hover-scale blink-shadow-orange">Hinai</a>
+                  <a href="https://kiit.ac.in/sap/" target="_blank" rel="noopener noreferrer" className="action-pill hover-scale blink-shadow-green">SAP</a>
+                  <a href="https://mail.google.com/mail/u/0/?tab=rm&ogbl#inbox" target="_blank" rel="noopener noreferrer" className="action-pill hover-scale blink-shadow-multicolor">Email</a>
                 </div>
               </div>
 
