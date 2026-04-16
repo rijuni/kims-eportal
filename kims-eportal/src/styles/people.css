@@ -106,7 +106,7 @@
     padding: 10px 25px;
     box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
     /* Increased subtraction to match 40px bottom gap of Dashboard Notice Board */
-    height: calc(100vh - 180px);
+    height: calc(100vh - 190px);
     display: flex;
     flex-direction: column;
 }

@@ -44,7 +44,7 @@
     border-radius: 20px;
     padding: 0;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-    height: calc(100vh - 120px);
+    height: calc(100vh - 135px);
     overflow-y: auto;
     position: relative;
 }
@@ -134,15 +134,33 @@
 
 /* Animations */
 @keyframes holiday-blink-anim {
-    0% { background-color: transparent; }
-    50% { background-color: #fffbeb; } /* Blinking Amber background */
-    100% { background-color: transparent; }
+    0% {
+        background-color: transparent;
+    }
+
+    50% {
+        background-color: #fffbeb;
+    }
+
+    /* Blinking Amber background */
+    100% {
+        background-color: transparent;
+    }
 }
 
 @keyframes holiday-today-highlight {
-    0% { filter: brightness(1); }
-    50% { filter: brightness(1.05); } /* Subtle brightness pulse for solid color */
-    100% { filter: brightness(1); }
+    0% {
+        filter: brightness(1);
+    }
+
+    50% {
+        filter: brightness(1.05);
+    }
+
+    /* Subtle brightness pulse for solid color */
+    100% {
+        filter: brightness(1);
+    }
 }
 
 @keyframes rainbow-border {
@@ -173,7 +191,8 @@
 }
 
 .holiday-today {
-    background-color: #ecfdf5 !important; /* Solid vibrant green background */
+    background-color: #ecfdf5 !important;
+    /* Solid vibrant green background */
     animation: holiday-today-highlight 3s infinite ease-in-out, rainbow-border 4s infinite linear;
     border-left: 8px solid #1fa463;
     font-weight: 700 !important;
