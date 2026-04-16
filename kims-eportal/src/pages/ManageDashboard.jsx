@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
 import API from "../services/api";
-import { Bell, UploadCloud, Trash2, Eye, EyeOff, ArrowLeft, User } from "lucide-react";
+import { Bell, UploadCloud, Trash2, Eye, EyeOff, ArrowLeft, User, MoreVertical, Edit, Check, X as XIcon, Camera } from "lucide-react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import "../styles/managedashboard.css";
@@ -43,8 +43,83 @@ const ManageDashboard = () => {
   // Notice deletion verification
   const [deletingNoticeId, setDeletingNoticeId] = useState(null);
   const [noticesDeleteInput, setNoticesDeleteInput] = useState("");
-  const [showNoticesList, setShowNoticesList] = useState(true);
+  const [showNoticesList, setShowNoticesList] = useState(false);
   const [showBirthdayUpload, setShowBirthdayUpload] = useState(true);
+  const [isBirthdaysFullScreen, setIsBirthdaysFullScreen] = useState(false);
+  const [birthdayList, setBirthdayList] = useState([]);
+  const [activeMenuId, setActiveMenuId] = useState(null);
+  const [editingBirthday, setEditingBirthday] = useState(null);
+  const [editName, setEditName] = useState("");
+  const [editDept, setEditDept] = useState("");
+  const [editDOB, setEditDOB] = useState("");
+
+  const handleIndividualDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this record?")) return;
+    try {
+      setLoading(true);
+      await API.delete(`/employees/birthdays/${id}`);
+      setRefresh(prev => prev + 1);
+      setBirthdaySuccess("Birthday deleted successfully.");
+      setTimeout(() => setBirthdaySuccess(""), 3000);
+    } catch (err) {
+      setBirthdayError("Failed to delete record.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const startEdit = (emp) => {
+    setEditingBirthday(emp.id);
+    setEditName(emp.name);
+    setEditDept(emp.designation || emp.department || 'Staff');
+    setEditDOB(emp.birthday || emp.date_of_birth);
+    setActiveMenuId(null);
+  };
+
+  const cancelEdit = () => {
+    setEditingBirthday(null);
+  };
+
+  const saveEdit = async (id) => {
+    try {
+      setLoading(true);
+      await API.put(`/employees/birthdays/${id}`, {
+        name: editName,
+        department: editDept,
+        date_of_birth: editDOB
+      });
+      setEditingBirthday(null);
+      setRefresh(prev => prev + 1);
+      setBirthdaySuccess("Saved successfully!");
+      setTimeout(() => setBirthdaySuccess(""), 3000);
+    } catch (err) {
+      setBirthdayError("Failed to save.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePhotoUpdate = async (id, file) => {
+    if (!file) return;
+    try {
+      setLoading(true);
+      const formData = new FormData();
+      formData.append("profileImage", file);
+      const res = await API.post(`/employees/birthdays/${id}/upload-image`, formData, {
+        headers: { "Content-Type": "multipart/form-data" }
+      });
+      if (res.data.success) {
+        setBirthdaySuccess("Photo uploaded successfully!");
+        setTimeout(() => setBirthdaySuccess(""), 3000);
+        setRefresh(prev => prev + 1);
+        setActiveMenuId(null);
+      }
+    } catch (err) {
+      setBirthdayError("Failed to upload photo.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
@@ -56,6 +131,10 @@ const ManageDashboard = () => {
     // Fetch last birthday sync file
     API.get("/settings/last_birthday_sync_file").then(res => {
       if (res.data && res.data.value) setLastUploadedFile(res.data.value);
+    }).catch(console.error);
+
+    API.get("/employees/birthdays").then(res => {
+      if (res.data) setBirthdayList(res.data);
     }).catch(console.error);
   }, [refresh]);
 
@@ -153,11 +232,12 @@ const ManageDashboard = () => {
         if (res.data.filename) setLastUploadedFile(res.data.filename);
         setExcelFile(null);
         setTimeout(() => setBirthdaySuccess(""), 5000);
+        setRefresh(prev => prev + 1);
       } else {
-        setBirthdayError("Error: " + res.data.message);
+        setBirthdayError(res.data.message || "Invalid Excel Format for Birthday");
       }
     } catch (err) {
-      setBirthdayError("Network or parse error on upload");
+      setBirthdayError("Invalid Excel Format for Birthday or network error");
     } finally {
       setLoading(false);
     }
@@ -296,71 +376,189 @@ const ManageDashboard = () => {
             </div>
 
             {/* Birthdays Excel Upload Box */}
-            <div className="manage-box box-orange">
-              <div className="box-header">
+            <div className={`manage-box box-orange ${isBirthdaysFullScreen ? 'is-fullscreen' : ''}`}>
+              <div className="box-header" style={{ justifyContent: 'space-between' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                   <UploadCloud size={24} /> <h2>Bulk Birthdays (Excel)</h2>
+                </div>
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                  {lastUploadedFile && (
+                    <button
+                      className="toggle-view-btn"
+                      onClick={() => setShowFileInfoDetail(!showFileInfoDetail)}
+                      title={showFileInfoDetail ? "Hide File Info" : "Show File Info"}
+                    >
+                      {showFileInfoDetail ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  )}
                   <button
-                    className="toggle-view-btn"
-                    onClick={() => setShowBirthdayUpload(!showBirthdayUpload)}
-                    title={showBirthdayUpload ? "Hide Upload Section" : "Show Upload Section"}
+                    className="view-detail-btn"
+                    onClick={() => setIsBirthdaysFullScreen(!isBirthdaysFullScreen)}
                   >
-                    {showBirthdayUpload ? <EyeOff size={16} /> : <Eye size={16} />}
+                    {isBirthdaysFullScreen ? "Close Detail" : "View Details"}
                   </button>
                 </div>
               </div>
-              {showBirthdayUpload && (
-                <div className="upload-container">
-                  <p className="upload-hint">Upload a valid Excel (.xlsx) file with headers: Name, Department, Date of Birth.</p>
+              <div className="upload-container">
+                {!isBirthdaysFullScreen && (
+                  <>
+                    <p className="upload-hint">Upload a valid Excel (.xlsx) file with headers: Name, Designation, Birthday.</p>
 
-                  <div className="file-info-bar">
-                    <div className="info-text"><strong>Synced:</strong> {lastUploadedFile || "None"}</div>
-                    {lastUploadedFile && !isDeleting && (
-                      <button
-                        className="trash-btn"
-                        onClick={handleTrashClick}
-                        title="Clear All Birthdays"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    )}
-                  </div>
-
-                  {isDeleting && (
-                    <div className="delete-confirm-box">
-                      <p className="confirm-msg">Are you sure? Type <strong>DELETE</strong> to confirm.</p>
-                      <input type="text" className="confirm-input" placeholder="DELETE" value={deleteInput} onChange={e => setDeleteInput(e.target.value)} />
-                      <div className="confirm-actions">
-                        <button className="btn-cancel" onClick={resetDeleteState}>Cancel</button>
-                        <button
-                          className="btn-confirm"
-                          disabled={deleteInput !== "DELETE" || loading}
-                          onClick={handleDeleteAllBirthdays}
-                        >
-                          {loading ? "Clearing..." : "Delete Permanently"}
-                        </button>
+                    {showFileInfoDetail && lastUploadedFile && (
+                      <div className="file-info-bar">
+                        <div className="info-text"><strong>Synced:</strong> {lastUploadedFile}</div>
+                        {!isDeleting && (
+                          <button
+                            className="trash-btn"
+                            onClick={handleTrashClick}
+                            title="Clear All Birthdays"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        )}
                       </div>
+                    )}
+
+                    {showFileInfoDetail && isDeleting && (
+                      <div className="delete-confirm-box">
+                        <p className="confirm-msg">Are you sure? Type <strong>DELETE</strong> to confirm.</p>
+                        <input type="text" className="confirm-input" placeholder="DELETE" value={deleteInput} onChange={e => setDeleteInput(e.target.value)} />
+                        <div className="confirm-actions">
+                          <button className="btn-cancel" onClick={resetDeleteState}>Cancel</button>
+                          <button
+                            className="btn-confirm"
+                            disabled={deleteInput !== "DELETE" || loading}
+                            onClick={handleDeleteAllBirthdays}
+                          >
+                            {loading ? "Clearing..." : "Delete Permanently"}
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="file-drop-area">
+                      <input id="excel-upload-input" type="file" accept=".xlsx, .xls" onChange={e => setExcelFile(e.target.files[0])} />
                     </div>
-                  )}
+                    <button
+                      type="button"
+                      onClick={handleFileUploadMenu}
+                      className="action-btn-orange"
+                      disabled={loading}
+                    >
+                      {loading ? "Processing..." : "Sync Database via Excel"}
+                    </button>
 
-                  <div className="file-drop-area">
-                    <input id="excel-upload-input" type="file" accept=".xlsx, .xls" onChange={e => setExcelFile(e.target.files[0])} />
-                  </div>
-                  <button
-                    type="button"
-                    onClick={handleFileUploadMenu}
-                    className="action-btn-orange"
-                    disabled={loading}
-                  >
-                    {loading ? "Processing..." : "Sync Database via Excel"}
-                  </button>
+                    <div className="feedback-area">
+                      {birthdayError && <div className="sync-error-msg">{birthdayError}</div>}
+                      {birthdaySuccess && <div className="sync-success-msg">{birthdaySuccess}</div>}
+                    </div>
+                  </>
+                )}
 
-                  <div className="feedback-area">
-                    {birthdayError && <div className="sync-error-msg">{birthdayError}</div>}
-                    {birthdaySuccess && <div className="sync-success-msg">{birthdaySuccess}</div>}
+                {isBirthdaysFullScreen && (
+                  <div className="table-responsive" style={{ marginTop: '5px' }}>
+                    <table className="upcoming-table">
+                      <thead>
+                        <tr>
+                          <th style={{ padding: '12px 15px' }}>Name</th>
+                          <th style={{ padding: '12px 15px' }}>Designation</th>
+                          <th style={{ padding: '12px 15px' }}>Birthday</th>
+                          <th style={{ padding: '12px 15px' }}>Image Name</th>
+                          <th style={{ padding: '12px 15px', textAlign: 'right' }}>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <input
+                          type="file"
+                          id="birthday-photo-upload"
+                          hidden
+                          accept="image/*"
+                          onChange={(e) => {
+                            if (e.target.files[0]) {
+                              handlePhotoUpdate(activeMenuId, e.target.files[0]);
+                              e.target.value = null; // reset
+                            }
+                          }}
+                        />
+                        {birthdayList.length > 0 ? (
+                          birthdayList.map((emp, idx) => (
+                            <tr key={idx} className={`upcoming-row ${editingBirthday === emp.id ? 'is-editing' : ''}`}>
+                              {editingBirthday === emp.id ? (
+                                <>
+                                  <td style={{ padding: '12px 15px' }}>
+                                    <input className="edit-input-small" value={editName} onChange={e => setEditName(e.target.value)} />
+                                  </td>
+                                  <td style={{ padding: '12px 15px' }}>
+                                    <input className="edit-input-small" value={editDept} onChange={e => setEditDept(e.target.value)} />
+                                  </td>
+                                  <td style={{ padding: '12px 15px' }}>
+                                    <input className="edit-input-small" value={editDOB} onChange={e => setEditDOB(e.target.value)} />
+                                  </td>
+                                  <td style={{ padding: '12px 15px' }}>
+                                    <span style={{ fontSize: '11px', color: '#94a3b8' }}>{emp.image ? emp.image.split('/').pop() : 'No Image'}</span>
+                                  </td>
+                                  <td style={{ padding: '12px 15px' }}>
+                                    <div className="edit-actions-wrap">
+                                      <button className="edit-btn-circle save" onClick={() => saveEdit(emp.id)} title="Save changes">
+                                        <Check size={16} />
+                                      </button>
+                                      <button className="edit-btn-circle cancel" onClick={cancelEdit} title="Cancel editing">
+                                        <XIcon size={16} />
+                                      </button>
+                                    </div>
+                                  </td>
+                                </>
+                              ) : (
+                                <>
+                                  <td style={{ padding: '12px 15px' }}>
+                                    <span style={{ fontSize: '13.5px', fontWeight: '600', color: '#1e293b' }}>{emp.name}</span>
+                                  </td>
+                                  <td style={{ padding: '12px 15px' }}>
+                                    <span style={{ fontSize: '12px', color: '#64748b' }}>{emp.designation || emp.department || 'Staff'}</span>
+                                  </td>
+                                  <td style={{ padding: '12px 15px' }}>
+                                    <span style={{ fontSize: '13px', color: '#f97316', fontWeight: '600' }}>{emp.birthday || emp.date_of_birth}</span>
+                                  </td>
+                                  <td style={{ padding: '12px 15px' }}>
+                                    <span style={{ fontSize: '11px', color: '#64748b', fontStyle: emp.image ? 'normal' : 'italic' }}>
+                                      {emp.image ? emp.image.split('/').pop() : 'No Image'}
+                                    </span>
+                                  </td>
+                                  <td className="actions-cell">
+                                    <button
+                                      className="dot-menu-btn"
+                                      onClick={() => setActiveMenuId(activeMenuId === emp.id ? null : emp.id)}
+                                    >
+                                      <MoreVertical size={18} />
+                                    </button>
+                                    {activeMenuId === emp.id && (
+                                      <div className="dropdown-menu-wrap">
+                                        <button className="dropdown-item" onClick={() => startEdit(emp)}>
+                                          <Edit size={14} /> Edit Record
+                                        </button>
+                                        <button className="dropdown-item" onClick={() => document.getElementById('birthday-photo-upload').click()}>
+                                          <Camera size={14} /> Upload Photo
+                                        </button>
+                                        <button className="dropdown-item delete" onClick={() => handleIndividualDelete(emp.id)}>
+                                          <Trash2 size={14} /> Delete
+                                        </button>
+                                      </div>
+                                    )}
+                                  </td>
+                                </>
+                              )}
+                            </tr>
+                          ))
+                        ) : (
+                          <tr>
+                            <td colSpan="5" style={{ textAlign: 'center', padding: '30px', color: '#94a3b8', fontSize: '13px' }}>No birthdays found. Sync via Excel first.</td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
 
           </div>

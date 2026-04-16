@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
 import API from "../services/api";
-import { CalendarHeart, UploadCloud, Trash2, Eye, EyeOff, ArrowLeft, MapPin, ChevronDown, ChevronUp, Pencil, X, Maximize2, Minimize2 } from "lucide-react";
+import { CalendarHeart, UploadCloud, Trash2, Eye, EyeOff, ArrowLeft, MapPin, ChevronDown, ChevronUp, Pencil, X, Maximize2, Minimize2, MoreVertical } from "lucide-react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import "../styles/managedashboard.css";
@@ -41,8 +41,10 @@ const ManageEvents = () => {
   const [editType, setEditType] = useState("");
   const [editDetails, setEditDetails] = useState("");
   const [editImage, setEditImage] = useState(null);
+  const [activeDropdown, setActiveDropdown] = useState(null);
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+  const closeDropdown = () => setActiveDropdown(null);
 
   const fetchEvents = async () => {
     try {
@@ -420,7 +422,7 @@ const ManageEvents = () => {
                       <th style={{ padding: '12px 15px' }}>Event</th>
                       <th style={{ padding: '12px 15px' }}>Location</th>
                       <th style={{ padding: '12px 15px' }}>Type</th>
-                      <th style={{ padding: '12px 15px' }}></th>
+                      <th style={{ padding: '12px 15px', textAlign: 'center' }}>Action</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -443,11 +445,25 @@ const ManageEvents = () => {
                               {ev.event_type}
                             </span>
                           </td>
-                          <td style={{ padding: '12px 15px', textAlign: 'right' }}>
-                            <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-                              <button onClick={() => handleEditClick(ev)} className="edit-btn" title="Edit Event Details"><Pencil size={14} /></button>
-                              <button onClick={() => handleSingleDelete(ev.id)} className="del-btn" title="Delete Event"><Trash2 size={14} /></button>
-                            </div>
+                          <td style={{ padding: '12px 15px', textAlign: 'center', position: 'relative' }}>
+                            <button 
+                              className="toggle-view-btn" 
+                              onClick={() => setActiveDropdown(activeDropdown === ev.id ? null : ev.id)}
+                              style={{ margin: '0 auto' }}
+                            >
+                              <MoreVertical size={18} />
+                            </button>
+
+                            {activeDropdown === ev.id && (
+                              <div className="dropdown-menu-floating">
+                                <button onClick={() => { handleEditClick(ev); closeDropdown(); }} className="dropdown-item">
+                                  <Pencil size={14} className="mr-2" /> Edit
+                                </button>
+                                <button onClick={() => { handleSingleDelete(ev.id); closeDropdown(); }} className="dropdown-item delete-item">
+                                  <Trash2 size={14} className="mr-2" /> Delete
+                                </button>
+                              </div>
+                            )}
                           </td>
                         </tr>
                       ))

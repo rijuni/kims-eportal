@@ -12,9 +12,10 @@ const Header = () => {
 
     // Ticker State
     const [tickerItems, setTickerItems] = useState([]);
+    const [currentIndex, setCurrentIndex] = useState(0);
 
     useEffect(() => {
-        // Fetch all notifications for the ticker
+        // Fetch all ticker data
         Promise.allSettled([
             API.get("/employees/birthdays"),
             API.get("/events/upcoming"),
@@ -22,31 +23,74 @@ const Header = () => {
         ]).then((results) => {
             const items = [];
 
-            // Handle Birthdays
-            if (results[0].status === 'fulfilled' && results[0].value.data?.length > 0) {
-                const names = results[0].value.data.map(b => b.name).join(', ');
-                items.push(`🎂 Happy Birthday to ${names}!`);
+            // Handle Birthdays (TODAY ONLY)
+            if (results[0].status === 'fulfilled') {
+                const today = new Date();
+                const d = today.getDate();
+                const dStr = d < 10 ? `0${d}` : String(d);
+                const mNumeric = today.getMonth() + 1;
+                const mStr = mNumeric < 10 ? `0${mNumeric}` : String(mNumeric);
+                const mLong = today.toLocaleString('default', { month: 'long' }).toLowerCase();
+                const mShort = today.toLocaleString('default', { month: 'short' }).toLowerCase();
+
+                const todayBirthdays = results[0].value.data.filter(b => {
+                    const dob = String(b.date_of_birth || '').toLowerCase();
+                    const nameMatch = dob.includes(String(d)) && (dob.includes(mLong) || dob.includes(mShort));
+                    const numericMatch = dob.includes(dStr) && dob.includes(mStr);
+                    const exactHyphen = dob.includes(`${dStr}-${mStr}`);
+                    return nameMatch || numericMatch || exactHyphen;
+                });
+
+                if (todayBirthdays.length > 0) {
+                    todayBirthdays.forEach(b => {
+                        items.push({
+                            type: 'birthday',
+                            text: `Happy Birthday ${b.name}!`,
+                            image: b.image
+                        });
+                    });
+                }
             }
 
             // Handle Events
             if (results[1].status === 'fulfilled' && results[1].value.data?.length > 0) {
                 const event = results[1].value.data[0];
-                items.push(`🎉 Upcoming Event: ${event.event_name} on ${event.event_date}`);
+                items.push({
+                    type: 'event',
+                    text: `🎉 Upcoming Event: ${event.event_name} on ${event.event_date}`
+                });
             }
 
             // Handle Notices
             if (results[2].status === 'fulfilled' && results[2].value.data?.length > 0) {
                 const notice = results[2].value.data[0];
-                items.push(`📢 Notice: ${notice.title}`);
+                items.push({
+                    type: 'notice',
+                    text: `📢 Notice: ${notice.title}`
+                });
             }
 
             if (items.length === 0) {
-                items.push("💡 Welcome to KIMS E-Portal! Have a great day.");
+                items.push({
+                    type: 'default',
+                    text: "💡 Welcome to KIMS E-Portal! Have a great day."
+                });
             }
 
             setTickerItems(items);
         });
     }, []);
+
+    // Cycle items one by one
+    useEffect(() => {
+        if (tickerItems.length <= 1) return;
+        
+        const timer = setInterval(() => {
+            setCurrentIndex(prev => (prev + 1) % tickerItems.length);
+        }, 5000); // 5 seconds per item
+        
+        return () => clearInterval(timer);
+    }, [tickerItems]);
 
     const isHidden = location.pathname !== "/";
 
@@ -58,17 +102,37 @@ const Header = () => {
         <div className="top-header !px-0" style={{ marginRight: '35px', paddingRight: '0', paddingLeft: '0', borderTopLeftRadius: '19px', borderBottomLeftRadius: '19px' }}>
             <div className="flex items-center w-full gap-[50px]">
 
-                {/* Left Column (Visually aligns exactly above Notice Board - flex 1.5) */}
+                {/* Left Column */}
                 <div className="flex-[1.5] flex items-center">
-                    {/* Scrolling Notification Ticker bounded by Notice Board width */}
                     <div className="flex-1 flex items-center overflow-hidden rounded-full h-[34px] px-2">
                         <div className="flex items-center justify-center w-[34px] h-[34px] rounded-full bg-[#e53e3e] blink-shadow-red mr-[10px] flex-shrink-0">
                             <Megaphone size={13} className="text-white fill-white/20" strokeWidth={2.5} />
                         </div>
-                        <div className="w-full overflow-hidden whitespace-nowrap">
-                            <div className="inline-block animate-[scroll_25s_linear_infinite] text-white text-[13.5px] font-medium tracking-wide">
-                                {tickerItems.join("    •    ")}
-                            </div>
+                        <div className="w-full overflow-hidden">
+                            {tickerItems[currentIndex] && (
+                                <div key={currentIndex} className="notice-ticker-item text-white text-[13.5px] font-medium tracking-wide flex items-center gap-3">
+                                    {tickerItems[currentIndex].type === 'birthday' && (
+                                        <div className="flex items-center gap-[12px]">
+                                            <span className="flex items-center gap-1">
+                                                <span>🎂</span>
+                                                {tickerItems[currentIndex].text}
+                                            </span>
+                                            {tickerItems[currentIndex].image ? (
+                                                <img 
+                                                  src={`http://${window.location.hostname}:5000${tickerItems[currentIndex].image}`} 
+                                                  className="w-[26px] h-[26px] rounded-full object-cover border-2 border-white/40 shadow-sm"
+                                                  alt="" 
+                                                />
+                                            ) : (
+                                                <span className="text-[16px]">🎂</span>
+                                            )}
+                                        </div>
+                                    )}
+                                    {tickerItems[currentIndex].type !== 'birthday' && (
+                                        <span>{tickerItems[currentIndex].text}</span>
+                                    )}
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>

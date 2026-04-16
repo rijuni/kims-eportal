@@ -118,6 +118,19 @@ body {
     }
 }
 
+@keyframes slideFadeIn {
+    0% { transform: translateY(15px); opacity: 0; }
+    100% { transform: translateY(0); opacity: 1; }
+}
+
+.notice-ticker-item {
+    animation: slideFadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+}
+
 @keyframes scroll {
     0% {
         transform: translateX(100%);
@@ -502,11 +515,8 @@ body {
     width: 100%;
     margin: 0;
 }
-
-.event-item,
-.birthday-item {
+.event-item {
     padding: 4.5px 12px;
-    /* Reduced left and right padding inside the container */
     border-bottom: 1px solid #f0f4f8;
     display: flex;
     justify-content: flex-start;
@@ -517,7 +527,47 @@ body {
 }
 
 .notice-item:last-child,
-.event-item:last-child,
+.event-item:last-child {
+    border-bottom: none;
+}
+
+.birthdays-card {
+    background: linear-gradient(to bottom, #fffaf0, #ffffff) !important;
+    border: 1px solid #e7d5b8 !important;
+    box-shadow: 0 6px 20px rgba(139, 94, 60, 0.08) !important;
+}
+
+.birthday-profile-section {
+    flex-shrink: 0;
+}
+
+.birthday-avatar-wrap {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #1fa463 0%, #154581 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    border: 2px solid white;
+}
+
+.birthday-item {
+    padding: 8px 12px;
+    border-bottom: 1px solid #f2e8d5;
+    display: flex;
+    justify-content: flex-start;
+    gap: 15px;
+    align-items: center;
+    width: 100%;
+    transition: all 0.3s ease;
+}
+
+.birthday-item:hover {
+    background: rgba(139, 94, 60, 0.03);
+}
+
 .birthday-item:last-child {
     border-bottom: none;
 }
@@ -547,9 +597,152 @@ body {
     color: #1a202c;
     font-weight: 500;
     margin-bottom: 2px;
-    /* Restored small gap to metadata */
     line-height: 1.35;
-    /* Increased for better readability */
+}
+
+/* Unique Birthday Typography Highlights */
+.birthday-meta-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.designation-pod {
+    font-size: 8px;
+    padding: 0px 6px;
+    border-radius: 4px; /* More subtle corner */
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 14px;
+    line-height: 1;
+    background: #f1f5f9; /* Neutral light gray */
+    color: #475569; /* Muted slate */
+    white-space: nowrap;
+}
+
+/* Unique Birthday Typography Highlights */
+.birthday-item .item-info h4 {
+    font-size: 13.5px;
+    font-weight: 800;
+    color: #1e293b;
+    margin-bottom: 2px;
+    letter-spacing: -0.2px;
+}
+
+.dob-pill {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: #64748b; /* Muted date color */
+    font-size: 10px;
+    font-weight: 700;
+    width: fit-content;
+    height: 14px;
+    line-height: 1;
+}
+
+.birthday-item.is-today-highlight {
+    background: linear-gradient(to right, rgba(255, 251, 235, 1), rgba(255, 255, 255, 1)) !important;
+    border-left: 4px solid #f59e0b !important;
+    position: relative;
+    z-index: 5;
+    animation: todayGlow 3s infinite ease-in-out, todayBounce 4s infinite ease-in-out;
+    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.15) !important;
+}
+
+@keyframes todayGlow {
+    0%, 100% { box-shadow: 0 0 5px rgba(245, 158, 11, 0.2); }
+    50% { box-shadow: 0 0 20px rgba(245, 158, 11, 0.5); }
+}
+
+@keyframes todayBounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-3px); }
+}
+
+.today-badge-floating {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
+    background: #e11d48;
+    color: white;
+    font-size: 6px;
+    font-weight: 900;
+    padding: 6px 2.5px;
+    border-radius: 4px 0 0 4px; /* Rounded only on the inside edge */
+    box-shadow: -1px 1px 4px rgba(225, 29, 72, 0.2);
+    z-index: 20;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+@keyframes badgePop {
+    0%, 100% { transform: scale(1) rotate(-5deg); }
+    50% { transform: scale(1.15) rotate(5deg); }
+}
+
+.birthday-stars-cluster {
+    position: absolute;
+    right: 40px;
+    top: 0;
+    width: 28px; /* High-density bunched width */
+    height: 40px;
+    pointer-events: none;
+    z-index: 10;
+}
+
+.hanging-star-item {
+    position: absolute;
+    top: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transform-origin: top center;
+    color: #f59e0b;
+}
+
+.star-thread {
+    width: 1.2px;
+    background: #f59e0b; /* Solid bold gold */
+    opacity: 0.8;
+}
+
+/* Ultra-Density Centered Bunching */
+.s1 { left: 4px; top: 1px; animation: starSwing 3.5s infinite ease-in-out; }
+.s1 .star-thread { height: 16px; }
+
+.s2 { left: 10px; top: 0; animation: starSwing 5.5s infinite ease-in-out; } /* Centered & Longest */
+.s2 .star-thread { height: 28px; }
+
+.s3 { left: 16px; top: 1px; animation: starSwing 4.5s infinite ease-in-out; }
+.s3 .star-thread { height: 18px; }
+
+@keyframes starSwing {
+    0%, 100% { transform: rotate(-8deg); }
+    50% { transform: rotate(8deg); }
+}
+
+.star-icon-wrap {
+    animation: starPulse 3s infinite ease-in-out;
+    display: block;
+    margin-top: -2px;
+}
+
+@keyframes starPulse {
+    0%, 100% { opacity: 0.7; transform: scale(0.9); filter: drop-shadow(0 0 2px rgba(245, 158, 11, 0.3)); }
+    50% { opacity: 1; transform: scale(1.1); filter: drop-shadow(0 0 6px rgba(245, 158, 11, 0.5)); }
 }
 
 .meta {
@@ -558,9 +751,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 2px;
-    /* Restored small vertical gap between meta rows */
     line-height: 1.35;
-    /* Balance between tight and readable */
 }
 
 .meta-label {

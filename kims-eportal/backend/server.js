@@ -122,6 +122,22 @@ const trainingStorage = multer.diskStorage({
 });
 const uploadTraining = multer({ storage: trainingStorage });
 
+// Multer Disk Storage for Birthdays (Profile Images)
+const birthdaysStorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        const dir = "uploads/birthdays";
+        if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir, { recursive: true });
+        }
+        cb(null, dir);
+    },
+    filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+        cb(null, "birthday-" + uniqueSuffix + path.extname(file.originalname));
+    }
+});
+const uploadBirthdayPhoto = multer({ storage: birthdaysStorage });
+
 // --- NOTICES ROUTES ---
 app.get("/api/notices", async (req, res) => {
     try {
@@ -370,7 +386,21 @@ app.delete("/api/events/:id", async (req, res) => {
 // --- BIRTHDAYS ROUTES ---
 app.get("/api/employees/birthdays", async (req, res) => {
     try {
-        const [rows] = await pool.query('SELECT * FROM birthdays ORDER BY created_at DESC');
+        const [rows] = await pool.query(`
+            SELECT *, 
+            STR_TO_DATE(date_of_birth, '%d-%m-%Y') as dob_date
+            FROM birthdays 
+            ORDER BY 
+                CASE 
+                    WHEN MONTH(STR_TO_DATE(date_of_birth, '%d-%m-%Y')) > MONTH(CURDATE()) 
+                         OR (MONTH(STR_TO_DATE(date_of_birth, '%d-%m-%Y')) = MONTH(CURDATE()) 
+                             AND DAY(STR_TO_DATE(date_of_birth, '%d-%m-%Y')) >= DAY(CURDATE())) 
+                    THEN 0 
+                    ELSE 1 
+                END,
+                MONTH(STR_TO_DATE(date_of_birth, '%d-%m-%Y')), 
+                DAY(STR_TO_DATE(date_of_birth, '%d-%m-%Y'))
+        `);
         res.json(rows);
     } catch (err) {
         res.status(500).json({ success: false, message: err.message });
@@ -383,34 +413,85 @@ app.post("/api/birthdays/upload", upload.single('excelFile'), async (req, res) =
             return res.status(400).json({ success: false, message: "No file uploaded" });
         }
 
-        // Parse Excel from memory buffer
         const workbook = xlsx.read(req.file.buffer, { type: 'buffer' });
-        const sheetName = workbook.SheetNames[0];
-        const sheet = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
+        let allBirthdayRows = [];
 
-        if (sheet.length === 0) {
-            return res.status(400).json({ success: false, message: "Excel file is empty" });
+        for (const sheetName of workbook.SheetNames) {
+            const sheet = workbook.Sheets[sheetName];
+            const rawData = xlsx.utils.sheet_to_json(sheet, { header: 1 });
+
+            if (!rawData || rawData.length === 0) continue;
+
+            let headerRowIndex = -1;
+            let colMap = {};
+
+            for (let i = 0; i < Math.min(rawData.length, 25); i++) {
+                const row = rawData[i];
+                if (!row || !Array.isArray(row)) continue;
+
+                const normalizedRow = row.map(cell => String(cell || '').toLowerCase().replace(/[\s._]/g, ''));
+
+                const nameIdx = normalizedRow.findIndex(c => c === 'name' || c === 'employeename' || c === 'fullname' || c === 'staffname' || c === 'empname');
+                const deptIdx = normalizedRow.findIndex(c => c === 'designation' || c === 'department' || c === 'dept');
+                const dobIdx = normalizedRow.findIndex(c => c === 'birthday' || c === 'dob' || c === 'dateofbirth' || c === 'birthdate' || c === 'date');
+
+                if (nameIdx !== -1 && (deptIdx !== -1 || dobIdx !== -1)) {
+                    headerRowIndex = i;
+                    colMap.name = nameIdx;
+                    colMap.dept = deptIdx;
+                    colMap.dob = dobIdx;
+                    break;
+                }
+            }
+
+            if (headerRowIndex !== -1) {
+                for (let j = headerRowIndex + 1; j < rawData.length; j++) {
+                    const row = rawData[j];
+                    if (!row || !row[colMap.name]) continue;
+
+                    const rawDob = row[colMap.dob];
+                    let dobStr = 'TBD';
+
+                    if (rawDob) {
+                        const numericDob = Number(rawDob);
+                        // Check if it's a number and within a reasonable Excel date range (e.g., > 10000)
+                        if (!isNaN(numericDob) && numericDob > 10000) {
+                            // Convert Excel serial date to JS Date object parts
+                            const dateObj = xlsx.SSF.parse_date_code(numericDob);
+                            if (dateObj) {
+                                const d = dateObj.d < 10 ? `0${dateObj.d}` : dateObj.d;
+                                const m = dateObj.m < 10 ? `0${dateObj.m}` : dateObj.m;
+                                dobStr = `${d}-${m}-${dateObj.y}`;
+                            } else {
+                                dobStr = String(rawDob);
+                            }
+                        } else {
+                            dobStr = String(rawDob).trim();
+                        }
+                    }
+
+                    allBirthdayRows.push({
+                        name: String(row[colMap.name] || '').trim(),
+                        department: colMap.dept !== -1 ? String(row[colMap.dept] || '').trim() : 'Staff',
+                        date_of_birth: dobStr
+                    });
+                }
+                if (allBirthdayRows.length > 0) break;
+            }
+        }
+
+        if (allBirthdayRows.length === 0) {
+            return res.status(400).json({ success: false, message: "Invalid Excel Format for Birthday" });
         }
 
         // Drop previous records
         await pool.query('TRUNCATE TABLE birthdays');
 
-        // Insert new records
-        for (const row of sheet) {
-            // Fuzzy match column names since headers might have different cases
-            const name = row['Name'] || row['name'] || row['Employee Name'];
-            const dept = row['Department'] || row['department'] || row['Dept'] || row['dept'];
-            const dob = row['DOB'] || row['dob'] || row['Date of Birth'] || row['date_of_birth'];
-
-            if (name && dept && dob) {
-                // To maintain legacy date format logic on front end or just insert the string
-                // Excel dates might parse weird. XLSX util usually gives excel epoch int or string.
-                // We'll trust whatever string or value it gives us and store it.
-                await pool.query(
-                    'INSERT INTO birthdays (name, department, date_of_birth) VALUES (?, ?, ?)',
-                    [String(name).trim(), String(dept).trim(), String(dob).trim()]
-                );
-            }
+        for (const emp of allBirthdayRows) {
+            await pool.query(
+                'INSERT INTO birthdays (name, department, date_of_birth) VALUES (?, ?, ?)',
+                [emp.name, emp.department, emp.date_of_birth]
+            );
         }
 
         // Track last uploaded file
@@ -424,6 +505,45 @@ app.post("/api/birthdays/upload", upload.single('excelFile'), async (req, res) =
     } catch (err) {
         console.error("Excel Upload Error:", err);
         res.status(500).json({ success: false, message: "Failed to process Excel file" });
+    }
+});
+
+// --- INDIVIDUAL BIRTHDAY MANAGEMENT ---
+app.put("/api/employees/birthdays/:id", async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { name, department, date_of_birth } = req.body;
+        await pool.query(
+            'UPDATE birthdays SET name = ?, department = ?, date_of_birth = ? WHERE id = ?',
+            [name, department, date_of_birth, id]
+        );
+        res.json({ success: true, message: "Birthday updated successfully" });
+    } catch (err) {
+        res.status(500).json({ success: false, message: "Failed to update birthday" });
+    }
+});
+
+app.delete("/api/employees/birthdays/:id", async (req, res) => {
+    try {
+        const { id } = req.params;
+        await pool.query('DELETE FROM birthdays WHERE id = ?', [id]);
+        res.json({ success: true, message: "Birthday deleted successfully" });
+    } catch (err) {
+        res.status(500).json({ success: false, message: "Failed to delete birthday" });
+    }
+});
+
+app.post("/api/employees/birthdays/:id/upload-image", uploadBirthdayPhoto.single("profileImage"), async (req, res) => {
+    try {
+        const { id } = req.params;
+        const imagePath = req.file ? `/uploads/birthdays/${req.file.filename}` : null;
+        if (!imagePath) return res.status(400).json({ success: false, message: "No image uploaded" });
+
+        await pool.query('UPDATE birthdays SET image = ? WHERE id = ?', [imagePath, id]);
+        res.json({ success: true, message: "Image uploaded successfully", imagePath });
+    } catch (err) {
+        console.error("Image Upload Error:", err);
+        res.status(500).json({ success: false, message: "Failed to upload image" });
     }
 });
 
