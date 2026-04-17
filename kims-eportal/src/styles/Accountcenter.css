@@ -1,0 +1,228 @@
+/* Accountcenter.css - Custom Styling for Account Management Dashboard */
+
+.account-center-container {
+    padding: 0 0px !important;
+    min-height: 460px;
+    color: #000 !important;
+    display: flex;
+    flex-direction: column;
+}
+
+.account-table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.account-table-wrapper::-webkit-scrollbar {
+    display: none;
+}
+
+.account-table {
+    width: 100%;
+    text-align: left;
+    border-collapse: collapse;
+    min-width: 900px;
+}
+
+.account-table thead {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.account-table thead tr {
+    border-bottom: 2px solid #f6f8f9;
+}
+
+.account-table th {
+    background-color: hsl(115, 89%, 82%);
+    /* Sticky headers must have solid background */
+    padding: 20px 48px;
+    font-size: 12.5px;
+    font-weight: 900;
+    color: #000 !important;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    white-space: nowrap;
+    /* Prevent header text from wrapping */
+    padding-bottom: 2px;
+    padding-top: 2px;
+}
+
+/* Strategic Padding for First Column */
+.account-table th:first-child,
+.account-table td:first-child {
+    padding-left: 28px !important;
+}
+
+.account-table td {
+    padding: 10px 38px;
+    font-size: 13.5px;
+    color: #000 !important;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.account-table tbody tr:hover {
+    background-color: #e6f0fa;
+    transition: all 0.2s ease-in-out;
+}
+
+.avatar-wrapper {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: #f1f5f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #000;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06);
+}
+
+.role-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 2px 10px;
+    border-radius: 9999px;
+    font-size: 11px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    height: 20px;
+}
+
+.role-admin {
+    background-color: #fef3c7;
+    color: #78350f !important;
+    border: 1px solid #fde68a;
+}
+
+.role-user {
+    background-color: #d1fae5;
+    color: #065f46 !important;
+    border: 1px solid #a7f3d0;
+}
+
+.me-indicator {
+    padding: 0 10px;
+    height: 20px;
+    line-height: 20px;
+    display: inline-flex;
+    align-items: center;
+    border-radius: 9999px;
+    background-color: #2563eb;
+    color: #ffffff !important;
+    font-size: 9px;
+    font-weight: 900;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 4px rgba(37, 99, 235, 0.3);
+}
+
+.status-flex {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* Center the pulsing icon */
+    width: 100%;
+}
+
+/* Align the entire Status column to the center and ensure visibility */
+.account-table th:last-child,
+.account-table td:last-child {
+    text-align: center;
+    padding-left: 20px !important;
+    padding-right: 20px !important;
+    min-width: 120px;
+}
+
+.pulse-circle {
+    width: 10px;
+    height: 10px;
+    background-color: #22c55e;
+    border-radius: 50%;
+    position: relative;
+}
+
+.pulse-circle::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #22c55e;
+    border-radius: 50%;
+    animation: account-ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+    opacity: 0.75;
+}
+
+@keyframes account-ping {
+
+    75%,
+    100% {
+        transform: scale(2.5);
+        opacity: 0;
+    }
+}
+
+/* --- Premium Search Reshape --- */
+.search-container-box {
+    position: relative;
+    display: flex;
+    align-items: center;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.search-icon-float {
+    position: absolute;
+    left: 4px;
+    width: 28px;
+    height: 28px;
+    background: #1fa463;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white !important;
+    box-shadow: 0 4px 10px rgba(31, 164, 99, 0.3);
+    z-index: 5;
+    transition: all 0.3s ease;
+}
+
+.search-input-premium {
+    width: 120px;
+    height: 36px;
+    padding: 0 15px 0 38px;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #000 !important;
+    outline: none;
+    transition: all 0.4s ease;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+}
+
+.search-container-box:focus-within .search-input-premium {
+    width: 180px;
+    background: #ffffff;
+    border-color: #1fa463;
+    box-shadow: 0 10px 25px rgba(31, 164, 99, 0.12);
+}
+
+.search-container-box:focus-within .search-icon-float {
+    background: #22c55e;
+    transform: scale(1.1) rotate(5deg);
+    box-shadow: 0 6px 15px rgba(34, 197, 94, 0.4);
+}
+
+.search-input-premium::placeholder {
+    color: #94a3b8;
+    font-weight: 600;
+}

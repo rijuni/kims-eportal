@@ -1,6 +1,6 @@
-import { Search, UserCircle, LogOut, X, Megaphone } from "lucide-react";
+import { Search, UserCircle, LogOut, X, Megaphone, ChevronDown } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useContext, useState, useEffect } from "react";
+import { useContext, useState, useEffect, useRef } from "react";
 import { AuthContext } from "../context/AuthContext";
 import API from "../services/api";
 
@@ -9,10 +9,23 @@ const Header = () => {
     const navigate = useNavigate();
     const { user, logout } = useContext(AuthContext);
     const [isSearchExpanded, setIsSearchExpanded] = useState(false);
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const dropdownRef = useRef(null);
 
     // Ticker State
     const [tickerItems, setTickerItems] = useState([]);
     const [currentIndex, setCurrentIndex] = useState(0);
+
+    // Close dropdown on click outside
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setIsDropdownOpen(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
 
     useEffect(() => {
         // Fetch all ticker data
@@ -174,16 +187,39 @@ const Header = () => {
                         )}
                     </div>
 
-                    {/* Auth Status Pill */}
+                    {/* Auth Status Dropdown */}
                     {user ? (
-                        <div className="flex items-center gap-3 flex-shrink-0">
+                        <div className="relative" ref={dropdownRef}>
                             <button
-                                onClick={logout}
-                                className="flex items-center justify-center gap-2 h-[34px] box-border px-4 bg-[#e53e3e] text-white rounded-full font-semibold text-[13px] hover-scale shadow-lg"
+                                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                                className="user-pill-btn flex items-center gap-2 h-[34px] px-4 transition-all"
                             >
-                                <LogOut size={15} strokeWidth={2.5} />
-                                <span>Logout</span>
+                                <div className="w-[20px] h-[20px] rounded-full bg-white/20 flex items-center justify-center">
+                                    <UserCircle size={14} className="text-white" />
+                                </div>
+                                <span>{user.username || "User"}</span>
+                                <ChevronDown size={14} className={`transition-transform duration-200 ${isDropdownOpen ? "rotate-180" : ""}`} />
                             </button>
+
+                            {/* Dropdown Menu */}
+                            {isDropdownOpen && (
+                                <div className="dropdown-menu animate-dropdown">
+                                    <div className="dropdown-user-info">
+                                        <span className="dropdown-user-name">{user.username || "Authorized User"}</span>
+                                        <span className="dropdown-user-role">KIMS Administrator</span>
+                                    </div>
+                                    <button
+                                        onClick={() => {
+                                            logout();
+                                            setIsDropdownOpen(false);
+                                        }}
+                                        className="dropdown-logout-btn"
+                                    >
+                                        <LogOut size={16} strokeWidth={2.5} />
+                                        <span>Logout</span>
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     ) : (
                         <button

@@ -6,7 +6,7 @@ import EventsCard from "../components/EventsCard";
 import BirthdayCard from "../components/BirthdayCard";
 import calendarIcon from "../img/calendar_premium.png";
 import cakeIcon from "../img/cake_icon.png";
-import "../styles/dashboard.css";
+import "../styles/dashboard.css?v=2.1"; // Forced Cache Busting for Rocket Fireworks
 
 const Dashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -26,12 +26,6 @@ const Dashboard = () => {
           <div className="dashboard-flex">
             {/* Notice Board Column (Green Side) */}
             <div className="notice-section">
-              <div className="section-header-row">
-                <div className="section-title-wrap">
-                  <h1 className="page-title">Notice Board</h1>
-                  <p className="page-subtitle">Stay updated with the latest announcements and important updates</p>
-                </div>
-              </div>
               <NoticeBoard />
             </div>
 

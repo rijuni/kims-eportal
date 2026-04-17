@@ -4,49 +4,17 @@ import { AuthContext } from "../context/AuthContext";
 import {
   HiMiniSquares2X2, HiMiniPresentationChartBar, HiMiniIdentification,
   HiMiniCalendarDays, HiMiniCalendar, HiMiniUsers, HiMiniShieldCheck,
-  HiMiniSquaresPlus, HiMiniChevronDown, HiMiniChevronUp
+  HiMiniSquaresPlus, HiMiniChevronDown, HiMiniChevronUp, HiMiniUserCircle
 } from "react-icons/hi2";
 import logo from "../img/Capture.PNG";
 import API from "../services/api";
 
 const Sidebar = ({ isOpen, toggleSidebar }) => {
-  const { user } = useContext(AuthContext);
+  const { user, isHolidayToday } = useContext(AuthContext);
   const location = useLocation();
-  const [isHolidayToday, setIsHolidayToday] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isAdminDropdownOpen, setIsAdminDropdownOpen] = useState(false);
 
-  useEffect(() => {
-    const checkTodayHoliday = async () => {
-      try {
-        const res = await API.get("/holidays");
-        if (res.data) {
-          const today = new Date();
-          today.setHours(0, 0, 0, 0);
-
-          const hasHoliday = res.data.some(h => {
-            if (!h.date) return false;
-            let hDate;
-            const dmyMatch = h.date.trim().match(/^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{2,4})$/);
-            if (dmyMatch) {
-              let year = parseInt(dmyMatch[3]);
-              if (year < 100) year += 2000;
-              hDate = new Date(year, dmyMatch[2] - 1, dmyMatch[1]);
-            } else {
-              const cleaned = h.date.replace(/(\d+)(st|nd|rd|th)/gi, '$1').trim();
-              hDate = new Date(cleaned);
-            }
-            if (isNaN(hDate.getTime())) return false;
-            hDate.setHours(0, 0, 0, 0);
-            return hDate.getTime() === today.getTime();
-          });
-          setIsHolidayToday(hasHoliday);
-        }
-      } catch (err) {
-        console.error("Sidebar holiday check failed:", err);
-      }
-    };
-    checkTodayHoliday();
-  }, []);
 
   const dashboardItem = { icon: <HiMiniSquares2X2 size={18} className="mr-3" />, label: "Dashboard", path: "/" };
 
@@ -59,10 +27,19 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
   ];
 
 
-  // Auto-open dropdown if we are on a route that is inside the dropdown
+  // Auto-open dropdown ONLY if we are on a route that is actually inside the dropdown
   useEffect(() => {
-    if (location.pathname !== "/") {
+    const isDropdownPath = dropdownItems.some(item => item.path === location.pathname);
+    if (isDropdownPath) {
       setIsDropdownOpen(true);
+    }
+    
+    // Auto-open Admin Hub if on admin, management, or account-center paths
+    const isAdminPath = location.pathname.startsWith('/admin') || 
+                        location.pathname.startsWith('/manage') || 
+                        location.pathname.startsWith('/account-center');
+    if (isAdminPath) {
+      setIsAdminDropdownOpen(true);
     }
   }, [location.pathname]);
 
@@ -96,15 +73,56 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
           </li>
           
           {user && user.role === 'admin' && (
-            <li>
-              <NavLink 
-                to="/admin" 
-                className={({ isActive }) => isActive ? "active-link flex items-center" : "flex items-center"}
+            <>
+              <li className="mt-2">
+                <a
+                  className={`flex items-center cursor-pointer justify-between w-full transition-all duration-300 ${isAdminDropdownOpen ? 'text-[#1FA463] font-semibold bg-gradient-to-r from-[rgba(31,164,99,0.1)] to-[rgba(31,164,99,0)]' : 'text-[#475569] hover:text-[#1FA463] hover:bg-gradient-to-r hover:from-[rgba(31,164,99,0.1)] hover:to-[rgba(31,164,99,0)]'} px-[40px] py-[12px]`}
+                  onClick={() => setIsAdminDropdownOpen(!isAdminDropdownOpen)}
+                >
+                  <div className="flex items-center gap-[5px]">
+                    <HiMiniShieldCheck size={18} className="mr-3 text-[#64748b]" style={{ color: isAdminDropdownOpen ? '#1fa463' : '#64748b' }} />
+                    <span className="flex-1" style={{ fontSize: '13.5px' }}>Admin Hub</span>
+                  </div>
+                  <div className={`transition-transform duration-300 ${isAdminDropdownOpen ? 'rotate-180 text-[#1FA463]' : 'text-[#64748b]'}`}>
+                    <HiMiniChevronDown size={14} />
+                  </div>
+                </a>
+              </li>
+
+              <div
+                className={`overflow-hidden transition-all duration-300 ease-in-out`}
+                style={{
+                  maxHeight: isAdminDropdownOpen ? '200px' : '0px',
+                  opacity: isAdminDropdownOpen ? 1 : 0,
+                  marginTop: isAdminDropdownOpen ? '4px' : '0px'
+                }}
               >
-                <HiMiniShieldCheck size={18} className="mr-3" />
-                <span className="flex-1">Admin Panel</span>
-              </NavLink>
-            </li>
+                <li>
+                  <NavLink
+                    to="/admin"
+                    className={({ isActive }) => `flex items-center ${isActive ? 'active-link' : ''}`}
+                    style={{ paddingLeft: '55px', paddingTop: '10px', paddingBottom: '10px', fontSize: '13.5px' }}
+                  >
+                    <div className="flex items-center opacity-85">
+                      <HiMiniSquaresPlus size={18} className="mr-3" />
+                    </div>
+                    <span className="flex-1 leading-none">Admin Panel</span>
+                  </NavLink>
+                </li>
+                <li>
+                  <NavLink
+                    to="/account-center"
+                    className={({ isActive }) => `flex items-center ${isActive ? 'active-link' : ''}`}
+                    style={{ paddingLeft: '55px', paddingTop: '10px', paddingBottom: '10px', fontSize: '13.5px' }}
+                  >
+                    <div className="flex items-center opacity-85">
+                      <HiMiniUserCircle size={18} className="mr-3" />
+                    </div>
+                    <span className="flex-1 leading-none">Account Center</span>
+                  </NavLink>
+                </li>
+              </div>
+            </>
           )}
 
           <li className="mt-2">

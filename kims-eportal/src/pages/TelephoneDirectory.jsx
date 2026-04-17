@@ -9,6 +9,7 @@ import * as XLSX from "xlsx";
 
 const TelephoneDirectory = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [directoryData, setDirectoryData] = useState([]);
     const [departments, setDepartments] = useState([]);
     
@@ -27,6 +28,7 @@ const TelephoneDirectory = () => {
 
     const fetchData = async () => {
         try {
+            setLoading(true);
             const [phoneRes, deptRes] = await Promise.all([
                 API.get("/telephone"),
                 API.get("/telephone/departments")
@@ -36,6 +38,8 @@ const TelephoneDirectory = () => {
             if (deptRes.data) setDepartments(deptRes.data);
         } catch (err) {
             console.error("Error fetching telephone data:", err);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -140,6 +144,17 @@ const TelephoneDirectory = () => {
         XLSX.writeFile(wb, `Telephone_Directory_${new Date().toLocaleDateString().replace(/\//g, '-')}.xlsx`);
     };
 
+    const [visibleCount, setVisibleCount] = useState(100);
+
+    const handleLoadMore = () => {
+        setVisibleCount(prev => prev + 100);
+    };
+
+    // Reset pagination when search params change
+    useEffect(() => {
+        setVisibleCount(100);
+    }, [searchParams]);
+
     return (
         <div className={`telephone-wrapper ${isSidebarOpen ? "sidebar-open" : ""}`}>
             <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
@@ -240,29 +255,49 @@ const TelephoneDirectory = () => {
                             </div>
                         </div>
 
-                        {filteredDirectory.length > 0 ? (
-                            filteredDirectory.map((item, index) => (
-                                <div className="directory-item" key={index}>
-                                    <div className="col-org">
-                                        <h3 className="org-name">{item.organisation || "N/A"}</h3>
-                                    </div>
-                                    <div className="col-dept">
-                                        <span className="info-value">{item.department || "N/A"}</span>
-                                    </div>
-                                    <div className="col-loc">
-                                        <span className="info-value">{item.location || "N/A"}</span>
-                                    </div>
-                                    <div className="col-name">
-                                        <span className="info-value">{item.name || "N/A"}</span>
-                                    </div>
-                                    <div className="col-ip">
-                                        <span className="info-value" style={{ color: '#0d9488', fontWeight: '600' }}>{item.ip_no || "-"}</span>
-                                    </div>
-                                    <div className="col-mob">
-                                        <span className="info-value">{item.mobile_no || "-"}</span>
-                                    </div>
+                        {loading ? (
+                            <div style={{ padding: '60px', textAlign: 'center', color: '#1fa463', fontWeight: 'bold' }}>
+                                <div className="mb-4 flex justify-center">
+                                    <div className="w-8 h-8 border-4 border-[#1fa463] border-t-transparent rounded-full animate-spin"></div>
                                 </div>
-                            ))
+                                Fetching contacts...
+                            </div>
+                        ) : filteredDirectory.length > 0 ? (
+                            <>
+                                {filteredDirectory.slice(0, visibleCount).map((item, index) => (
+                                    <div className="directory-item" key={index}>
+                                        <div className="col-org">
+                                            <h3 className="org-name">{item.organisation || "N/A"}</h3>
+                                        </div>
+                                        <div className="col-dept">
+                                            <span className="info-value">{item.department || "N/A"}</span>
+                                        </div>
+                                        <div className="col-loc">
+                                            <span className="info-value">{item.location || "N/A"}</span>
+                                        </div>
+                                        <div className="col-name">
+                                            <span className="info-value">{item.name || "N/A"}</span>
+                                        </div>
+                                        <div className="col-ip">
+                                            <span className="info-value" style={{ color: '#0d9488', fontWeight: '600' }}>{item.ip_no || "-"}</span>
+                                        </div>
+                                        <div className="col-mob">
+                                            <span className="info-value">{item.mobile_no || "-"}</span>
+                                        </div>
+                                    </div>
+                                ))}
+                                
+                                {visibleCount < filteredDirectory.length && (
+                                    <div className="p-6 flex justify-center">
+                                        <button 
+                                            onClick={handleLoadMore}
+                                            className="px-8 py-2.5 bg-slate-100 text-[#1fa463] rounded-full text-xs font-black uppercase tracking-wider hover:bg-[#1fa463] hover:text-white transition-all shadow-sm"
+                                        >
+                                            Load More Contacts ({filteredDirectory.length - visibleCount} remaining)
+                                        </button>
+                                    </div>
+                                )}
+                            </>
                         ) : (
                             <div style={{ padding: '40px', textAlign: 'center', color: '#64748b', fontSize: '14px', width: '100%' }}>
                                 No contacts found matching your search.

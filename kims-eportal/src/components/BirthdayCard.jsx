@@ -13,12 +13,6 @@ const BirthdayCard = () => {
 
   return (
     <div className="card birthdays-card">
-      {/* Cracker Animation elements */}
-      <div className="cracker-wrapper">
-        <div className="cracker" style={{ left: '20%', top: '40%', animationDelay: '0s' }}></div>
-        <div className="cracker" style={{ left: '75%', top: '30%', animationDelay: '0.8s' }}></div>
-        <div className="cracker" style={{ left: '45%', top: '70%', animationDelay: '1.6s' }}></div>
-      </div>
       
       {birthdays.map((b) => {
         // Today Detection Logic
@@ -34,6 +28,14 @@ const BirthdayCard = () => {
 
         return (
           <div className={`birthday-item hover-scale ${isToday ? 'is-today-highlight' : ''}`} key={b.id || Math.random()}>
+            {isToday && (
+              <div className="cracker-wrapper">
+                <div className="cracker" style={{ left: '15%', top: '25%', animationDelay: '0s' }}></div>
+                <div className="cracker" style={{ left: '80%', top: '15%', animationDelay: '1s' }}></div>
+                <div className="cracker" style={{ left: '40%', top: '75%', animationDelay: '2s' }}></div>
+                <div className="cracker" style={{ left: '60%', top: '45%', animationDelay: '0.5s' }}></div>
+              </div>
+            )}
             <div className="birthday-profile-section">
               <div className="birthday-avatar-wrap">
                 {b.image ? (

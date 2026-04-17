@@ -998,6 +998,25 @@
     border-color: #fb923c;
 }
 
+.fullscreen-icon-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    background: none;
+    border: none;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.2s;
+    border-radius: 50%;
+}
+
+.fullscreen-icon-btn:hover {
+    background: rgba(0, 0, 0, 0.05);
+    color: #1a202c;
+    transform: scale(1.1);
+}
+
 /* Individual Birthday Management Styles */
 .actions-cell {
   position: relative;
@@ -1126,4 +1145,49 @@
 
 .edit-btn-circle:hover {
   transform: scale(1.1);
+}
+
+/* Visibility Toggle Button Styling */
+.visibility-toggle-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 50px;
+    font-size: 10.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1.5px solid transparent;
+}
+
+.visibility-toggle-btn.is-public {
+    background: #f0fdf4;
+    color: #15803d;
+    border-color: #bcf3cc;
+    box-shadow: 0 2px 5px rgba(21, 128, 61, 0.08);
+}
+
+.visibility-toggle-btn.is-public:hover {
+    background: #dcfce7;
+    border-color: #22c55e;
+    transform: translateY(-1.5px);
+    box-shadow: 0 4px 12px rgba(21, 128, 61, 0.15);
+}
+
+.visibility-toggle-btn.is-hidden {
+    background: #fef2f2;
+    color: #ef4444;
+    border-color: #fecdd3;
+    box-shadow: 0 2px 4px rgba(239, 68, 68, 0.05);
+}
+
+.visibility-toggle-btn.is-hidden:hover {
+    background: #fee2e2;
+    border-color: #fca5a5;
+    color: #dc2626;
+    transform: translateY(-1.5px);
+    box-shadow: 0 4px 8px rgba(239, 68, 68, 0.12);
 }

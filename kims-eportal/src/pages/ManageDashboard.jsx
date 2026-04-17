@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
 import API from "../services/api";
-import { Bell, UploadCloud, Trash2, Eye, EyeOff, ArrowLeft, User, MoreVertical, Edit, Check, X as XIcon, Camera } from "lucide-react";
+import { Bell, UploadCloud, Trash2, Eye, EyeOff, ArrowLeft, User, MoreVertical, Edit, Check, X as XIcon, Camera, Maximize2, Minimize2, Plus } from "lucide-react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import "../styles/managedashboard.css";
@@ -46,9 +46,100 @@ const ManageDashboard = () => {
   const [showNoticesList, setShowNoticesList] = useState(false);
   const [showBirthdayUpload, setShowBirthdayUpload] = useState(true);
   const [isBirthdaysFullScreen, setIsBirthdaysFullScreen] = useState(false);
+  const [isNoticesFullScreen, setIsNoticesFullScreen] = useState(false);
   const [birthdayList, setBirthdayList] = useState([]);
   const [activeMenuId, setActiveMenuId] = useState(null);
+  const [activeNoticeMenuId, setActiveNoticeMenuId] = useState(null);
+
+  // Close dropdowns on outside click
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (!event.target.closest('.dot-menu-btn') && !event.target.closest('.dropdown-menu-wrap')) {
+        setActiveMenuId(null);
+        setActiveNoticeMenuId(null);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
   const [editingBirthday, setEditingBirthday] = useState(null);
+  const [editingNoticeId, setEditingNoticeId] = useState(null);
+  const [managingPDFNoticeId, setManagingPDFNoticeId] = useState(null);
+  
+  // Notice Edit States
+  const [editNoticeTitle, setEditNoticeTitle] = useState("");
+  const [editNoticeIssuedBy, setEditNoticeIssuedBy] = useState("");
+  const [editNoticeDate, setEditNoticeDate] = useState("");
+
+  const handleAddNoticePdf = async (noticeId, file) => {
+    if (!file) return;
+    const formData = new FormData();
+    formData.append("noticeFile", file);
+    try {
+      setLoading(true);
+      await API.post(`/notices/${noticeId}/pdfs`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      setRefresh(prev => prev + 1);
+      setNoticeSuccess("PDF added successfully!");
+      setTimeout(() => setNoticeSuccess(""), 3000);
+    } catch (err) {
+      setNoticeError("Failed to upload PDF.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteNoticePdf = async (pdfId, isPrimary, noticeId) => {
+    if (!window.confirm("Delete this document?")) return;
+    try {
+      setLoading(true);
+      if (isPrimary) {
+        await API.delete(`/notices/${noticeId}/primary-pdf`);
+      } else {
+        await API.delete(`/notices/pdfs/${pdfId}`);
+      }
+      setRefresh(prev => prev + 1);
+      setNoticeSuccess("Document removed.");
+      setTimeout(() => setNoticeSuccess(""), 3000);
+    } catch (err) {
+      setNoticeError("Failed to delete document.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const startNoticeEdit = (n) => {
+    setEditingNoticeId(n.id);
+    setEditNoticeTitle(n.title);
+    setEditNoticeIssuedBy(n.issued_by);
+    setEditNoticeDate(n.date);
+    setActiveNoticeMenuId(null);
+  };
+
+  const cancelNoticeEdit = () => {
+    setEditingNoticeId(null);
+  };
+
+  const saveNoticeEdit = async (id) => {
+    try {
+      setLoading(true);
+      await API.put(`/notices/${id}`, {
+        title: editNoticeTitle,
+        issued_by: editNoticeIssuedBy,
+        date: editNoticeDate
+      });
+      setEditingNoticeId(null);
+      setRefresh(prev => prev + 1);
+      setNoticeSuccess("Notice updated successfully!");
+      setTimeout(() => setNoticeSuccess(""), 3000);
+    } catch (err) {
+      setNoticeError("Failed to update notice.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const [editName, setEditName] = useState("");
   const [editDept, setEditDept] = useState("");
   const [editDOB, setEditDOB] = useState("");
@@ -290,8 +381,8 @@ const ManageDashboard = () => {
           <div className="manage-grid">
 
             {/* Notices Box */}
-            <div className="manage-box box-blue">
-              <div className="box-header">
+            <div className={`manage-box box-blue ${isNoticesFullScreen ? 'is-fullscreen' : ''}`}>
+              <div className="box-header" style={{ justifyContent: 'space-between' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                   <Bell size={24} /> <h2>Notice Board</h2>
                   <button
@@ -302,35 +393,218 @@ const ManageDashboard = () => {
                     {showNoticesList ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
                 </div>
+                <button
+                  className="fullscreen-icon-btn"
+                  onClick={() => setIsNoticesFullScreen(!isNoticesFullScreen)}
+                  title={isNoticesFullScreen ? "Close Fullscreen" : "View Fullscreen Notices"}
+                >
+                  {isNoticesFullScreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
+                </button>
               </div>
 
 
-              <form onSubmit={handleNoticeSubmit}>
-                <input required className="light-input" type="text" placeholder="Notice Title" value={noticeTitle} onChange={e => setNoticeTitle(e.target.value)} />
-                <input required className="light-input" type="text" placeholder="Issued By" value={noticeIssuedBy} onChange={e => setNoticeIssuedBy(e.target.value)} />
-                <DatePicker
-                  selected={noticeDate}
-                  onChange={(date) => setNoticeDate(date)}
-                  dateFormat="MMMM d, yyyy"
-                  placeholderText="Select Notice Date"
-                  className="light-input"
-                  todayButton="Select Today"
-                  portalId="root"
-                  required
-                />
-                <div className="file-input-wrapper">
-                  <label htmlFor="notice-file-input">Select PDF (Mandatory):</label>
-                  <input required id="notice-file-input" type="file" accept=".pdf" onChange={e => setNoticeFile(e.target.files[0])} />
-                </div>
-                <button type="submit" className="action-btn-blue">Add Notice</button>
+              {!isNoticesFullScreen ? (
+                <form onSubmit={handleNoticeSubmit}>
+                  <input required className="light-input" type="text" placeholder="Notice Title" value={noticeTitle} onChange={e => setNoticeTitle(e.target.value)} />
+                  <input required className="light-input" type="text" placeholder="Issued By" value={noticeIssuedBy} onChange={e => setNoticeIssuedBy(e.target.value)} />
+                  <DatePicker
+                    selected={noticeDate}
+                    onChange={(date) => setNoticeDate(date)}
+                    dateFormat="MMMM d, yyyy"
+                    placeholderText="Select Notice Date"
+                    className="light-input"
+                    todayButton="Select Today"
+                    portalId="root"
+                    required
+                  />
+                  <div className="file-input-wrapper">
+                    <label htmlFor="notice-file-input">Select PDF (Mandatory):</label>
+                    <input required id="notice-file-input" type="file" accept=".pdf" onChange={e => setNoticeFile(e.target.files[0])} />
+                  </div>
+                  <button type="submit" className="action-btn-blue">Add Notice</button>
 
-                <div className="feedback-area">
-                  {noticeError && <div className="sync-error-msg">{noticeError}</div>}
-                  {noticeSuccess && <div className="sync-success-msg">{noticeSuccess}</div>}
-                </div>
-              </form>
+                  <div className="feedback-area">
+                    {noticeError && <div className="sync-error-msg">{noticeError}</div>}
+                    {noticeSuccess && <div className="sync-success-msg">{noticeSuccess}</div>}
+                  </div>
+                </form>
+              ) : (
+                <div className="table-responsive" style={{ marginTop: '10px' }}>
+                  <table className="upcoming-table">
+                    <thead>
+                      <tr>
+                        <th style={{ padding: '12px 15px' }}>Title</th>
+                        <th style={{ padding: '12px 15px' }}>Issued By</th>
+                        <th style={{ padding: '12px 15px' }}>Date</th>
+                        <th style={{ padding: '12px 15px' }}>Document</th>
+                        <th style={{ padding: '12px 15px' }}>Visibility</th>
+                        <th style={{ padding: '12px 15px', textAlign: 'right' }}>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {notices.length > 0 ? (
+                        notices.map(n => (
+                          <tr key={n.id} className={`upcoming-row ${editingNoticeId === n.id ? 'is-editing' : ''}`}>
+                            {editingNoticeId === n.id ? (
+                              <>
+                                <td style={{ padding: '12px 15px' }}>
+                                  <input className="edit-input-small" value={editNoticeTitle} onChange={e => setEditNoticeTitle(e.target.value)} />
+                                </td>
+                                <td style={{ padding: '12px 15px' }}>
+                                  <input className="edit-input-small" value={editNoticeIssuedBy} onChange={e => setEditNoticeIssuedBy(e.target.value)} />
+                                </td>
+                                <td style={{ padding: '12px 15px' }}>
+                                  <input className="edit-input-small" value={editNoticeDate} onChange={e => setEditNoticeDate(e.target.value)} />
+                                </td>
+                                <td style={{ padding: '12px 15px' }}>
+                                  <span style={{ fontSize: '11px', color: '#94a3b8' }}>PDF Attached</span>
+                                </td>
+                                <td style={{ padding: '12px 15px' }}>
+                                  <div className="visibility-toggle-btn is-public opacity-50 cursor-not-allowed">
+                                    <Eye size={12} /> {n.is_visible ? "PUBLIC" : "HIDDEN"}
+                                  </div>
+                                </td>
+                                <td style={{ padding: '12px 15px' }}>
+                                  <div className="edit-actions-wrap">
+                                    <button className="edit-btn-circle save" onClick={() => saveNoticeEdit(n.id)} title="Save changes">
+                                      <Check size={16} />
+                                    </button>
+                                    <button className="edit-btn-circle cancel" onClick={cancelNoticeEdit} title="Cancel editing">
+                                      <XIcon size={16} />
+                                    </button>
+                                  </div>
+                                </td>
+                              </>
+                            ) : (
+                              <>
+                                <td style={{ padding: '12px 15px' }}>
+                                  <span style={{ fontSize: '13.5px', fontWeight: '600' }}>{n.title}</span>
+                                </td>
+                                <td style={{ padding: '12px 15px' }}>
+                                  <span style={{ fontSize: '12.5px', color: '#64748b' }}>{n.issued_by}</span>
+                                </td>
+                                <td style={{ padding: '12px 15px' }}>
+                                  <span style={{ fontSize: '13px', color: '#1e3a8a' }}>{n.date}</span>
+                                </td>
+                                <td style={{ padding: '12px 15px' }}>
+                                  <div className="flex flex-col gap-1">
+                                    {n.pdfs && n.pdfs.length > 0 ? (
+                                      n.pdfs.map((p, pIdx) => (
+                                        <div key={p.id || pIdx} className="flex items-center gap-2 group">
+                                          <a 
+                                            href={`http://${window.location.hostname}:5000${p.pdf_url}`} 
+                                            target="_blank" 
+                                            rel="noopener noreferrer" 
+                                            className="text-blue-600 hover:underline text-[12px] whitespace-nowrap overflow-hidden text-ellipsis max-w-[120px]"
+                                            title={p.pdf_name}
+                                          >
+                                            {p.pdf_name}
+                                          </a>
+                                        </div>
+                                      ))
+                                    ) : "No PDF"}
+                                  </div>
+                                </td>
+                                <td style={{ padding: '12px 15px' }}>
+                                  <button 
+                                    onClick={() => handleNoticeToggleVisibility(n.id)} 
+                                    className={`visibility-toggle-btn ${n.is_visible ? 'is-public' : 'is-hidden'}`}
+                                  >
+                                    {n.is_visible ? <Eye size={12} /> : <EyeOff size={12} />}
+                                    {n.is_visible ? "PUBLIC" : "HIDDEN"}
+                                  </button>
+                                </td>
+                                <td style={{ padding: '12px 15px', textAlign: 'right', position: 'relative' }}>
+                                  <button 
+                                    className="dot-menu-btn"
+                                    onClick={() => setActiveNoticeMenuId(activeNoticeMenuId === n.id ? null : n.id)}
+                                  >
+                                    <MoreVertical size={18} />
+                                  </button>
+                                  
+                                  {activeNoticeMenuId === n.id && (
+                                    <div className="dropdown-menu-wrap" style={{ top: '45px', right: '15px', minWidth: '220px' }}>
+                                      <div className="dropdown-header-label" style={{ padding: '8px 15px', fontSize: '10px', color: '#94a3b8', fontWeight: '700', textTransform: 'uppercase' }}>General</div>
+                                      <button className="dropdown-item" onClick={() => startNoticeEdit(n)}>
+                                        <Edit size={14} /> Edit Details
+                                      </button>
+                                      
+                                      <div className="dropdown-divider" style={{ height: '1px', background: '#f1f5f9', margin: '4px 0' }}></div>
+                                      <div className="dropdown-header-label" style={{ padding: '8px 15px', fontSize: '10px', color: '#3b82f6', fontWeight: '700', textTransform: 'uppercase' }}>Manage PDFs</div>
+                                      
+                                      {n.pdfs && n.pdfs.map((p, pIdx) => (
+                                        <div key={p.id || pIdx} className="dropdown-item-inline" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 15px' }}>
+                                          <span style={{ fontSize: '11.5px', color: '#475569', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '120px' }}>{p.pdf_name}</span>
+                                          <button 
+                                            onClick={() => handleDeleteNoticePdf(p.id, p.id === 'primary', n.id)}
+                                            style={{ color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}
+                                          >
+                                            <Trash2 size={12} />
+                                          </button>
+                                        </div>
+                                      ))}
 
-              {showNoticesList && (
+                                      <label className="dropdown-item" style={{ color: '#22c55e', cursor: 'pointer' }}>
+                                        <Plus size={14} /> Add Additional PDF
+                                        <input 
+                                          type="file" 
+                                          accept=".pdf" 
+                                          hidden 
+                                          onChange={(e) => {
+                                            if (e.target.files[0]) {
+                                              handleAddNoticePdf(n.id, e.target.files[0]);
+                                              e.target.value = null;
+                                              setActiveNoticeMenuId(null);
+                                            }
+                                          }}
+                                        />
+                                      </label>
+
+                                      <div className="dropdown-divider" style={{ height: '1px', background: '#f1f5f9', margin: '4px 0' }}></div>
+                                      <button className="dropdown-item delete" onClick={() => { handleNoticeDeleteClick(n.id); setActiveNoticeMenuId(null); }}>
+                                        <Trash2 size={14} /> Delete Notice
+                                      </button>
+                                    </div>
+                                  )}
+
+                                  {deletingNoticeId === n.id && (
+                                    <div className="delete-confirm-box absolute right-0 mt-2 bg-white p-4 shadow-xl border rounded-lg z-[1001]" style={{ minWidth: '180px' }}>
+                                      <p className="confirm-msg" style={{ fontSize: '10.5px', marginBottom: '4px' }}>Delete this notice? Type <strong>DELETE</strong></p>
+                                      <input
+                                        type="text"
+                                        className="confirm-input"
+                                        placeholder="DELETE"
+                                        value={noticesDeleteInput}
+                                        onChange={(e) => setNoticesDeleteInput(e.target.value)}
+                                        style={{ padding: '4px', fontSize: '12px', marginBottom: '8px' }}
+                                      />
+                                      <div className="confirm-actions">
+                                        <button className="btn-cancel" onClick={() => setDeletingNoticeId(null)} style={{ padding: '4px' }}>Cancel</button>
+                                        <button
+                                          className="btn-confirm"
+                                          disabled={noticesDeleteInput !== "DELETE" || loading}
+                                          onClick={handleExecuteNoticeDelete}
+                                          style={{ padding: '4px' }}
+                                        >
+                                          {loading ? "..." : "Delete"}
+                                        </button>
+                                      </div>
+                                    </div>
+                                  )}
+                                </td>
+                              </>
+                            )}
+                          </tr>
+                        ))
+                      ) : (
+                        <tr><td colSpan="6" style={{ textAlign: 'center', padding: '20px' }}>No notices found</td></tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+
+              {!isNoticesFullScreen && showNoticesList && (
                 <div className="data-list">
                   {notices.map(n => (
                     <div key={n.id} className="notice-item-wrapper" style={{ marginBottom: '4px' }}>
@@ -382,7 +656,7 @@ const ManageDashboard = () => {
                   <UploadCloud size={24} /> <h2>Bulk Birthdays (Excel)</h2>
                 </div>
                 <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                  {lastUploadedFile && (
+                  {lastUploadedFile && !isBirthdaysFullScreen && (
                     <button
                       className="toggle-view-btn"
                       onClick={() => setShowFileInfoDetail(!showFileInfoDetail)}

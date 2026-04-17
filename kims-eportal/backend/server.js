@@ -28,6 +28,25 @@ app.use(cors());
 app.use(express.json());
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
+// Create notice_pdfs table if it doesn't exist
+async function initTables() {
+    try {
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS notice_pdfs (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                notice_id INT NOT NULL,
+                pdf_url VARCHAR(255) NOT NULL,
+                pdf_name VARCHAR(255) NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (notice_id) REFERENCES notices(id) ON DELETE CASCADE
+            )
+        `);
+    } catch (err) {
+        console.error("Error creating notice_pdfs table:", err);
+    }
+}
+initTables();
+
 // Auth Route
 app.post("/api/login", async (req, res) => {
     try {
@@ -68,6 +87,16 @@ app.post("/api/login", async (req, res) => {
     } catch (error) {
         console.error("Login Error:", error);
         res.status(500).json({ success: false, message: "Internal server error" });
+    }
+});
+
+// --- USER MANAGEMENT ROUTES ---
+app.get("/api/users", async (req, res) => {
+    try {
+        const [users] = await pool.query('SELECT id, username, role, created_at FROM users ORDER BY created_at DESC');
+        res.json(users);
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
     }
 });
 
@@ -147,8 +176,21 @@ app.get("/api/notices", async (req, res) => {
             sql += " WHERE is_visible = 1";
         }
         sql += " ORDER BY created_at DESC";
-        const [rows] = await pool.query(sql);
-        res.json(rows);
+        const [notices] = await pool.query(sql);
+
+        // Fetch all additional PDFs
+        const [pdfs] = await pool.query("SELECT * FROM notice_pdfs");
+
+        // Map PDFs to notices
+        const noticesWithPdfs = notices.map(n => ({
+            ...n,
+            pdfs: [
+                ...(n.document_url ? [{ id: 'primary', pdf_url: n.document_url, pdf_name: 'Main Document' }] : []),
+                ...pdfs.filter(p => p.notice_id === n.id)
+            ]
+        }));
+
+        res.json(noticesWithPdfs);
     } catch (err) {
         res.status(500).json({ success: false, message: err.message });
     }
@@ -160,12 +202,79 @@ app.post("/api/notices", uploadNotice.single("noticeFile"), async (req, res) => 
         const document_url = req.file ? `/uploads/notices/${req.file.filename}` : null;
 
         await pool.query(
-            'INSERT INTO notices (title, issued_by, date, document_url) VALUES (?, ?, ?, ?)',
+            'INSERT INTO notices (title, issued_by, date, document_url, is_visible) VALUES (?, ?, ?, ?, 1)',
             [title, issued_by, date, document_url]
         );
         res.json({ success: true, message: "Notice added successfully" });
     } catch (err) {
         res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+// Route to add an additional PDF to a notice
+app.post("/api/notices/:id/pdfs", uploadNotice.single("noticeFile"), async (req, res) => {
+    try {
+        const { id } = req.params;
+        if (!req.file) return res.status(400).json({ success: false, message: "No file uploaded" });
+
+        const pdf_url = `/uploads/notices/${req.file.filename}`;
+        const pdf_name = req.file.originalname;
+
+        await pool.query(
+            'INSERT INTO notice_pdfs (notice_id, pdf_url, pdf_name) VALUES (?, ?, ?)',
+            [id, pdf_url, pdf_name]
+        );
+        res.json({ success: true, message: "Additional PDF added successfully", pdf: { pdf_url, pdf_name } });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+// Route to delete a specific additional PDF
+app.delete("/api/notices/pdfs/:id", async (req, res) => {
+    try {
+        const { id } = req.params;
+        // Optional: delete from disk
+        const [rows] = await pool.query("SELECT pdf_url FROM notice_pdfs WHERE id = ?", [id]);
+        if (rows.length > 0) {
+            const filePath = path.join(__dirname, rows[0].pdf_url);
+            if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+        }
+
+        await pool.query("DELETE FROM notice_pdfs WHERE id = ?", [id]);
+        res.json({ success: true, message: "Additional PDF deleted successfully" });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+// Route to delete the primary PDF
+app.delete("/api/notices/:id/primary-pdf", async (req, res) => {
+    try {
+        const { id } = req.params;
+        const [rows] = await pool.query("SELECT document_url FROM notices WHERE id = ?", [id]);
+        if (rows.length > 0 && rows[0].document_url) {
+            const filePath = path.join(__dirname, rows[0].document_url);
+            if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+        }
+        await pool.query("UPDATE notices SET document_url = NULL WHERE id = ?", [id]);
+        res.json({ success: true, message: "Primary PDF deleted successfully" });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+app.put("/api/notices/:id", async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { title, issued_by, date } = req.body;
+        await pool.query(
+            'UPDATE notices SET title = ?, issued_by = ?, date = ? WHERE id = ?',
+            [title, issued_by, date, id]
+        );
+        res.json({ success: true, message: "Notice updated successfully" });
+    } catch (err) {
+        res.status(500).json({ success: false, message: "Failed to update notice" });
     }
 });
 

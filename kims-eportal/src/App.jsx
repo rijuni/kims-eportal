@@ -13,6 +13,7 @@ import ManageHolidays from "./pages/ManageHolidays";
 import ManageEvents from "./pages/ManageEvents";
 import ManageTelephone from "./pages/ManageTelephone";
 import ManageTraining from "./pages/ManageTraining";
+import AccountCenter from "./pages/AccountCenter";
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
           <Route path="/admin/manage-events" element={<ManageEvents />} />
           <Route path="/admin/manage-telephone" element={<ManageTelephone />} />
           <Route path="/admin/manage-training" element={<ManageTraining />} />
+          <Route path="/account-center" element={<AccountCenter />} />
         </Routes>
       </Router>
     </AuthProvider>
