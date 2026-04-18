@@ -45,11 +45,14 @@
 .upcoming-card {
     background: white;
     border-radius: 24px;
-    padding: 0px 10px;
+    padding: 0;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-    /* Calculated for a strict 40px bottom gap */
     height: calc(100vh - 130px);
-    overflow-y: auto;
+    overflow: hidden;
+    /* Ensure this clips the sticky header rounding gaps */
+    position: relative;
+    display: flex;
+    flex-direction: column;
 }
 
 /* Custom Scrollbar for the card */
@@ -143,31 +146,40 @@
     background: #172554;
 }
 
-/* Table View for Upcoming Events (Public) */
 .table-responsive {
     width: 100%;
-    overflow-x: auto;
+    flex: 1;
+    /* Take full height */
+    overflow-y: auto;
     background: white;
-    border-radius: 12px;
 }
 
 .upcoming-table {
     width: 100%;
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0;
     min-width: 900px;
-    /* Ensures columns stay wide enough */
+}
+
+.upcoming-table thead {
+    background: linear-gradient(90deg, #48c6ef 0%, #6f86d6 100%) !important;
+    border-radius: 24px 24px 0 0;
 }
 
 .upcoming-table thead th {
     text-align: left;
-    padding: 16px 20px;
-    background: #f8fafc;
-    color: #475569;
+    padding: 8px 20px;
+    background: transparent !important;
+    color: #000000 !important;
     font-size: 13px;
-    font-weight: 600;
+    font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
-    border-bottom: 2px solid #f1f5f9;
+    letter-spacing: 0.8px;
+    border-bottom: 2px solid rgba(0, 0, 0, 0.05);
+}
+
+.upcoming-table thead th svg {
+    color: #000000 !important;
 }
 
 .upcoming-row {

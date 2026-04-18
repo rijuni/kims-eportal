@@ -39,7 +39,7 @@
 .account-table th {
     background-color: hsl(115, 89%, 82%);
     /* Sticky headers must have solid background */
-    padding: 20px 48px;
+    padding: 12px 24px;
     font-size: 12.5px;
     font-weight: 900;
     color: #000 !important;
@@ -54,11 +54,11 @@
 /* Strategic Padding for First Column */
 .account-table th:first-child,
 .account-table td:first-child {
-    padding-left: 28px !important;
+    padding-left: 15px !important;
 }
 
 .account-table td {
-    padding: 10px 38px;
+    padding: 10px 24px;
     font-size: 13.5px;
     color: #000 !important;
     border-bottom: 1px solid #f1f5f9;
@@ -126,18 +126,41 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    /* Center the pulsing icon */
+    /* Centered Active dot */
     width: 100%;
 }
 
-/* Align the entire Status column to the center and ensure visibility */
+/* Status and Action columns (centered) */
+.account-table th:nth-last-child(2),
+.account-table td:nth-last-child(2),
 .account-table th:last-child,
 .account-table td:last-child {
     text-align: center;
-    padding-left: 20px !important;
-    padding-right: 20px !important;
-    min-width: 120px;
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+    min-width: 80px;
 }
+
+.action-btn-more {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #000;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin: 0 auto;
+}
+
+.action-btn-more:hover {
+    background-color: #f1f5f9;
+    color: #1fa463;
+}
+
 
 .pulse-circle {
     width: 10px;
@@ -225,4 +248,53 @@
 .search-input-premium::placeholder {
     color: #94a3b8;
     font-weight: 600;
+}
+
+/* --- Refresh Button --- */
+.refresh-button-premium {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 50%;
+    color: #1fa463;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+    outline: none;
+}
+
+.refresh-button-premium:hover {
+    background: #1fa463;
+    color: #ffffff !important;
+    transform: rotate(180deg);
+    box-shadow: 0 4px 15px rgba(31, 164, 99, 0.3);
+}
+
+.refresh-button-premium:active {
+    transform: rotate(180deg) scale(0.9);
+}
+
+.animate-spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Specific Actions Layout */
+.account-actions-flex {
+    display: flex;
+    align-items: center;
+    gap: 20px; /* Reduced spacing as requested */
 }

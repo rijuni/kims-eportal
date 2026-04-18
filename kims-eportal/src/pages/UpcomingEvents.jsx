@@ -16,7 +16,7 @@ const UpcomingEvents = () => {
 
     useEffect(() => {
         API.get("/events/upcoming")
-            .then(res => { if(res.data) setEvents(res.data); })
+            .then(res => { if (res.data) setEvents(res.data); })
             .catch(console.error);
     }, []);
 
@@ -68,8 +68,8 @@ const UpcomingEvents = () => {
                                                 </span>
                                             </td>
                                             <td className="action-cell">
-                                                <button 
-                                                    className="detail-action-btn" 
+                                                <button
+                                                    className="detail-action-btn"
                                                     onClick={() => setSelectedEvent(event)}
                                                 >
                                                     View Details
@@ -88,10 +88,10 @@ const UpcomingEvents = () => {
                 <div className="event-modal-overlay" onClick={() => setSelectedEvent(null)}>
                     <div className="event-modal-box" onClick={e => e.stopPropagation()}>
                         {selectedEvent.image_url ? (
-                            <div 
-                                className="modal-hero-bg" 
-                                style={{ 
-                                    backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.7)), url(http://${window.location.hostname}:5000${selectedEvent.image_url})` 
+                            <div
+                                className="modal-hero-bg"
+                                style={{
+                                    backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.7)), url(http://${window.location.hostname}:5000${selectedEvent.image_url})`
                                 }}
                             >
                                 <button className="close-btn-overlay" onClick={() => setSelectedEvent(null)}>&times;</button>
@@ -120,10 +120,10 @@ const UpcomingEvents = () => {
                                     <div className="m-item"><MapPin size={14} /> {selectedEvent.location}</div>
                                 </div>
                             )}
-                           <div className="modal-details-content">
+                            <div className="modal-details-content">
                                 <h3>About this Event</h3>
                                 <p>{selectedEvent.event_details || "No additional details provided for this event."}</p>
-                           </div>
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -4,24 +4,34 @@ import Header from "../components/Header";
 import API from "../services/api";
 import { AuthContext } from "../context/AuthContext";
 import "../styles/Accountcenter.css";
-import { User, Shield, Clock, Search } from "lucide-react";
+import { User, Shield, Clock, Search, RefreshCcw, MoreVertical } from "lucide-react";
 
 const AccountCenter = () => {
   const { user } = useContext(AuthContext);
   const [users, setUsers] = useState([]);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
   useEffect(() => {
     fetchUsers();
+
+    // Auto refresh every 10 seconds
+    const interval = setInterval(() => {
+      fetchUsers(true); // pass true to indicate it's a silent refresh if we want, but standard fetch is fine
+    }, 10000);
+
+    return () => clearInterval(interval);
   }, []);
 
-  const fetchUsers = async () => {
+  const fetchUsers = async (isSilent = false) => {
+    const startTime = Date.now();
     try {
-      setLoading(true);
+      if (!isSilent) setLoading(true);
+      setRefreshing(true);
       const res = await API.get("/users");
       // CRITICAL: Ensure we only set array data to prevent crashes
       if (Array.isArray(res.data)) {
@@ -35,7 +45,14 @@ const AccountCenter = () => {
       console.error("Failed to fetch users:", err);
       setUsers([]);
     } finally {
-      setLoading(false);
+      // Ensure the spin animation is visible for at least 800ms
+      const elapsedTime = Date.now() - startTime;
+      const remainingTime = Math.max(0, 800 - elapsedTime);
+      
+      setTimeout(() => {
+        setLoading(false);
+        setRefreshing(false);
+      }, remainingTime);
     }
   };
 
@@ -70,7 +87,7 @@ const AccountCenter = () => {
                 <p className="text-[11px] text-black font-semibold mt-1">Manage existing user accounts and permissions</p>
               </div>
 
-              <div className="flex items-center gap-3">
+              <div className="account-actions-flex">
                 <div className="search-container-box">
                   <div className="search-icon-float">
                     <Search size={14} />
@@ -83,6 +100,13 @@ const AccountCenter = () => {
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
                 </div>
+                <button
+                  className="refresh-button-premium"
+                  onClick={() => fetchUsers()}
+                  title="Refresh Data"
+                >
+                  <RefreshCcw size={16} className={refreshing ? "animate-spin" : ""} />
+                </button>
               </div>
             </div>
 
@@ -96,6 +120,7 @@ const AccountCenter = () => {
                       <th>Role</th>
                       <th>Created Date</th>
                       <th>Status</th>
+                      <th>Action</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
@@ -135,12 +160,12 @@ const AccountCenter = () => {
                             </div>
                           </td>
                           <td>
-                            <div className="flex items-center gap-2.5 font-bold">
-                              <Clock size={16} className="text-[#1fa463]" />
+                            <div className="flex items-center font-bold text-[13px] text-slate-800">
+                              <Clock size={13} className="text-slate-600" style={{ marginRight: '8px' }} />
                               {new Date(u.created_at).toLocaleDateString('en-IN', {
                                 day: '2-digit',
-                                month: 'short',
-                                year: 'numeric'
+                                month: '2-digit',
+                                year: '2-digit'
                               })}
                             </div>
                           </td>
@@ -148,6 +173,11 @@ const AccountCenter = () => {
                             <div className="status-flex">
                               <div className="pulse-circle"></div>
                             </div>
+                          </td>
+                          <td>
+                            <button className="action-btn-more">
+                              <MoreVertical size={16} />
+                            </button>
                           </td>
                         </tr>
                       ))

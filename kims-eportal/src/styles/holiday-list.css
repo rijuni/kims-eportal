@@ -67,25 +67,28 @@
     display: grid;
     grid-template-columns: 10% 20% 15% 15% 40%;
     align-items: center;
-    padding: 12px 25px;
-    background: #e1f7d0;
-    border-bottom: 1px solid #edf2f7;
+    padding: 8px 25px;
+    background: linear-gradient(90deg, #48c6ef 0%, #6f86d6 100%);
+    border-bottom: 2px solid rgba(0, 0, 0, 0.05);
     position: sticky;
     top: 0;
     z-index: 10;
-    border-top: 4px solid #e1f7d0;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .header-col {
     display: flex;
     align-items: center;
     gap: 8px;
-    color: #64748b;
+    color: #000000 !important;
     font-size: 11px;
-    font-weight: 700;
+    font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.8px;
+}
+
+.header-col svg {
+    color: #000000 !important;
 }
 
 .holiday-item {
@@ -110,12 +113,14 @@
 }
 
 .header-col.col-event {
-    justify-content: flex-end;
+    justify-content: flex-start;
+    padding-left: 35px;
 }
 
 .col-event {
-    text-align: right;
+    text-align: left;
     min-width: 0;
+    padding-left: 35px;
 }
 
 .col-nod {
