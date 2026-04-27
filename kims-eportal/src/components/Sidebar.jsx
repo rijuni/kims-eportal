@@ -72,7 +72,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             </NavLink>
           </li>
           
-          {user && user.role === 'admin' && (
+          {user && (user.role === 'admin' || user.role === 'sub_admin') && (
             <>
               <li className="mt-2">
                 <a
@@ -109,18 +109,20 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
                     <span className="flex-1 leading-none">Admin Panel</span>
                   </NavLink>
                 </li>
-                <li>
-                  <NavLink
-                    to="/account-center"
-                    className={({ isActive }) => `flex items-center ${isActive ? 'active-link' : ''}`}
-                    style={{ paddingLeft: '55px', paddingTop: '10px', paddingBottom: '10px', fontSize: '13.5px' }}
-                  >
-                    <div className="flex items-center opacity-85">
-                      <HiMiniUserCircle size={18} className="mr-3" />
-                    </div>
-                    <span className="flex-1 leading-none">Account Center</span>
-                  </NavLink>
-                </li>
+                {user.role === 'admin' && (
+                  <li>
+                    <NavLink
+                      to="/account-center"
+                      className={({ isActive }) => `flex items-center ${isActive ? 'active-link' : ''}`}
+                      style={{ paddingLeft: '55px', paddingTop: '10px', paddingBottom: '10px', fontSize: '13.5px' }}
+                    >
+                      <div className="flex items-center opacity-85">
+                        <HiMiniUserCircle size={18} className="mr-3" />
+                      </div>
+                      <span className="flex-1 leading-none">Account Center</span>
+                    </NavLink>
+                  </li>
+                )}
               </div>
             </>
           )}

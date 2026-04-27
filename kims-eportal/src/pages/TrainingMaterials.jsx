@@ -1,12 +1,16 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
+import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
 import { ChevronRight, ChevronDown, FileText } from "lucide-react";
 import { FaFilePdf } from "react-icons/fa6";
 import API from "../services/api";
+import { AuthContext } from "../context/AuthContext";
 import "../styles/training.css";
 
 const TrainingMaterials = () => {
+    const navigate = useNavigate();
+    const { user } = useContext(AuthContext);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [documents, setDocuments] = useState([]);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -54,9 +58,60 @@ const TrainingMaterials = () => {
                             </button>
                             {isDropdownOpen && (
                                 <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: '8px', background: 'white', border: '1px solid #bbf7d0', borderRadius: '8px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)', zIndex: 50, minWidth: '180px', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-                                    <button style={{ padding: '12px 16px', textAlign: 'left', background: '#f0fdf4', border: 'none', borderBottom: '1px solid #dcfce7', cursor: 'pointer', fontSize: '14px', color: '#166534', fontWeight: '500', transition: 'background-color 0.2s' }} onMouseOver={(e) => e.target.style.background = '#dcfce7'} onMouseOut={(e) => e.target.style.background = '#f0fdf4'}>
-                                        Training Request
-                                    </button>
+                                    {user && (user.role === 'admin' || (user.role === 'sub_admin' && user.permissions?.includes('training'))) && (
+                                        <>
+                                            <button 
+                                                onClick={() => navigate("/training-request")}
+                                                style={{ padding: '12px 16px', textAlign: 'left', background: '#f0fdf4', border: 'none', borderBottom: '1px solid #dcfce7', cursor: 'pointer', fontSize: '14px', color: '#166534', fontWeight: '500', transition: 'background-color 0.2s' }} 
+                                                onMouseOver={(e) => e.target.style.background = '#dcfce7'} 
+                                                onMouseOut={(e) => e.target.style.background = '#f0fdf4'}
+                                            >
+                                                Training Request
+                                            </button>
+                                            {(user.role === 'admin' || (user.role === 'sub_admin' && user.permissions?.includes('training') && user.permissions?.includes('trainer'))) && (
+                                                <button 
+                                                    onClick={() => navigate("/admin-trainer-record")}
+                                                    style={{ padding: '12px 16px', textAlign: 'left', background: '#f0fdf4', border: 'none', borderBottom: '1px solid #dcfce7', cursor: 'pointer', fontSize: '14px', color: '#166534', fontWeight: '500', transition: 'background-color 0.2s' }} 
+                                                    onMouseOver={(e) => e.target.style.background = '#dcfce7'} 
+                                                    onMouseOut={(e) => e.target.style.background = '#f0fdf4'}
+                                                >
+                                                    Trainer Record
+                                                </button>
+                                            )}
+                                            <button 
+                                                onClick={() => navigate("/admin-trainer-dashboard")}
+                                                style={{ padding: '12px 16px', textAlign: 'left', background: '#f0fdf4', border: 'none', borderBottom: '1px solid #dcfce7', cursor: 'pointer', fontSize: '14px', color: '#166534', fontWeight: '500', transition: 'background-color 0.2s' }} 
+                                                onMouseOver={(e) => e.target.style.background = '#dcfce7'} 
+                                                onMouseOut={(e) => e.target.style.background = '#f0fdf4'}
+                                            >
+                                                Admin Trainer Dashboard
+                                            </button>
+                                            <button 
+                                                onClick={() => navigate("/admin-training-dashboard")}
+                                                style={{ padding: '12px 16px', textAlign: 'left', background: '#f0fdf4', border: 'none', borderBottom: '1px solid #dcfce7', cursor: 'pointer', fontSize: '14px', color: '#166534', fontWeight: '500', transition: 'background-color 0.2s' }} 
+                                                onMouseOver={(e) => e.target.style.background = '#dcfce7'} 
+                                                onMouseOut={(e) => e.target.style.background = '#f0fdf4'}
+                                            >
+                                                Admin Training Dashboard
+                                            </button>
+                                            <button 
+                                                onClick={() => navigate("/user-test")}
+                                                style={{ padding: '12px 16px', textAlign: 'left', background: '#f0fdf4', border: 'none', borderBottom: '1px solid #dcfce7', cursor: 'pointer', fontSize: '14px', color: '#166534', fontWeight: '500', transition: 'background-color 0.2s' }} 
+                                                onMouseOver={(e) => e.target.style.background = '#dcfce7'} 
+                                                onMouseOut={(e) => e.target.style.background = '#f0fdf4'}
+                                            >
+                                                User Test
+                                            </button>
+                                            <button 
+                                                onClick={() => navigate("/evaluation-dashboard")}
+                                                style={{ padding: '12px 16px', textAlign: 'left', background: '#f0fdf4', border: 'none', borderBottom: '1px solid #dcfce7', cursor: 'pointer', fontSize: '14px', color: '#166534', fontWeight: '500', transition: 'background-color 0.2s' }} 
+                                                onMouseOver={(e) => e.target.style.background = '#dcfce7'} 
+                                                onMouseOut={(e) => e.target.style.background = '#f0fdf4'}
+                                            >
+                                                Evaluation Dashboard
+                                            </button>
+                                        </>
+                                    )}
                                     <button style={{ padding: '12px 16px', textAlign: 'left', background: '#f0fdf4', border: 'none', borderBottom: '1px solid #dcfce7', cursor: 'pointer', fontSize: '14px', color: '#166534', fontWeight: '500', transition: 'background-color 0.2s' }} onMouseOver={(e) => e.target.style.background = '#dcfce7'} onMouseOut={(e) => e.target.style.background = '#f0fdf4'}>
                                         Training Library
                                     </button>

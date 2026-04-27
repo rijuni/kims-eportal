@@ -8,6 +8,7 @@ const Login = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState(null);
+    const [isLoggingIn, setIsLoggingIn] = useState(false);
     const { login, user } = useContext(AuthContext);
     const navigate = useNavigate();
 
@@ -18,11 +19,17 @@ const Login = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError(null);
+        setIsLoggingIn(true);
+        
+        // Brief delay to show progress
+        await new Promise(resolve => setTimeout(resolve, 600));
+        
         const res = await login(username, password);
         if (res.success) {
-            navigate('/');
+            navigate('/', { state: { loginSuccess: true } });
         } else {
             setError(res.message);
+            setIsLoggingIn(false);
         }
     };
 
@@ -32,7 +39,7 @@ const Login = () => {
                 <div className="login-header">
                     <img src={logo} alt="KIMS Logo" className="login-logo" />
                     <h1 className="login-title">KIMS EPORTAL</h1>
-                    <p className="login-subtitle">Sign in to access</p>
+                    <p className="login-subtitle">Log in to access</p>
                 </div>
                 {error && <div className="login-error">{error}</div>}
                 <form onSubmit={handleSubmit} className="login-form">
@@ -56,7 +63,13 @@ const Login = () => {
                             required
                         />
                     </div>
-                    <button type="submit" className="login-submit-btn hover-lift">Sign In</button>
+                    <button 
+                        type="submit" 
+                        className="login-submit-btn hover-lift"
+                        disabled={isLoggingIn}
+                    >
+                        {isLoggingIn ? "Logging In..." : "Log In"}
+                    </button>
                     <button type="button" className="login-back-btn" onClick={() => navigate('/')}>Back to Portal</button>
                 </form>
             </div>

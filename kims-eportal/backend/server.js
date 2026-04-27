@@ -28,7 +28,7 @@ app.use(cors());
 app.use(express.json());
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-// Create notice_pdfs table if it doesn't exist
+// Create notice_pdfs and training_requests tables if they don't exist
 async function initTables() {
     try {
         await pool.query(`
@@ -41,11 +41,298 @@ async function initTables() {
                 FOREIGN KEY (notice_id) REFERENCES notices(id) ON DELETE CASCADE
             )
         `);
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS training_requests (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                user_id INT,
+                name VARCHAR(255),
+                department VARCHAR(255),
+                module_subject VARCHAR(255),
+                topic VARCHAR(255),
+                sub_topic VARCHAR(255),
+                email VARCHAR(255),
+                contact VARCHAR(50),
+                branch_location VARCHAR(255),
+                start_date DATE,
+                trainer_name VARCHAR(255) DEFAULT 'n/a',
+                from_time VARCHAR(50) DEFAULT 'n/a',
+                to_time VARCHAR(50) DEFAULT 'n/a',
+                status VARCHAR(50) DEFAULT 'Pending',
+                nominees JSON,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+
+        // Update users table with extra fields
+        try {
+            await pool.query('ALTER TABLE users ADD COLUMN email VARCHAR(255)');
+        } catch (e) {}
+        try {
+            await pool.query('ALTER TABLE users ADD COLUMN contact VARCHAR(50)');
+        } catch (e) {}
+        try {
+            await pool.query('ALTER TABLE users ADD COLUMN department VARCHAR(255)');
+        } catch (e) {}
+        try {
+            await pool.query('ALTER TABLE users ADD COLUMN hinai_id VARCHAR(50)');
+        } catch (e) {}
+        try {
+            await pool.query('ALTER TABLE users ADD COLUMN title VARCHAR(20)');
+        } catch (e) {}
+        try {
+            await pool.query('ALTER TABLE users ADD COLUMN designation VARCHAR(255)');
+        } catch (e) {}
+
+        // Seed HR and Test users
+        const seedUsers = [
+            { username: 'admin', email: 'admin@kims.ac.in', contact: '0000000000', department: 'IT', hinai_id: '55', title: 'Mr.', designation: 'Super Admin' },
+            { username: 'Sansad Badajena', email: 'sansad.badajena@kims.ac.in', contact: '7008981734', department: 'HR', hinai_id: 'H1001', title: 'Mr.', designation: 'HR Executive' },
+            { username: 'Manoj Kumar Sethi', email: 'manojkumar.sethi@kims.ac.in', contact: '8260201162', department: 'HR', hinai_id: 'H1002', title: 'Mr.', designation: 'HR Assistant' },
+            { username: 'test_user', email: 'test@kims.ac.in', contact: '0000000000', department: 'IT', hinai_id: 'H999', title: 'Mr.', designation: 'System Admin' },
+            { username: 'test_user2', email: 'test2@kims.ac.in', contact: '1111111111', department: 'IT', hinai_id: '22', title: 'Ms.', designation: 'Junior Staff' }
+        ];
+
+        for (const user of seedUsers) {
+            const [existing] = await pool.query('SELECT id FROM users WHERE username = ?', [user.username]);
+            if (existing.length === 0) {
+                await pool.query(
+                    'INSERT INTO users (username, password, role, email, contact, department, hinai_id, title, designation) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                    [user.username, '$2b$10$dummyhash', 'user', user.email, user.contact, user.department, user.hinai_id, user.title, user.designation]
+                );
+            } else {
+                await pool.query(
+                    'UPDATE users SET email = ?, contact = ?, department = ?, hinai_id = ?, title = ?, designation = ? WHERE username = ?',
+                    [user.email, user.contact, user.department, user.hinai_id, user.title, user.designation, user.username]
+                );
+            }
+        }
+        try {
+            await pool.query('ALTER TABLE training_requests ADD COLUMN nominees JSON');
+        } catch (e) {}
+
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS user_sessions (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                user_id INT,
+                username VARCHAR(255),
+                login_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+                logout_time DATETIME NULL,
+                status ENUM('active', 'terminated', 'completed') DEFAULT 'active',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+
+        // Ensure username column exists (in case table was created with old schema)
+        try {
+            await pool.query('ALTER TABLE user_sessions ADD COLUMN username VARCHAR(255) AFTER user_id');
+        } catch (e) {}
+
+        // Ensure status enum is correct
+        try {
+            await pool.query("ALTER TABLE user_sessions MODIFY COLUMN status ENUM('active', 'terminated', 'completed') DEFAULT 'active'");
+        } catch (e) {}
+
+        // Add training_type and remarks to users for Trainer Dashboard
+        try {
+            await pool.query('ALTER TABLE users ADD COLUMN training_type VARCHAR(255)');
+        } catch (e) {}
+        try {
+            await pool.query('ALTER TABLE users ADD COLUMN training_remarks TEXT');
+        } catch (e) {}
+        try {
+            await pool.query('ALTER TABLE training_requests ADD COLUMN user_id INT');
+        } catch (e) {}
+        try {
+            await pool.query('ALTER TABLE training_requests ADD COLUMN training_type VARCHAR(255)');
+        } catch (e) {}
+        try {
+            await pool.query('ALTER TABLE training_requests ADD COLUMN remarks TEXT');
+        } catch (e) {}
+        try {
+            await pool.query('ALTER TABLE training_requests ADD COLUMN topic VARCHAR(255)');
+        } catch (e) {}
+        try {
+            await pool.query('ALTER TABLE training_requests ADD COLUMN sub_topic VARCHAR(255)');
+        } catch (e) {}
+        try {
+            await pool.query('ALTER TABLE training_requests ADD COLUMN updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP');
+        } catch (e) {}
     } catch (err) {
-        console.error("Error creating notice_pdfs table:", err);
+        console.error("Error creating tables:", err);
     }
 }
 initTables();
+
+// --- TRAINING REQUESTS ROUTES ---
+app.post("/api/training-requests", async (req, res) => {
+    try {
+        const { userId, dept, module, topic, subTopic, name, email, contact, branch, requestedDate, nominees } = req.body;
+        // Format date to YYYY-MM-DD safely
+        let formattedDate = null;
+        if (requestedDate) {
+            try {
+                formattedDate = new Date(requestedDate).toISOString().split('T')[0];
+            } catch (e) {
+                console.error("Date formatting error:", e);
+            }
+        }
+        
+        await pool.query(
+            'INSERT INTO training_requests (user_id, name, department, module_subject, topic, sub_topic, email, contact, branch_location, start_date, nominees) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            [userId, name, dept, module, topic, subTopic, email, contact, branch, formattedDate, JSON.stringify(nominees || [])]
+        );
+        res.json({ success: true, message: "Training Request Submitted Successfully" });
+    } catch (err) {
+        console.error("Error inserting training request:", err);
+        res.status(500).json({ success: false, message: "Internal server error" });
+    }
+});
+app.get("/api/training-requests", async (req, res) => {
+    try {
+        const [rows] = await pool.query(`
+            SELECT tr.*, tu.department as trainer_dept
+            FROM training_requests tr
+            LEFT JOIN users tu ON tr.trainer_name = tu.username
+            ORDER BY tr.created_at DESC
+        `);
+        res.json(rows);
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+app.get("/api/trainer-data", async (req, res) => {
+    try {
+        const query = `
+            SELECT 
+                tr.id, tr.trainer_name as username, tr.branch_location as branch, 
+                tr.start_date, tr.topic, tr.sub_topic, tr.module_subject as module, 
+                tr.from_time, tr.to_time, tr.nominees, tr.status,
+                u.department, u.hinai_id, u.designation
+            FROM training_requests tr
+            LEFT JOIN users u ON tr.trainer_name = u.username
+            ORDER BY tr.created_at DESC
+        `;
+        const [trainers] = await pool.query(query);
+        res.json(trainers);
+    } catch (err) {
+        console.error("Trainer Data Error:", err);
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+app.get("/api/trainer-records", async (req, res) => {
+    try {
+        const query = `
+            SELECT 
+                tr.id as request_id, tr.id, tr.trainer_name, tr.training_type, tr.remarks, 
+                tr.updated_at as last_training_update, tr.branch_location as branch,
+                tr.start_date, tr.topic, tr.sub_topic, tr.module_subject as module,
+                tr.from_time, tr.to_time, tr.nominees, tr.status,
+                u.department as trainer_dept, u.hinai_id, u.designation, u.username
+            FROM training_requests tr
+            LEFT JOIN users u ON tr.trainer_name = u.username
+            ORDER BY tr.created_at DESC
+        `;
+        const [records] = await pool.query(query);
+        res.json(records);
+    } catch (err) {
+        console.error("Trainer Records Error:", err);
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+app.put("/api/trainer-data/:id", async (req, res) => {
+    try {
+        const { id } = req.params; // This is the request_id now
+        const { trainer_name, training_type, remarks } = req.body;
+        await pool.query(
+            'UPDATE training_requests SET trainer_name = ?, training_type = ?, remarks = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+            [trainer_name, training_type, remarks, id]
+        );
+        res.json({ success: true, message: "Record updated successfully" });
+    } catch (err) {
+        console.error("Trainer Data Update Error:", err);
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+// Birthday API - MUST BE ABOVE :id route
+app.get("/api/employees/birthdays", async (req, res) => {
+    try {
+        const [rows] = await pool.query(`
+            SELECT *, 
+            STR_TO_DATE(date_of_birth, '%d-%m-%Y') as dob_date
+            FROM birthdays 
+            ORDER BY 
+            CASE 
+                WHEN MONTH(STR_TO_DATE(date_of_birth, '%d-%m-%Y')) > MONTH(CURDATE()) 
+                     OR (MONTH(STR_TO_DATE(date_of_birth, '%d-%m-%Y')) = MONTH(CURDATE()) 
+                         AND DAY(STR_TO_DATE(date_of_birth, '%d-%m-%Y')) >= DAY(CURDATE())) 
+                THEN 0 
+                ELSE 1 
+            END,
+            MONTH(STR_TO_DATE(date_of_birth, '%d-%m-%Y')), 
+            DAY(STR_TO_DATE(date_of_birth, '%d-%m-%Y'))
+        `);
+        res.json(rows);
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+// Mock Employee Search API - Linked to Users table
+app.get("/api/employees/:id", async (req, res) => {
+    const { id } = req.params;
+    
+    try {
+        // Try to find in the actual users table by ID, HINAI ID, or Username
+        const [users] = await pool.query(
+            'SELECT hinai_id, title, username as name, designation, department, contact, email FROM users WHERE id = ? OR hinai_id = ? OR username = ?', 
+            [id, id, id]
+        );
+        
+        if (users.length > 0) {
+            return res.json({ success: true, employee: users[0] });
+        }
+
+        // Fallback to mock data for demonstration
+        const mockEmployees = {
+            "101": { hinai_id: "H001", title: "Mr.", name: "John Doe", designation: "Staff Nurse", department: "Nursing", contact: "9876543210", email: "john@kims.in" },
+            "102": { hinai_id: "H002", title: "Ms.", name: "Jane Smith", designation: "Medical Officer", department: "OPD", contact: "8765432109", email: "jane@kims.in" },
+            "103": { hinai_id: "H003", title: "Mr.", name: "Robert Wilson", designation: "ICT Analyst", department: "IT", contact: "7654321098", email: "robert@kims.in" }
+        };
+
+        if (mockEmployees[id]) {
+            res.json({ success: true, employee: mockEmployees[id] });
+        } else {
+            res.json({ 
+                success: true, 
+                employee: { 
+                    hinai_id: `H${id}`, 
+                    title: "Mr./Ms.", 
+                    name: `Staff Member ${id}`, 
+                    designation: "General Staff", 
+                    department: "Hospital Services", 
+                    contact: "N/A", 
+                    email: `${id}@kims.in` 
+                } 
+            });
+        }
+    } catch (err) {
+        console.error("Employee search error:", err);
+        res.status(500).json({ success: false, message: "Error searching Account Center" });
+    }
+});
+
+app.get("/api/training-requests", async (req, res) => {
+    try {
+        const [requests] = await pool.query('SELECT * FROM training_requests ORDER BY created_at DESC');
+        res.json(requests);
+    } catch (err) {
+        res.status(500).json({ success: false, message: "Internal server error" });
+    }
+});
 
 // Auth Route
 app.post("/api/login", async (req, res) => {
@@ -69,17 +356,30 @@ app.post("/api/login", async (req, res) => {
 
         // Create JWT token
         const token = jwt.sign(
-            { id: user.id, username: user.username, role: user.role },
+            { id: user.id, username: user.username, role: user.role, permissions: user.permissions },
             process.env.JWT_SECRET || 'secret',
             { expiresIn: '1d' }
         );
+
+        // Record session
+        try {
+            console.log("Attempting to record session for user:", user.username, "ID:", user.id);
+            const [sessionResult] = await pool.query(
+                'INSERT INTO user_sessions (user_id, username, login_time, status) VALUES (?, ?, CURRENT_TIMESTAMP, ?)',
+                [user.id, user.username, 'active']
+            );
+            console.log("Session recorded successfully. ID:", sessionResult.insertId);
+        } catch (sessionErr) {
+            console.error("CRITICAL: Failed to record login session:", sessionErr);
+        }
 
         res.json({
             success: true,
             user: {
                 id: user.id,
                 username: user.username,
-                role: user.role
+                role: user.role,
+                permissions: user.permissions
             },
             token
         });
@@ -90,11 +390,80 @@ app.post("/api/login", async (req, res) => {
     }
 });
 
+// Sessions API
+app.get("/api/sessions", async (req, res) => {
+    try {
+        const query = `
+            SELECT s.*, u.hinai_id as emp_id 
+            FROM user_sessions s
+            LEFT JOIN users u ON s.user_id = u.id
+            ORDER BY s.login_time DESC
+        `;
+        const [sessions] = await pool.query(query);
+        res.json(sessions);
+    } catch (err) {
+        res.status(500).json({ success: false, message: "Internal server error" });
+    }
+});
+
+app.post("/api/sessions/:id/terminate", async (req, res) => {
+    const { id } = req.params;
+    try {
+        await pool.query(
+            'UPDATE user_sessions SET logout_time = CURRENT_TIMESTAMP, status = ? WHERE id = ?',
+            ['terminated', id]
+        );
+        res.json({ success: true, message: "Session forced terminated" });
+    } catch (err) {
+        res.status(500).json({ success: false, message: "Internal server error" });
+    }
+});
+
+app.post("/api/logout", async (req, res) => {
+    const { userId } = req.body;
+    try {
+        if (userId) {
+            // Find the most recent active session for this user and close it
+            await pool.query(
+                'UPDATE user_sessions SET logout_time = CURRENT_TIMESTAMP, status = ? WHERE user_id = ? AND status = ? ORDER BY login_time DESC LIMIT 1',
+                ['completed', userId, 'active']
+            );
+        }
+        res.json({ success: true });
+    } catch (err) {
+        console.error("Logout recording error:", err);
+        res.status(500).json({ success: false });
+    }
+});
+
 // --- USER MANAGEMENT ROUTES ---
 app.get("/api/users", async (req, res) => {
     try {
-        const [users] = await pool.query('SELECT id, username, role, created_at FROM users ORDER BY created_at DESC');
+        const [users] = await pool.query('SELECT id, username, role, permissions, email, contact, department, hinai_id, title, designation, created_at FROM users ORDER BY created_at DESC');
         res.json(users);
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+app.put("/api/users/:id/role", async (req, res) => {
+    const { id } = req.params;
+    const { role, permissions } = req.body;
+
+    try {
+        if (role && !['admin', 'sub_admin', 'user'].includes(role)) {
+            return res.status(400).json({ success: false, message: "Invalid role" });
+        }
+
+        if (role && permissions !== undefined) {
+            await pool.query('UPDATE users SET role = ?, permissions = ? WHERE id = ?', [role, JSON.stringify(permissions), id]);
+        } else if (role) {
+            await pool.query('UPDATE users SET role = ? WHERE id = ?', [role, id]);
+        } else if (permissions !== undefined) {
+            await pool.query('UPDATE users SET permissions = ? WHERE id = ?', [JSON.stringify(permissions), id]);
+        }
+        
+        res.json({ success: true, message: "User updated successfully" });
     } catch (err) {
         res.status(500).json({ success: false, message: err.message });
     }
@@ -493,34 +862,21 @@ app.delete("/api/events/:id", async (req, res) => {
 });
 
 // --- BIRTHDAYS ROUTES ---
-app.get("/api/employees/birthdays", async (req, res) => {
-    try {
-        const [rows] = await pool.query(`
-            SELECT *, 
-            STR_TO_DATE(date_of_birth, '%d-%m-%Y') as dob_date
-            FROM birthdays 
-            ORDER BY 
-                CASE 
-                    WHEN MONTH(STR_TO_DATE(date_of_birth, '%d-%m-%Y')) > MONTH(CURDATE()) 
-                         OR (MONTH(STR_TO_DATE(date_of_birth, '%d-%m-%Y')) = MONTH(CURDATE()) 
-                             AND DAY(STR_TO_DATE(date_of_birth, '%d-%m-%Y')) >= DAY(CURDATE())) 
-                    THEN 0 
-                    ELSE 1 
-                END,
-                MONTH(STR_TO_DATE(date_of_birth, '%d-%m-%Y')), 
-                DAY(STR_TO_DATE(date_of_birth, '%d-%m-%Y'))
-        `);
-        res.json(rows);
-    } catch (err) {
-        res.status(500).json({ success: false, message: err.message });
-    }
-});
+
 
 app.post("/api/birthdays/upload", upload.single('excelFile'), async (req, res) => {
     try {
         if (!req.file) {
             return res.status(400).json({ success: false, message: "No file uploaded" });
         }
+
+        // Save file to permanent storage
+        const excelDir = path.join(__dirname, 'uploads', 'birthdays');
+        if (!fs.existsSync(excelDir)) fs.mkdirSync(excelDir, { recursive: true });
+        
+        const fileName = `birthday_sync_${Date.now()}_${req.file.originalname}`;
+        const filePath = path.join(excelDir, fileName);
+        fs.writeFileSync(filePath, req.file.buffer);
 
         const workbook = xlsx.read(req.file.buffer, { type: 'buffer' });
         let allBirthdayRows = [];
@@ -563,9 +919,7 @@ app.post("/api/birthdays/upload", upload.single('excelFile'), async (req, res) =
 
                     if (rawDob) {
                         const numericDob = Number(rawDob);
-                        // Check if it's a number and within a reasonable Excel date range (e.g., > 10000)
                         if (!isNaN(numericDob) && numericDob > 10000) {
-                            // Convert Excel serial date to JS Date object parts
                             const dateObj = xlsx.SSF.parse_date_code(numericDob);
                             if (dateObj) {
                                 const d = dateObj.d < 10 ? `0${dateObj.d}` : dateObj.d;
@@ -593,27 +947,43 @@ app.post("/api/birthdays/upload", upload.single('excelFile'), async (req, res) =
             return res.status(400).json({ success: false, message: "Invalid Excel Format for Birthday" });
         }
 
+        // SMART SYNC: Fetch existing images before clearing
+        const [existingBirthdays] = await pool.query('SELECT name, image FROM birthdays WHERE image IS NOT NULL');
+        const imageMap = {};
+        existingBirthdays.forEach(b => { imageMap[b.name.toLowerCase()] = b.image; });
+
         // Drop previous records
         await pool.query('TRUNCATE TABLE birthdays');
 
         for (const emp of allBirthdayRows) {
+            const preservedImage = imageMap[emp.name.toLowerCase()] || null;
             await pool.query(
-                'INSERT INTO birthdays (name, department, date_of_birth) VALUES (?, ?, ?)',
-                [emp.name, emp.department, emp.date_of_birth]
+                'INSERT INTO birthdays (name, department, date_of_birth, image) VALUES (?, ?, ?, ?)',
+                [emp.name, emp.department, emp.date_of_birth, preservedImage]
             );
         }
 
-        // Track last uploaded file
+        // Track last uploaded file info
+        const fileUrl = `/uploads/birthdays/${fileName}`;
         await pool.query(
             'INSERT INTO system_settings (setting_key, setting_value) VALUES (?, ?) ON DUPLICATE KEY UPDATE setting_value = ?',
             ['last_birthday_sync_file', req.file.originalname, req.file.originalname]
         );
+        await pool.query(
+            'INSERT INTO system_settings (setting_key, setting_value) VALUES (?, ?) ON DUPLICATE KEY UPDATE setting_value = ?',
+            ['last_birthday_sync_url', fileUrl, fileUrl]
+        );
 
-        res.json({ success: true, message: "Birthdays updated successfully from Excel!", filename: req.file.originalname });
+        res.json({ 
+            success: true, 
+            message: "Birthdays updated successfully!", 
+            filename: req.file.originalname,
+            fileUrl: fileUrl
+        });
 
     } catch (err) {
-        console.error("Excel Upload Error:", err);
-        res.status(500).json({ success: false, message: "Failed to process Excel file" });
+        console.error("Birthday upload error:", err);
+        res.status(500).json({ success: false, message: err.message });
     }
 });
 
@@ -979,8 +1349,10 @@ app.get("/", (req, res) => {
 });
 
 // Start Server
-app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Server is running on port ${PORT}`);
-    console.log(`Local Access: http://localhost:${PORT}`);
-    console.log(`Network Access: http://10.11.173.89:${PORT}`);
+initTables().then(() => {
+    app.listen(PORT, "0.0.0.0", () => {
+        console.log(`Server is running on port ${PORT}`);
+        console.log(`Local Access: http://localhost:${PORT}`);
+        console.log(`Network Access: http://10.11.173.89:${PORT}`);
+    });
 });

@@ -7,7 +7,7 @@ const NoticeBoard = () => {
 
   useEffect(() => {
     API.get("/notices?public=true")
-      .then((res) => { if (res.data) setNotices(res.data) })
+      .then((res) => { if (Array.isArray(res.data)) setNotices(res.data) })
       .catch((err) => console.error(err));
   }, []);
 

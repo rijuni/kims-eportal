@@ -1,0 +1,175 @@
+/* UserSessions.css - Styling for Session Management */
+
+.sessions-glass-card {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 28px;
+    padding: 12px;
+    width: 100%;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
+    margin-top: 10px;
+}
+
+.glass-header>div:first-child {
+    text-align: left;
+    /* Keep left alignment relative to the back button */
+}
+
+.glass-title {
+    margin: 0;
+    line-height: 1.2;
+    margin-left: 10px;
+    margin-bottom: -5px;
+}
+
+.glass-subtitle {
+    margin: 0;
+    margin-top: 2px;
+    margin-left: 10px;
+    font-size: 11px;
+    color: #475569;
+}
+
+.account-table-wrapper {
+    width: 100% !important;
+    overflow-x: scroll !important;
+    border-radius: 12px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 !important;
+    /* Force it to fill the height of the container */
+    scrollbar-width: auto !important;
+    scrollbar-color: #475569 #f1f5f9 !important;
+}
+
+#sessions-table-scroll {
+    width: 100% !important;
+    overflow-x: scroll !important;
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 !important;
+}
+
+/* Custom Scrollbar for the table - High Visibility */
+.account-table-wrapper::-webkit-scrollbar {
+    height: 10px !important;
+    display: block !important;
+}
+
+.account-table-wrapper::-webkit-scrollbar-track {
+    background: #f1f5f9 !important;
+    border-radius: 10px !important;
+}
+
+.account-table-wrapper::-webkit-scrollbar-thumb {
+    background: #475569 !important;
+    /* Dark Slate for high contrast */
+    border-radius: 10px !important;
+    border: 2px solid #f1f5f9 !important;
+    transition: all 0.3s !important;
+}
+
+.account-table-wrapper::-webkit-scrollbar-thumb:hover {
+    background: #1e293b !important;
+}
+
+/* Optimize spacing to remove gaps */
+.sessions-glass-card .account-table {
+    min-width: 1000px !important;
+    table-layout: auto;
+}
+
+/* Specific column widths for better density */
+.sessions-glass-card .account-table th:nth-child(1),
+.sessions-glass-card .account-table td:nth-child(1) {
+    width: 80px;
+}
+
+.sessions-glass-card .account-table th:nth-child(2),
+.sessions-glass-card .account-table td:nth-child(2) {
+    width: 100px;
+}
+
+.sessions-glass-card .account-table th:nth-child(3),
+.sessions-glass-card .account-table td:nth-child(3),
+.sessions-glass-card .account-table th:nth-child(4),
+.sessions-glass-card .account-table td:nth-child(4) {
+    width: 160px;
+}
+
+/* Tighter spacing for the end columns */
+.sessions-glass-card .account-table th:nth-child(5),
+.sessions-glass-card .account-table td:nth-child(5),
+.sessions-glass-card .account-table th:nth-child(6),
+.sessions-glass-card .account-table td:nth-child(6) {
+    width: 100px;
+}
+
+.sessions-glass-card .account-table th:nth-child(7),
+.sessions-glass-card .account-table td:nth-child(7) {
+    width: 150px;
+}
+
+.sessions-glass-card .account-table th,
+.sessions-glass-card .account-table td {
+    text-align: center !important;
+}
+
+.terminate-btn-premium {
+    background: #fff1f2;
+    color: #e11d48;
+    border: 1px solid #fecdd3;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 10.5px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    margin: 0 auto;
+}
+
+.terminate-btn-premium:hover {
+    background: #e11d48;
+    color: white !important;
+    box-shadow: 0 4px 12px rgba(225, 29, 72, 0.3);
+    transform: translateY(-1px);
+}
+
+.terminate-btn-premium:active {
+    transform: translateY(0);
+}
+
+.pulse-circle {
+    width: 8px;
+    height: 8px;
+    background-color: #22c55e;
+    border-radius: 50%;
+    position: relative;
+    display: inline-block;
+}
+
+.pulse-circle::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #22c55e;
+    border-radius: 50%;
+    animation: account-ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+    opacity: 0.75;
+}
+
+@keyframes account-ping {
+
+    75%,
+    100% {
+        transform: scale(2.5);
+        opacity: 0;
+    }
+}

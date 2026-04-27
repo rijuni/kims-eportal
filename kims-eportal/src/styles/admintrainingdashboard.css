@@ -1,0 +1,311 @@
+.admin-training-header-banner {
+    background: linear-gradient(135deg, #cbd5e1 0%, #fef08a 100%);
+    padding: 15px 32px 15px 15px;
+    text-align: center;
+    border-radius: 12px 12px 0 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    margin-bottom: 0;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.admin-training-header-banner h1 {
+    margin: 0 0 0 15px;
+    color: #1e293b;
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    font-family: 'Poppins', sans-serif;
+}
+
+.back-btn-dashboard {
+    background: white;
+    border: none;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #154581;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s;
+    flex-shrink: 0;
+}
+
+.back-btn-dashboard:hover {
+    background: #154581;
+    color: white;
+    box-shadow: 0 4px 15px rgba(21, 69, 129, 0.2);
+}
+
+
+.admin-training-table-wrapper {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+    border-radius: 0 0 12px 12px;
+    overflow: visible;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.admin-training-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 10.5px;
+    /* Reduced font size for high density */
+}
+
+.admin-training-table thead {
+    background: #154581;
+    /* KIMS Blue theme */
+    color: white;
+}
+
+.admin-training-table th {
+    padding: 10px 12px;
+    text-align: left;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: 9.5px;
+}
+
+.admin-training-table td {
+    padding: 7px 12px;
+    border-bottom: 1px solid #f1f5f9;
+    border-right: 1px solid #f1f5f9;
+    color: #334155;
+    font-weight: 500;
+}
+
+.admin-training-table tr:hover {
+    background-color: rgba(31, 164, 99, 0.03) !important;
+    /* Slight KIMS Green hint */
+}
+
+.admin-training-table tr.even-row {
+    background-color: #f8fafc;
+}
+
+.icon-col {
+    width: 32px;
+    text-align: center !important;
+}
+
+.status-col {
+    width: 85px;
+}
+
+.status-cell {
+    font-weight: 700;
+    text-align: center;
+    border-radius: 4px;
+    text-transform: uppercase;
+    font-size: 8.5px;
+}
+
+.status-scheduled {
+    background-color: #fef9c3 !important;
+    color: #854d0e !important;
+}
+
+.status-progress {
+    background-color: #dcfce7 !important;
+    color: #166534 !important;
+}
+
+.status-pending {
+    background-color: #f1f5f9 !important;
+    color: #475569 !important;
+}
+
+/* Grouped Rows */
+.group-header-row {
+    background-color: #ffffff;
+    transition: background-color 0.2s;
+}
+
+.group-header-row:hover {
+    background-color: #f8fafc;
+}
+
+.group-toggle-btn {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.group-toggle-btn:hover {
+    background: #e2e8f0;
+    color: #0f172a;
+}
+
+.group-toggle-btn.expanded {
+    background: #0f172a;
+    color: #ffffff;
+    border-color: #0f172a;
+}
+
+.sub-trainee-container {
+    padding: 10px 20px 20px 50px;
+    background: #ffffff;
+    border-top: 1px solid #e2e8f0;
+}
+
+.sub-trainee-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 10px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.sub-trainee-table thead th {
+    background: #f1f5f9;
+    color: #475569;
+    font-weight: 700;
+    padding: 8px 12px;
+    border-bottom: 1px solid #e2e8f0;
+    text-align: left;
+}
+
+.sub-trainee-table tbody td {
+    padding: 6px 12px;
+    border-bottom: 1px solid #f8fafc;
+    color: #334155;
+}
+
+/* Scroll to top button */
+.scroll-top-btn {
+    position: fixed;
+    bottom: 25px;
+    right: 25px;
+    width: 34px;
+    height: 34px;
+    background: #154581;
+    color: white;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 8px 15px rgba(21, 69, 129, 0.2);
+    z-index: 100;
+    transition: all 0.3s;
+}
+
+.scroll-top-btn:hover {
+    transform: translateY(-2px);
+    background: #1FA463;
+}
+
+/* Integrated Header Search Wrapper */
+.header-search-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.header-search-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background: #ffffff;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 50px;
+    padding: 3px 4px 3px 15px;
+    width: 130px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.header-search-container:focus-within {
+    width: 200px;
+    background: #ffffff;
+    border-color: #154581;
+    box-shadow: 0 10px 20px -5px rgba(21, 69, 129, 0.15);
+}
+
+.header-search-label {
+    font-size: 11px;
+    font-weight: 800;
+    color: #154581;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-right: 8px;
+    border-right: 1.5px solid #e2e8f0;
+    padding-right: 8px;
+    height: 14px;
+    /* Ultra-short divider */
+    display: flex;
+    align-items: center;
+}
+
+.header-search-input {
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #0f172a;
+    font-size: 12px;
+    font-weight: 600;
+    width: 100%;
+}
+
+.header-search-input::placeholder {
+    color: #94a3b8;
+    font-weight: 400;
+}
+
+.header-search-icon-box {
+    width: 26px;
+    height: 26px;
+    background: #154581;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    transition: all 0.2s;
+    flex-shrink: 0;
+    margin-left: 5px;
+}
+
+.header-search-container:focus-within .header-search-icon-box {
+    transform: scale(1.05);
+    background: #1FA463;
+    /* KIMS Green on focus */
+}
+
+.support-desk-tab {
+    position: fixed;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%) rotate(-90deg);
+    transform-origin: right center;
+    background: #0f172a;
+    color: white;
+    padding: 10px 18px;
+    font-weight: 700;
+    font-size: 10px;
+    border-radius: 8px 8px 0 0;
+    cursor: pointer;
+    z-index: 100;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}

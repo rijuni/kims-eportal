@@ -14,6 +14,11 @@ import ManageEvents from "./pages/ManageEvents";
 import ManageTelephone from "./pages/ManageTelephone";
 import ManageTraining from "./pages/ManageTraining";
 import AccountCenter from "./pages/AccountCenter";
+import TrainingRequest from "./pages/TrainingRequest";
+import AdminTrainingDashboard from "./pages/AdminTrainingDashboard";
+import AdminTrainerDashboard from "./pages/AdminTrainerDashboard";
+import TrainerRecord from "./pages/TrainerRecord";
+import UserSessions from "./pages/UserSessions";
 
 function App() {
   return (
@@ -34,6 +39,11 @@ function App() {
           <Route path="/admin/manage-telephone" element={<ManageTelephone />} />
           <Route path="/admin/manage-training" element={<ManageTraining />} />
           <Route path="/account-center" element={<AccountCenter />} />
+          <Route path="/user-sessions" element={<UserSessions />} />
+          <Route path="/training-request" element={<TrainingRequest />} />
+          <Route path="/admin-training-dashboard" element={<AdminTrainingDashboard />} />
+          <Route path="/admin-trainer-dashboard" element={<AdminTrainerDashboard />} />
+          <Route path="/admin-trainer-record" element={<TrainerRecord />} />
         </Routes>
       </Router>
     </AuthProvider>

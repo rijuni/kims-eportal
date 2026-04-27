@@ -1,0 +1,367 @@
+/* AdminTrainerDashboard.css - Matching Admin Training Dashboard Style */
+
+.trainer-dashboard-container {
+    padding: 20px;
+    background: transparent;
+    min-height: calc(100vh - 80px);
+}
+
+.trainer-content-wrapper {
+    max-width: 1400px;
+    margin: 0 auto;
+    width: 100%;
+    position: relative;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+/* Matching yellow header from Admin Training Dashboard */
+.trainer-header-banner {
+    background: linear-gradient(135deg, #cbd5e1 0%, #fef08a 100%);
+    padding: 15px 25px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    width: 100%;
+    position: relative;
+}
+
+.trainer-header-banner h1 {
+    color: #1e293b;
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin: 0;
+    letter-spacing: -0.5px;
+    flex: 1;
+    text-align: center;
+}
+
+.back-btn-trainer {
+    background: white;
+    border: none;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #154581;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s;
+}
+
+.back-btn-trainer:hover {
+    background: #154581;
+    color: white;
+    transform: scale(1.05);
+}
+
+.refresh-btn-trainer {
+    background: #154581;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.refresh-btn-trainer:hover {
+    background: #1FA463;
+    transform: translateY(-1px);
+}
+
+.trainer-table-card {
+    background: white;
+    width: 100%;
+}
+
+.trainer-table-header {
+    padding: 12px 20px;
+    border-bottom: 1px solid #f1f5f9;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f8fafc;
+}
+
+.trainer-table-header h2 {
+    font-size: 13px;
+    font-weight: 700;
+    color: #475569;
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.trainer-table-wrapper {
+    overflow-x: auto;
+}
+
+.trainer-premium-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+/* Matching KIMS Blue Header */
+.trainer-premium-table thead {
+    background: #154581;
+    color: white;
+}
+
+.trainer-premium-table th {
+    padding: 10px 12px;
+    text-align: center;
+    font-size: 9.5px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.trainer-premium-table td {
+    padding: 8px 12px;
+    font-size: 11px;
+    color: #334155;
+    border-bottom: 1px solid #f1f5f9;
+    border-right: 1px solid #f1f5f9;
+    text-align: center;
+    font-weight: 500;
+}
+
+/* Matching Name alignment */
+.trainer-premium-table td:nth-child(2),
+.trainer-premium-table th:nth-child(2) {
+    text-align: left;
+}
+
+/* Grouped Rows */
+.group-header-row {
+    background-color: #ffffff;
+    transition: background-color 0.2s;
+}
+
+.group-header-row:hover {
+    background-color: #f8fafc;
+}
+
+.group-header-row.active {
+    background-color: #f1f5f9;
+    border-left: 4px solid #3b82f6;
+}
+
+.group-toggle-btn {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.group-toggle-btn:hover {
+    background: #e2e8f0;
+    color: #0f172a;
+    transform: scale(1.1);
+}
+
+.group-toggle-btn.expanded {
+    background: #0f172a;
+    color: #ffffff;
+    border-color: #0f172a;
+}
+
+.sub-trainee-row-wrapper {
+    background-color: #f8fafc;
+}
+
+.sub-trainee-container {
+    padding: 15px 30px 20px 60px;
+    background: #ffffff;
+    border-top: 1px solid #e2e8f0;
+    border-bottom: 1px solid #e2e8f0;
+    box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.05);
+}
+
+.sub-trainee-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 11px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.sub-trainee-table thead th {
+    background: #f1f5f9;
+    color: #475569;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 10px 15px;
+    border-bottom: 2px solid #e2e8f0;
+    text-align: left;
+}
+
+.sub-trainee-table tbody td {
+    padding: 8px 15px;
+    border-bottom: 1px solid #f1f5f9;
+    color: #334155;
+}
+
+.sub-trainee-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.sub-trainee-table tbody tr:hover {
+    background-color: #f8fafc;
+}
+
+.trainer-premium-table tr.group-header-row td {
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.trainer-premium-table tr.sub-trainee-row-wrapper td {
+    padding: 0;
+}
+
+.trainer-premium-table tr:hover {
+    background-color: rgba(31, 164, 99, 0.03) !important;
+}
+
+.trainer-premium-table tr:nth-child(even) {
+    background-color: #f8fafc;
+}
+
+/* Specific Light Theme for Inputs within the high-density table */
+.trainer-premium-table select,
+.trainer-premium-table input {
+    background: #ffffff !important;
+    color: #1e293b !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 4px !important;
+    padding: 4px 8px !important;
+    font-size: 10px !important;
+    font-weight: 600 !important;
+    width: 100% !important;
+    outline: none !important;
+}
+
+.trainer-premium-table select:focus,
+.trainer-premium-table input:focus {
+    border-color: #154581 !important;
+    box-shadow: 0 0 0 2px rgba(21, 69, 129, 0.1) !important;
+}
+
+.trainer-name-cell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.save-btn-trainer {
+    background: #154581;
+    color: white;
+    border: none;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.save-btn-trainer:hover {
+    background: #1FA463;
+    transform: scale(1.05);
+}
+
+.save-btn-trainer:disabled {
+    background: #94a3b8;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Explicit Light Theme Overrides for Search and Filter */
+.trainer-table-header input,
+.trainer-table-header select {
+    background-color: #ffffff !important;
+    color: #1e293b !important;
+    border: 1px solid #cbd5e1 !important;
+    height: 32px !important; /* Fixed height for alignment */
+    font-size: 11px !important;
+    border-radius: 6px !important;
+}
+
+.trainer-table-header input {
+    padding-left: 32px !important; /* Room for search icon */
+}
+
+.trainer-table-header select {
+    padding-left: 32px !important; /* Room for filter icon */
+    padding-right: 24px !important; /* Room for chevron */
+    cursor: pointer !important;
+    appearance: none !important;
+}
+
+.trainer-table-header input::placeholder {
+    color: #94a3b8 !important;
+}
+
+.trainer-table-header button {
+    background-color: #ffffff !important;
+    color: #64748b !important;
+    border: 1px solid #cbd5e1 !important;
+    height: 32px !important; /* Match input height */
+    padding: 0 12px !important;
+    font-size: 11px !important;
+    border-radius: 6px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    cursor: pointer !important;
+}
+
+.trainer-table-header button:hover,
+.trainer-table-header select:hover {
+    background-color: #f8fafc !important;
+    border-color: #154581 !important;
+}
+
+.trainer-table-header svg {
+    color: #64748b !important;
+}
+
+.trainer-table-header .relative svg {
+    pointer-events: none !important;
+}
+
+.trainer-table-header .relative:first-child svg {
+    left: 10px !important;
+}
+
+.trainer-table-header .relative:last-child svg:first-child {
+    left: 10px !important;
+}
+
+.trainer-table-header .relative:last-child svg:last-child {
+    right: 8px !important;
+}

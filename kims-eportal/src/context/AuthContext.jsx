@@ -16,7 +16,7 @@ export const AuthProvider = ({ children }) => {
                     const today = new Date();
                     today.setHours(0, 0, 0, 0);
 
-                    const hasHoliday = res.data.some(h => {
+                    const hasHoliday = Array.isArray(res.data) && res.data.some(h => {
                         if (!h.date) return false;
                         let hDate;
                         const dmyMatch = h.date.trim().match(/^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{2,4})$/);
@@ -32,7 +32,7 @@ export const AuthProvider = ({ children }) => {
                         hDate.setHours(0, 0, 0, 0);
                         return hDate.getTime() === today.getTime();
                     });
-                    setIsHolidayToday(hasHoliday);
+                    setIsHolidayToday(!!hasHoliday);
                 }
             } catch (err) {
                 console.error("Global holiday check failed:", err);
@@ -71,10 +71,18 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    const logout = () => {
-        setUser(null);
-        localStorage.removeItem('kims_user');
-        localStorage.removeItem('kims_token');
+    const logout = async () => {
+        try {
+            if (user?.id) {
+                await API.post('/logout', { userId: user.id });
+            }
+        } catch (err) {
+            console.error("Failed to notify server of logout:", err);
+        } finally {
+            setUser(null);
+            localStorage.removeItem('kims_user');
+            localStorage.removeItem('kims_token');
+        }
     };
 
     return (

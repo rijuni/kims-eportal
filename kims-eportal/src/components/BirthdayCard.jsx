@@ -7,13 +7,13 @@ const BirthdayCard = () => {
 
   useEffect(() => {
     API.get("/employees/birthdays")
-      .then((res) => { if (res.data) setBirthdays(res.data) })
+      .then((res) => { if (Array.isArray(res.data)) setBirthdays(res.data) })
       .catch((err) => console.error(err));
   }, []);
 
   return (
     <div className="card birthdays-card">
-      
+
       {birthdays.map((b) => {
         // Today Detection Logic
         const today = new Date();
@@ -22,9 +22,23 @@ const BirthdayCard = () => {
         const mStr = mNumeric < 10 ? `0${mNumeric}` : String(mNumeric);
         const mLong = today.toLocaleString('default', { month: 'long' }).toLowerCase();
         const mShort = today.toLocaleString('default', { month: 'short' }).toLowerCase();
-        
+
         const dob = String(b.date_of_birth || '').toLowerCase();
-        const isToday = dob.includes(`${dStr}-${mStr}`) || (dob.includes(dStr) && (dob.includes(mLong) || dob.includes(mShort)));
+        const parts = dob.split(/[- /.]/);
+        let isToday = false;
+        if (parts.length >= 2) {
+          const dayPart = parseInt(parts[0]);
+          const monthPart = parts[1];
+          const isDayMatch = (dayPart === today.getDate());
+          const isMonthMatch = (monthPart === mStr || parseInt(monthPart) === mNumeric || monthPart === mLong || monthPart === mShort);
+          if (isDayMatch && isMonthMatch) isToday = true;
+        }
+
+        if (!isToday) {
+          const hasDay = new RegExp(`(^|[^0-9])${today.getDate()}([^0-9]|$)`).test(dob) || new RegExp(`(^|[^0-9])${dStr}([^0-9]|$)`).test(dob);
+          const hasMonth = dob.includes(mLong) || dob.includes(mShort);
+          isToday = hasDay && hasMonth;
+        }
 
         return (
           <div className={`birthday-item hover-scale ${isToday ? 'is-today-highlight' : ''}`} key={b.id || Math.random()}>
@@ -39,9 +53,9 @@ const BirthdayCard = () => {
             <div className="birthday-profile-section">
               <div className="birthday-avatar-wrap">
                 {b.image ? (
-                  <img 
-                    src={`http://${window.location.hostname}:5000${b.image}`} 
-                    alt={b.name} 
+                  <img
+                    src={`http://${window.location.hostname}:5000${b.image}`}
+                    alt={b.name}
                     className="w-full h-full rounded-full object-cover"
                   />
                 ) : (

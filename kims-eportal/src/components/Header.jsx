@@ -10,6 +10,9 @@ const Header = () => {
     const { user, logout } = useContext(AuthContext);
     const [isSearchExpanded, setIsSearchExpanded] = useState(false);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const [isLoggingOut, setIsLoggingOut] = useState(false);
+    const [showLogoutToast, setShowLogoutToast] = useState(false);
+    const [showLoginToast, setShowLoginToast] = useState(false);
     const dropdownRef = useRef(null);
 
     // Ticker State
@@ -47,11 +50,20 @@ const Header = () => {
                 const mShort = today.toLocaleString('default', { month: 'short' }).toLowerCase();
 
                 const todayBirthdays = results[0].value.data.filter(b => {
-                    const dob = String(b.date_of_birth || '').toLowerCase();
-                    const nameMatch = dob.includes(String(d)) && (dob.includes(mLong) || dob.includes(mShort));
-                    const numericMatch = dob.includes(dStr) && dob.includes(mStr);
-                    const exactHyphen = dob.includes(`${dStr}-${mStr}`);
-                    return nameMatch || numericMatch || exactHyphen;
+                    const dob = String(b.date_of_birth || "").toLowerCase();
+                    // Precise match for DD-MM, DD/MM, or "DD Month" formats
+                    const parts = dob.split(/[- /.]/);
+                    if (parts.length >= 2) {
+                        const dayPart = parseInt(parts[0]);
+                        const monthPart = parts[1];
+                        const isDayMatch = (dayPart === d);
+                        const isMonthMatch = (monthPart === mStr || parseInt(monthPart) === mNumeric || monthPart === mLong || monthPart === mShort);
+                        if (isDayMatch && isMonthMatch) return true;
+                    }
+                    // Fallback for more varied formats, still maintaining day boundary
+                    const hasDay = new RegExp(`(^|[^0-9])${d}([^0-9]|$)`).test(dob) || new RegExp(`(^|[^0-9])${dStr}([^0-9]|$)`).test(dob);
+                    const hasMonth = dob.includes(mLong) || dob.includes(mShort);
+                    return hasDay && hasMonth;
                 });
 
                 if (todayBirthdays.length > 0) {
@@ -97,13 +109,23 @@ const Header = () => {
     // Cycle items one by one
     useEffect(() => {
         if (tickerItems.length <= 1) return;
-        
+
         const timer = setInterval(() => {
             setCurrentIndex(prev => (prev + 1) % tickerItems.length);
         }, 5000); // 5 seconds per item
-        
+
         return () => clearInterval(timer);
     }, [tickerItems]);
+    
+    // Handle Login Success Toast
+    useEffect(() => {
+        if (location.state?.loginSuccess) {
+            setShowLoginToast(true);
+            setTimeout(() => setShowLoginToast(false), 3000);
+            // Clear state to prevent repeating on refresh
+            window.history.replaceState({}, document.title);
+        }
+    }, [location.state]);
 
     const isHidden = location.pathname !== "/";
 
@@ -131,10 +153,10 @@ const Header = () => {
                                                 {tickerItems[currentIndex].text}
                                             </span>
                                             {tickerItems[currentIndex].image ? (
-                                                <img 
-                                                  src={`http://${window.location.hostname}:5000${tickerItems[currentIndex].image}`} 
-                                                  className="w-[26px] h-[26px] rounded-full object-cover border-2 border-white/40 shadow-sm"
-                                                  alt="" 
+                                                <img
+                                                    src={`http://${window.location.hostname}:5000${tickerItems[currentIndex].image}`}
+                                                    className="w-[26px] h-[26px] rounded-full object-cover border-2 border-white/40 shadow-sm"
+                                                    alt=""
                                                 />
                                             ) : (
                                                 <span className="text-[16px]">🎂</span>
@@ -190,6 +212,14 @@ const Header = () => {
                     {/* Auth Status Dropdown */}
                     {user ? (
                         <div className="relative" ref={dropdownRef}>
+                            {showLoginToast && (
+                                <div className="logout-success-toast animate-fade-in-up">
+                                    <div className="toast-inner">
+                                        <div className="toast-check">✓</div>
+                                        <span>Logged in successfully</span>
+                                    </div>
+                                </div>
+                            )}
                             <button
                                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                                 className="user-pill-btn flex items-center gap-2 h-[34px] px-4 transition-all"
@@ -209,26 +239,45 @@ const Header = () => {
                                         <span className="dropdown-user-role">KIMS Administrator</span>
                                     </div>
                                     <button
-                                        onClick={() => {
-                                            logout();
+                                        onClick={async () => {
+                                            setIsLoggingOut(true);
+                                            // Simulate a brief delay to show "Logging Out..." progress
+                                            await new Promise(resolve => setTimeout(resolve, 800));
+                                            await logout();
+                                            setIsLoggingOut(false);
                                             setIsDropdownOpen(false);
+                                            
+                                            // Show success toast
+                                            setShowLogoutToast(true);
+                                            setTimeout(() => setShowLogoutToast(false), 3000);
                                         }}
                                         className="dropdown-logout-btn"
+                                        disabled={isLoggingOut}
                                     >
-                                        <LogOut size={16} strokeWidth={2.5} />
-                                        <span>Logout</span>
+                                        <LogOut size={16} strokeWidth={2.5} className={isLoggingOut ? "animate-spin-slow" : ""} />
+                                        <span>{isLoggingOut ? "Logging Out..." : "Logout"}</span>
                                     </button>
                                 </div>
                             )}
                         </div>
                     ) : (
-                        <button
-                            onClick={() => navigate('/login')}
-                            className="flex items-center justify-center gap-[6px] h-[34px] box-border px-[18px] bg-[#1fa463] text-white rounded-full font-semibold text-[13px] hover-scale shadow-[0_4px_12px_rgba(31,164,99,0.3)] flex-shrink-0"
-                        >
-                            <UserCircle size={17} className="text-white opacity-90" strokeWidth={2} />
-                            <span>Login</span>
-                        </button>
+                        <div className="relative flex items-center">
+                            {showLogoutToast && (
+                                <div className="logout-success-toast animate-fade-in-up">
+                                    <div className="toast-inner">
+                                        <div className="toast-check">✓</div>
+                                        <span>Logged out successfully</span>
+                                    </div>
+                                </div>
+                            )}
+                            <button
+                                onClick={() => navigate('/login')}
+                                className="flex items-center justify-center gap-[6px] h-[34px] box-border px-[18px] bg-[#1fa463] text-white rounded-full font-semibold text-[13px] hover-scale shadow-[0_4px_12px_rgba(31,164,99,0.3)] flex-shrink-0"
+                            >
+                                <UserCircle size={17} className="text-white opacity-90" strokeWidth={2} />
+                                <span>Login</span>
+                            </button>
+                        </div>
                     )}
                 </div>
             </div>

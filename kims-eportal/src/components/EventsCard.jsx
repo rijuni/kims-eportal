@@ -10,7 +10,7 @@ const EventsCard = () => {
 
     useEffect(() => {
         API.get("/events/upcoming")
-            .then((res) => { if (res.data) setEvents(res.data) })
+            .then((res) => { if (Array.isArray(res.data)) setEvents(res.data) })
             .catch((err) => console.error(err));
     }, []);
 
