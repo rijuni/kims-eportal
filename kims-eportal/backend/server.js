@@ -207,7 +207,7 @@ app.get("/api/trainer-data", async (req, res) => {
             SELECT 
                 tr.id, tr.trainer_name as username, tr.branch_location as branch, 
                 tr.start_date, tr.topic, tr.sub_topic, tr.module_subject as module, 
-                tr.from_time, tr.to_time, tr.nominees, tr.status,
+                tr.from_time, tr.to_time, tr.nominees, tr.status, tr.training_type, tr.remarks,
                 u.department, u.hinai_id, u.designation
             FROM training_requests tr
             LEFT JOIN users u ON tr.trainer_name = u.username
@@ -242,14 +242,49 @@ app.get("/api/trainer-records", async (req, res) => {
     }
 });
 
+app.put("/api/training-requests/bulk-status", async (req, res) => {
+    try {
+        const { ids, status } = req.body;
+        if (!ids || !Array.isArray(ids)) return res.status(400).json({ success: false, message: "Invalid IDs" });
+        
+        await pool.query('UPDATE training_requests SET status = ? WHERE id IN (?)', [status, ids]);
+        res.json({ success: true, message: `Status updated to ${status}` });
+    } catch (err) {
+        console.error("Bulk Status Update Error:", err);
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
 app.put("/api/trainer-data/:id", async (req, res) => {
     try {
         const { id } = req.params; // This is the request_id now
-        const { trainer_name, training_type, remarks } = req.body;
-        await pool.query(
-            'UPDATE training_requests SET trainer_name = ?, training_type = ?, remarks = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
-            [trainer_name, training_type, remarks, id]
-        );
+        const { trainer_name, training_type, remarks, from_time, to_time, nominees } = req.body;
+        
+        let updates = ['trainer_name = ?', 'updated_at = CURRENT_TIMESTAMP'];
+        let queryParams = [trainer_name];
+
+        if (training_type !== undefined) {
+            updates.push('training_type = ?');
+            queryParams.push(training_type);
+        }
+        if (remarks !== undefined) {
+            updates.push('remarks = ?');
+            queryParams.push(remarks);
+        }
+        if (nominees !== undefined) {
+            updates.push('nominees = ?');
+            queryParams.push(nominees);
+        }
+        if (from_time !== undefined && to_time !== undefined) {
+            updates.push('from_time = ?');
+            updates.push('to_time = ?');
+            queryParams.push(from_time, to_time);
+        }
+
+        queryParams.push(id);
+        const updateQuery = `UPDATE training_requests SET ${updates.join(', ')} WHERE id = ?`;
+
+        await pool.query(updateQuery, queryParams);
         res.json({ success: true, message: "Record updated successfully" });
     } catch (err) {
         console.error("Trainer Data Update Error:", err);

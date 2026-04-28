@@ -18,6 +18,14 @@ const TrainerRecord = () => {
     const [trainerSearchTerm, setTrainerSearchTerm] = useState("");
     const [showResults, setShowResults] = useState(false);
     const [expandedGroups, setExpandedGroups] = useState({});
+    const [toastMessage, setToastMessage] = useState(null);
+    const [toastType, setToastType] = useState('success');
+
+    const showToast = (message, type = 'success') => {
+        setToastMessage(message);
+        setToastType(type);
+        setTimeout(() => setToastMessage(null), 3000);
+    };
 
     const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
@@ -34,7 +42,9 @@ const TrainerRecord = () => {
                     ...r,
                     editTrainer: r.trainer_name || "n/a",
                     editType: r.training_type || "General",
-                    editRemarks: r.remarks || ""
+                    editRemarks: r.remarks || "",
+                    editFromTime: r.from_time || "",
+                    editToTime: r.to_time || ""
                 }));
                 setRecords(processed);
             }
@@ -116,9 +126,9 @@ const TrainerRecord = () => {
                                     <th>Topic</th>
                                     <th>Sub Topic</th>
                                     <th>Module</th>
-                                    <th>From Time</th>
-                                    <th>To Time</th>
-                                    <th>Trainer Name</th>
+                                    <th className={editingId ? "blink-header" : ""} style={{ transition: 'color 0.2s' }}>From Time</th>
+                                    <th className={editingId ? "blink-header" : ""} style={{ transition: 'color 0.2s' }}>To Time</th>
+                                    <th className={editingId ? "blink-header" : ""} style={{ transition: 'color 0.2s' }}>Trainer Name</th>
                                     <th>Trainer Dept</th>
                                     <th className="text-center" style={{ width: '100px' }}>Action</th>
                                 </tr>
@@ -159,8 +169,40 @@ const TrainerRecord = () => {
                                                     <td className="font-semibold">{first.topic || "N/A"}</td>
                                                     <td>{first.sub_topic || "N/A"}</td>
                                                     <td className="font-bold text-indigo-600">{first.module || "N/A"}</td>
-                                                    <td className="text-emerald-600 font-bold">{first.from_time || "n/a"}</td>
-                                                    <td className="text-rose-600 font-bold">{first.to_time || "n/a"}</td>
+                                                    <td>
+                                                        {editingId === key ? (
+                                                            <input
+                                                                type="time"
+                                                                value={first.editFromTime}
+                                                                onChange={(e) => {
+                                                                    const newVal = e.target.value;
+                                                                    setRecords(prev => prev.map(r => 
+                                                                        group.some(gr => gr.request_id === r.request_id) ? { ...r, editFromTime: newVal } : r
+                                                                    ));
+                                                                }}
+                                                                style={{ width: '85px', padding: '4px', fontSize: '10px', borderRadius: '4px', border: '1px solid #cbd5e1', outline: 'none', backgroundColor: '#ffffff', color: '#1e293b', colorScheme: 'light' }}
+                                                            />
+                                                        ) : (
+                                                            <span className="text-emerald-600 font-bold">{first.from_time || "n/a"}</span>
+                                                        )}
+                                                    </td>
+                                                    <td>
+                                                        {editingId === key ? (
+                                                            <input
+                                                                type="time"
+                                                                value={first.editToTime}
+                                                                onChange={(e) => {
+                                                                    const newVal = e.target.value;
+                                                                    setRecords(prev => prev.map(r => 
+                                                                        group.some(gr => gr.request_id === r.request_id) ? { ...r, editToTime: newVal } : r
+                                                                    ));
+                                                                }}
+                                                                style={{ width: '85px', padding: '4px', fontSize: '10px', borderRadius: '4px', border: '1px solid #cbd5e1', outline: 'none', backgroundColor: '#ffffff', color: '#1e293b', colorScheme: 'light' }}
+                                                            />
+                                                        ) : (
+                                                            <span className="text-rose-600 font-bold">{first.to_time || "n/a"}</span>
+                                                        )}
+                                                    </td>
                                                     <td style={{ position: 'relative' }}>
                                                         {editingId === key ? (
                                                             <div className="relative">
@@ -277,8 +319,8 @@ const TrainerRecord = () => {
                                                         {editingId === key ? (
                                                             <button 
                                                                 style={{ 
-                                                                    padding: '7px 18px', 
-                                                                    backgroundColor: '#10b981', 
+                                                                    padding: '8px 16px', 
+                                                                    backgroundColor: '#2563eb', 
                                                                     color: '#ffffff', 
                                                                     borderRadius: '8px', 
                                                                     fontSize: '10px', 
@@ -286,30 +328,43 @@ const TrainerRecord = () => {
                                                                     textTransform: 'uppercase',
                                                                     border: 'none',
                                                                     cursor: 'pointer',
-                                                                    boxShadow: '0 2px 8px rgba(16, 185, 129, 0.15)',
+                                                                    boxShadow: '0 3px 10px rgba(37, 99, 235, 0.2)',
                                                                     transition: 'all 0.2s'
                                                                 }}
                                                                 onClick={async () => {
+                                                                    const hasChanges = first.editTrainer !== (first.trainer_name || "n/a") || 
+                                                                                       first.editFromTime !== (first.from_time || "") || 
+                                                                                       first.editToTime !== (first.to_time || "");
+                                                                                       
+                                                                    if (!hasChanges) {
+                                                                        showToast("Nothing to Update", "error");
+                                                                        setEditingId(null);
+                                                                        return;
+                                                                    }
+
                                                                     setUpdatingId(key);
                                                                     try {
                                                                         await Promise.all(group.map(t => 
                                                                             API.put(`/trainer-data/${t.request_id}`, {
                                                                                 trainer_name: first.editTrainer,
                                                                                 training_type: first.editType,
-                                                                                remarks: first.editRemarks
+                                                                                remarks: first.editRemarks,
+                                                                                from_time: first.editFromTime,
+                                                                                to_time: first.editToTime
                                                                             })
                                                                         ));
                                                                         setEditingId(null);
                                                                         fetchRecords();
+                                                                        showToast("Trainer assigned successfully", "success");
                                                                     } catch (err) {
-                                                                        alert("Update failed.");
+                                                                        showToast("Update failed.", "error");
                                                                     } finally {
                                                                         setUpdatingId(null);
                                                                     }
                                                                 }}
                                                                 disabled={updatingId === key}
                                                             >
-                                                                {updatingId === key ? "Wait..." : "Save"}
+                                                                {updatingId === key ? "Wait..." : "Revise"}
                                                             </button>
                                                         ) : (
                                                             <button 
@@ -341,9 +396,6 @@ const TrainerRecord = () => {
                                                     <tr className="sub-trainee-row-wrapper">
                                                         <td colSpan="11">
                                                             <div className="sub-trainee-container">
-                                                                <div className="p-3 text-[11px] font-bold text-slate-500 uppercase border-b border-slate-100 mb-2">
-                                                                    Session Participants (Nominees)
-                                                                </div>
                                                                 <table className="sub-trainee-table">
                                                                     <thead>
                                                                         <tr>
@@ -352,8 +404,8 @@ const TrainerRecord = () => {
                                                                             <th>Department</th>
                                                                             <th>Trainee Designation</th>
                                                                             <th>Contact no</th>
+                                                                            <th>Date</th>
                                                                             <th>Type</th>
-                                                                            <th>Status</th>
                                                                         </tr>
                                                                     </thead>
                                                                     <tbody>
@@ -370,10 +422,8 @@ const TrainerRecord = () => {
                                                                                     <td>{nom.department || "N/A"}</td>
                                                                                     <td>{nom.designation || "N/A"}</td>
                                                                                     <td>{nom.contact || nom.contact_no || "N/A"}</td>
+                                                                                    <td className="font-semibold text-slate-700">{req.start_date ? new Date(req.start_date).toLocaleDateString('en-IN') : "N/A"}</td>
                                                                                     <td className="font-medium text-slate-500">{req.training_type || "General"}</td>
-                                                                                    <td className={`status-cell ${req.status?.toLowerCase().includes('scheduled') ? 'status-scheduled' : req.status?.toLowerCase().includes('progress') ? 'status-progress' : 'status-pending'}`} style={{ background: 'transparent', padding: '0' }}>
-                                                                                        {req.status || "Pending"}
-                                                                                    </td>
                                                                                 </tr>
                                                                             ));
                                                                         })}
@@ -396,6 +446,25 @@ const TrainerRecord = () => {
             <div className="scroll-top-btn" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
                 <ArrowUpIcon size={16} />
             </div>
+            
+            {toastMessage && (
+                <div style={{
+                    position: 'fixed',
+                    top: '5px',
+                    right: '50px',
+                    backgroundColor: toastType === 'success' ? '#10b981' : '#ef4444',
+                    color: 'white',
+                    padding: '6px 20px',
+                    borderRadius: '8px',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                    zIndex: 9999,
+                    fontWeight: 'bold',
+                    fontSize: '12px',
+                    letterSpacing: '0.5px'
+                }}>
+                    {toastMessage}
+                </div>
+            )}
             
             <div className="support-desk-tab">Support Desk</div>
         </div>

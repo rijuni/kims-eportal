@@ -201,7 +201,7 @@ const AccountCenter = () => {
 
         <div className="dashboard-container">
           {viewMode === "list" ? (
-            <div className="glass-card w-full">
+            <div className="glass-card w-full" style={{ height: '560px' }}>
               <div className="glass-header flex flex-wrap justify-between items-center gap-4">
                 <div className="flex flex-col">
                   <h3 className="glass-title">Account Center</h3>
@@ -258,6 +258,8 @@ const AccountCenter = () => {
                         <th>Account Name</th>
                         <th>Role</th>
                         <th>Designation</th>
+                        <th>Mail Id</th>
+                        <th>Contact No</th>
                         <th>Created Date</th>
                         <th>Status</th>
                         <th>Action</th>
@@ -266,7 +268,7 @@ const AccountCenter = () => {
                     <tbody className="divide-y divide-slate-100">
                       {loading ? (
                         <tr>
-                          <td colSpan="8" className="px-8 py-20 text-center text-black font-bold text-sm">
+                          <td colSpan="10" className="px-8 py-20 text-center text-black font-bold text-sm">
                             Fetching accounts...
                           </td>
                         </tr>
@@ -307,6 +309,8 @@ const AccountCenter = () => {
                               </div>
                             </td>
                             <td className="font-bold text-slate-700 text-[12px]">{u.designation || "N/A"}</td>
+                            <td className="font-medium text-slate-600 text-[12px]">{u.email || "N/A"}</td>
+                            <td className="font-medium text-slate-600 text-[12px]">{u.contact_no || u.contact || "N/A"}</td>
                             <td>
                               <div className="flex items-center font-bold text-[13px] text-slate-800">
                                 <Clock size={13} className="text-slate-600" style={{ marginRight: '8px' }} />

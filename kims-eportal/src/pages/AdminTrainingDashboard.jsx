@@ -75,6 +75,8 @@ const AdminTrainingDashboard = () => {
         const s = status ? status.toLowerCase() : '';
         if (s.includes('scheduled')) return 'status-scheduled';
         if (s.includes('progress')) return 'status-progress';
+        if (s.includes('present') || s.includes('attended')) return 'status-progress'; // Green
+        if (s.includes('absent')) return 'status-scheduled'; // Yellow/Red-ish (scheduled class is yellow)
         return 'status-pending'; 
     };
 
@@ -133,7 +135,7 @@ const AdminTrainingDashboard = () => {
                                     <th>From Time</th>
                                     <th>To Time</th>
                                     <th>Trainer Name</th>
-                                    <th>Trainer Department</th>
+                                    <th>Trainer<br />Dept</th>
                                     <th className="status-col">Status</th>
                                 </tr>
                             </thead>
@@ -172,16 +174,6 @@ const AdminTrainingDashboard = () => {
                                                     <tr className="expanded-details-row">
                                                         <td colSpan="10">
                                                             <div className="sub-trainee-container">
-                                                                <div className="flex justify-between items-center p-3 border-b border-slate-100 mb-2">
-                                                                    <div className="text-[12px] font-bold text-slate-500">
-                                                                        Scheduled Participants (Nominees)
-                                                                    </div>
-                                                                    <div className="flex gap-4 text-[11px]">
-                                                                        <span className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded font-bold border border-slate-200">
-                                                                            LOCATION: {first.branch_location || 'GENERAL'}
-                                                                        </span>
-                                                                    </div>
-                                                                </div>
                                                                 <table className="sub-trainee-table">
                                                                             <thead>
                                                                                 <tr>
@@ -211,8 +203,8 @@ const AdminTrainingDashboard = () => {
                                                                                             <td>{nom.contact || nom.contact_no || 'n/a'}</td>
                                                                                             <td className="font-medium text-slate-500">{req.training_type || 'General'}</td>
                                                                                             <td className="font-bold text-indigo-600">{req.trainer_name || 'N/A'}</td>
-                                                                                            <td className={`status-cell ${getStatusClass(req.status)}`} style={{ background: 'transparent', padding: '0' }}>
-                                                                                                {req.status || 'Pending'}
+                                                                                            <td className={`status-cell ${getStatusClass(nom.remarks || req.status)}`} style={{ background: 'transparent', padding: '0', fontWeight: '900' }}>
+                                                                                                {nom.remarks || req.status || 'Pending'}
                                                                                             </td>
                                                                                         </tr>
                                                                                     ));

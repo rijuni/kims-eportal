@@ -9,6 +9,11 @@
     width: 100%;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
     margin-top: 10px;
+    height: 560px;
+}
+
+.sessions-glass-card .account-center-container {
+    height: 475px !important;
 }
 
 .glass-header>div:first-child {
@@ -41,6 +46,7 @@
     /* Force it to fill the height of the container */
     scrollbar-width: auto !important;
     scrollbar-color: #475569 #f1f5f9 !important;
+    height: 380px;
 }
 
 #sessions-table-scroll {

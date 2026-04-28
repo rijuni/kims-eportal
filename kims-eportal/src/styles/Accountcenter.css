@@ -2,10 +2,11 @@
 
 .account-center-container {
     padding: 0 0px !important;
-    min-height: 460px;
+    height: 420px;
     color: #000 !important;
     display: flex;
     flex-direction: column;
+    overflow-y: auto;
 }
 
 .glass-subtitle {
@@ -18,11 +19,13 @@
 .account-table-wrapper {
     width: 100%;
     overflow-x: auto;
-    padding-bottom: 15px; /* Space for scrollbar */
+    padding-bottom: 15px;
+    /* Space for scrollbar */
 }
 
 .account-table-wrapper::-webkit-scrollbar {
-    height: 8px; /* Slightly thicker */
+    height: 8px;
+    /* Slightly thicker */
     display: block !important;
 }
 
@@ -33,7 +36,8 @@
 }
 
 .account-table-wrapper::-webkit-scrollbar-thumb {
-    background: #94a3b8; /* Darker color for better visibility */
+    background: #94a3b8;
+    /* Darker color for better visibility */
     border-radius: 10px;
     border: 2px solid #f8fafc;
 }
@@ -78,7 +82,8 @@
 .account-table th:first-child,
 .account-table td:first-child {
     padding-left: 15px !important;
-    width: 90px; /* Reduced slightly */
+    width: 90px;
+    /* Reduced slightly */
 }
 
 /* User ID column specific style */
@@ -90,8 +95,8 @@
 }
 
 .account-table td {
-    padding: 10px 15px;
-    font-size: 13px;
+    padding: 6px 15px;
+    font-size: 12px;
     color: #000 !important;
     border-bottom: 1px solid #f1f5f9;
 }
@@ -249,8 +254,8 @@
 }
 
 .account-table td {
-    padding: 10px 24px;
-    font-size: 13.5px;
+    padding: 6px 24px;
+    font-size: 12px;
     color: #000 !important;
     border-bottom: 1px solid #f1f5f9;
     overflow: visible !important;
@@ -264,7 +269,7 @@
     /* Ensure vertical overflow is allowed */
     scrollbar-width: none;
     -ms-overflow-style: none;
-    padding-bottom: 80px;
+    padding-bottom: 40px;
     /* Buffer space for the last row dropdown */
 }
 
@@ -350,6 +355,7 @@
         opacity: 0;
         transform: translateY(-5px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -437,11 +443,13 @@
 .search-input-premium {
     width: 120px;
     height: 36px;
-    padding: 0 15px 0 10px; /* Reduced left padding to fit next to select */
+    padding: 0 15px 0 10px;
+    /* Reduced left padding to fit next to select */
     background: rgba(255, 255, 255, 0.8);
     backdrop-filter: blur(10px);
     border: 1px solid rgba(0, 0, 0, 0.08);
-    border-radius: 0 100px 100px 0; /* Rounded only on right */
+    border-radius: 0 100px 100px 0;
+    /* Rounded only on right */
     font-size: 12px;
     font-weight: 700;
     color: #000 !important;
@@ -456,7 +464,8 @@
     border: 1px solid rgba(0, 0, 0, 0.08);
     border-right: none;
     border-radius: 100px 0 0 100px;
-    padding: 0 8px 0 38px; /* Space for the floating icon */
+    padding: 0 8px 0 38px;
+    /* Space for the floating icon */
     font-size: 10px;
     font-weight: 800;
     color: #1fa463;
@@ -545,7 +554,8 @@
     width: 650px;
     margin: 0 auto;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
-    max-height: 88vh; /* Ensure it fits in viewport */
+    max-height: 88vh;
+    /* Ensure it fits in viewport */
     display: flex;
     flex-direction: column;
 }
@@ -554,14 +564,17 @@
     background: #ffffff;
     border-radius: 22px;
     padding: 15px 25px;
-    overflow-y: auto; /* Enable vertical scroll */
-    flex: 1; /* Take up remaining space */
+    overflow-y: auto;
+    /* Enable vertical scroll */
+    flex: 1;
+    /* Take up remaining space */
 }
 
 /* Custom scrollbar for premium look */
 .privileges-inner-white-container::-webkit-scrollbar {
     width: 4px;
 }
+
 .privileges-inner-white-container::-webkit-scrollbar-thumb {
     background: #e2e8f0;
     border-radius: 10px;
@@ -797,7 +810,8 @@
 .account-actions-flex {
     display: flex;
     align-items: center;
-    gap: 15px; /* Slightly reduced gap */
+    gap: 15px;
+    /* Slightly reduced gap */
 }
 
 .sessions-button-premium {

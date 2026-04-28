@@ -24,8 +24,6 @@ const AdminPanel = () => {
     const allSections = [
         { id: 'dashboard', title: "Dashboard", icon: <Clipboard />, desc: "Manage Dashboard", theme: "green", link: "/admin/manage-dashboard" },
         { id: 'training', title: "Training Materials", icon: <BookOpen />, desc: "Manage Training Documents", theme: "teal", link: "/admin/manage-training" },
-        { id: 'training_dashboard', title: "Training Dashboard", icon: <LayoutDashboard />, desc: "Monitor Training Requests", theme: "blue", link: "/admin-training-dashboard" },
-        { id: 'trainer', title: "Trainer Records", icon: <GraduationCap />, desc: "Manage Trainer Assignments", theme: "teal", link: "/admin-trainer-dashboard" },
         { id: 'telephone', title: "Telephone Directory", icon: <Contact />, desc: "Manage Telephone Directory", theme: "blue", link: "/admin/manage-telephone" },
         { id: 'holidays', title: "Holiday List", icon: <CalendarRange />, desc: "Manage Holiday List", theme: "green", link: "/admin/manage-holidays" },
         { id: 'events', title: "Upcoming Events", icon: <CalendarClock />, desc: "Manage Upcoming Events", theme: "teal", link: "/admin/manage-events" },
